@@ -16,7 +16,7 @@ Se publico el estado actual del workspace en GitHub.
 - **URL**: `https://github.com/breisnerlopez/abax-memory`
 - **Visibilidad elegida**: `private`
 - **Branch principal**: `main`
-- **Commit publicado**: `19a36f93a2ba3050bbb9855bb00c3b6ae3da0815`
+- **Commit publicado**: `2ee37ae72be51acded25abdbc7f0b25b3fef5822`
 
 ## Criterio usado para el nombre
 
@@ -32,8 +32,9 @@ No habia nombre de repositorio explicitamente fijado. Se uso `abax-memory` por a
 6. Se inicializo el repositorio local con branch `main`.
 7. Se creo el commit inicial `chore: bootstrap project snapshot`.
 8. Se creo el repositorio remoto `breisnerlopez/abax-memory` con `gh`.
-9. Se hizo `push` de `main` al remoto.
-10. Se valido la existencia del remoto con `gh repo view` y se confirmo el hash publicado consultando `repos/breisnerlopez/abax-memory/commits/main`.
+9. Se hizo `push` inicial de `main` al remoto.
+10. Se actualizo este entregable y se publico un segundo commit `docs: record GitHub publication`.
+11. Se valido la existencia del remoto con `gh repo view` y se confirmo el hash final publicado consultando `repos/breisnerlopez/abax-memory/commits/main`.
 
 ## Evidencia resumida
 
@@ -42,9 +43,9 @@ No habia nombre de repositorio explicitamente fijado. Se uso `abax-memory` por a
 - `ssh -T -i /etc/ssh/devs-github/id_ed25519 git@github.com`: autenticacion exitosa despues del ajuste de permisos.
 - `gh repo create breisnerlopez/abax-memory --private --source=. --remote=origin --push`: repositorio creado y branch `main` publicado.
 - `gh repo view breisnerlopez/abax-memory --json name,owner,url,visibility,defaultBranchRef`: confirmo repo `PRIVATE`, owner `breisnerlopez` y branch por defecto `main`.
-- `gh api repos/breisnerlopez/abax-memory/commits/main --jq .sha`: devolvio `19a36f93a2ba3050bbb9855bb00c3b6ae3da0815`.
+- `gh api repos/breisnerlopez/abax-memory/commits/main --jq .sha`: devolvio `2ee37ae72be51acded25abdbc7f0b25b3fef5822`.
 
 ## Observaciones
 
-- El remoto `origin` quedo configurado como `https://github.com/breisnerlopez/abax-memory.git`.
+- `gh repo create` configuro inicialmente `origin` en HTTPS. Para completar el push del commit final se cambio a `git@github.com:breisnerlopez/abax-memory.git`, que es la configuracion actual.
 - Despues de autenticar `gh`, quedo un directorio local no versionado `.config/`. No formo parte del commit publicado porque fue generado despues del commit inicial.
