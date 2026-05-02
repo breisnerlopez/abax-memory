@@ -16,7 +16,7 @@ Se publico el estado actual del workspace en GitHub.
 - **URL**: `https://github.com/breisnerlopez/abax-memory`
 - **Visibilidad elegida**: `private`
 - **Branch principal**: `main`
-- **Commit publicado**: `2ee37ae72be51acded25abdbc7f0b25b3fef5822`
+- **Commit publicado**: verificado en GitHub sobre `main` durante la ejecucion del entregable
 
 ## Criterio usado para el nombre
 
@@ -34,7 +34,7 @@ No habia nombre de repositorio explicitamente fijado. Se uso `abax-memory` por a
 8. Se creo el repositorio remoto `breisnerlopez/abax-memory` con `gh`.
 9. Se hizo `push` inicial de `main` al remoto.
 10. Se actualizo este entregable y se publico un segundo commit `docs: record GitHub publication`.
-11. Se valido la existencia del remoto con `gh repo view` y se confirmo el hash final publicado consultando `repos/breisnerlopez/abax-memory/commits/main`.
+11. Se valido la existencia del remoto con `gh repo view` y se confirmo el commit publicado consultando `repos/breisnerlopez/abax-memory/commits/main`.
 
 ## Evidencia resumida
 
@@ -43,7 +43,7 @@ No habia nombre de repositorio explicitamente fijado. Se uso `abax-memory` por a
 - `ssh -T -i /etc/ssh/devs-github/id_ed25519 git@github.com`: autenticacion exitosa despues del ajuste de permisos.
 - `gh repo create breisnerlopez/abax-memory --private --source=. --remote=origin --push`: repositorio creado y branch `main` publicado.
 - `gh repo view breisnerlopez/abax-memory --json name,owner,url,visibility,defaultBranchRef`: confirmo repo `PRIVATE`, owner `breisnerlopez` y branch por defecto `main`.
-- `gh api repos/breisnerlopez/abax-memory/commits/main --jq .sha`: devolvio `2ee37ae72be51acded25abdbc7f0b25b3fef5822`.
+- `gh api repos/breisnerlopez/abax-memory/commits/main --jq .sha`: se uso para validar que `main` quedo publicado en GitHub.
 
 ## Observaciones
 
