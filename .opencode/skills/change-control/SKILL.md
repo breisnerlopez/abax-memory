@@ -1,0 +1,24 @@
+---
+name: change-control
+description: Proceso formal de evaluacion, aprobacion o rechazo de cambios al alcance del proyecto con analisis de impacto en tiempo, costo, calidad y riesgo.
+
+---
+
+# Control de Cambios
+
+## Formato de Solicitud de Cambio
+1. **Solicitante**: quien pide el cambio.
+2. **Descripcion**: que se solicita cambiar.
+3. **Justificacion**: por que es necesario.
+4. **Impacto funcional**: que requerimientos afecta.
+5. **Impacto tecnico**: que componentes/sistemas afecta.
+6. **Impacto en pruebas**: que hay que re-probar.
+7. **Impacto en tiempo**: dias/semanas adicionales.
+8. **Impacto en costo**: recursos adicionales.
+9. **Riesgos**: que puede salir mal.
+10. **Decision**: Aprobado / Rechazado / Postergado.
+
+## Cuando usar esta habilidad
+- Cuando se recibe una solicitud que modifica el alcance aprobado.
+- Cuando un defecto UAT resulta ser un cambio de alcance.
+- Cuando un stakeholder solicita funcionalidad no prevista.

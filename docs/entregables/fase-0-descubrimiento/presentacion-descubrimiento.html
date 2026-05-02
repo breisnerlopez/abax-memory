@@ -1,0 +1,630 @@
+<!-- Fase: 0-Descubrimiento, Entregable: Presentacion de Descubrimiento, Responsable: business-analyst, Fecha: 2026-05-01, Estado: Completado. -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMOA - Presentación de Descubrimiento</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --color-bg: #f3f6fa;
+            --color-surface: #ffffff;
+            --color-surface-alt: #eef3f8;
+            --color-ink: #16202b;
+            --color-ink-muted: #516173;
+            --color-line: #d7e0ea;
+            --color-primary: #0f4c81;
+            --color-primary-soft: #dceaf6;
+            --color-secondary: #1e6f5c;
+            --color-secondary-soft: #dbefe9;
+            --color-accent: #b97816;
+            --color-accent-soft: #f9ecd6;
+            --color-danger: #a63a3a;
+            --color-danger-soft: #f7e1e1;
+            --color-warning: #8a6700;
+            --color-warning-soft: #f7efc8;
+            --color-success: #256d3f;
+            --color-success-soft: #ddf0e3;
+            --color-info: #0d5e7a;
+            --color-info-soft: #dceff6;
+
+            --font-family-base: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            --font-family-mono: "Consolas", "Courier New", monospace;
+            --font-size-xxs: 0.7rem;
+            --font-size-xs: 0.82rem;
+            --font-size-sm: 0.95rem;
+            --font-size-md: 1.08rem;
+            --font-size-lg: 1.35rem;
+            --font-size-xl: 2rem;
+            --font-size-2xl: 2.9rem;
+            --font-size-3xl: 4rem;
+            --line-height-tight: 1.15;
+            --line-height-base: 1.45;
+            --line-height-loose: 1.7;
+            --font-weight-regular: 400;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.5rem;
+            --space-6: 2rem;
+            --space-7: 3rem;
+            --space-8: 4rem;
+
+            --radius-sm: 0.35rem;
+            --radius-md: 0.7rem;
+            --radius-lg: 1rem;
+            --border-thin: 1px solid var(--color-line);
+            --border-strong: 1px solid rgba(15, 76, 129, 0.28);
+            --shadow-sm: 0 0.4rem 1rem rgba(20, 35, 52, 0.08);
+            --shadow-md: 0 0.9rem 2rem rgba(20, 35, 52, 0.12);
+
+            --badge-padding: 0.35rem 0.7rem;
+            --badge-radius: 999px;
+            --table-header-bg: #e8f0f7;
+            --table-row-alt: #f8fbfd;
+            --slide-width: 1280px;
+            --slide-height: 720px;
+            --transition-base: 220ms ease;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: var(--color-bg);
+            color: var(--color-ink);
+            font-family: var(--font-family-base);
+            line-height: var(--line-height-base);
+        }
+
+        body { padding: var(--space-6); }
+
+        .presentation {
+            display: grid;
+            gap: var(--space-6);
+            justify-content: center;
+        }
+
+        .slide {
+            position: relative;
+            width: min(100%, var(--slide-width));
+            min-height: var(--slide-height);
+            margin: 0 auto;
+            padding: var(--space-7);
+            background: var(--color-surface);
+            border: var(--border-thin);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: var(--space-5);
+            transition: transform var(--transition-base), box-shadow var(--transition-base);
+        }
+
+        .slide:hover {
+            transform: translateY(-0.2rem);
+            box-shadow: 0 1.2rem 2.4rem rgba(20, 35, 52, 0.14);
+        }
+
+        .slide::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 0.4rem;
+            background: var(--color-primary);
+        }
+
+        .slide__header, .slide__footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-4);
+            color: var(--color-ink-muted);
+            font-size: var(--font-size-xs);
+        }
+
+        .slide__header {
+            padding-bottom: var(--space-3);
+            border-bottom: var(--border-thin);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .slide__footer {
+            padding-top: var(--space-3);
+            border-top: var(--border-thin);
+        }
+
+        .slide__content {
+            display: grid;
+            gap: var(--space-5);
+            align-content: start;
+        }
+
+        .project-name { font-weight: var(--font-weight-bold); color: var(--color-primary); }
+
+        h1, h2, h3, h4, p, ul, ol, blockquote { margin: 0; }
+        h1 { font-size: var(--font-size-3xl); line-height: var(--line-height-tight); }
+        h2 { font-size: var(--font-size-2xl); line-height: var(--line-height-tight); }
+        h3 { font-size: var(--font-size-xl); line-height: 1.2; }
+        h4 { font-size: var(--font-size-lg); line-height: 1.25; }
+        p, li, td, th { font-size: var(--font-size-md); }
+
+        .eyebrow {
+            color: var(--color-primary);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-bold);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .lead { max-width: 52rem; font-size: var(--font-size-lg); color: var(--color-ink-muted); }
+        .muted { color: var(--color-ink-muted); }
+        .accent { color: var(--color-primary); }
+
+        .divider {
+            width: 6rem;
+            height: 0.28rem;
+            background: var(--color-primary);
+            border-radius: 999px;
+        }
+
+        .layout-cover .slide__content { align-content: center; gap: var(--space-6); }
+        .cover-meta { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+        .layout-agenda .agenda-list, .content-list, .check-list { display: grid; gap: var(--space-3); padding-left: 1.25rem; }
+        .agenda-list li::marker, .content-list li::marker, .check-list li::marker { color: var(--color-primary); }
+        .layout-content .slide__content, .layout-table .slide__content, .layout-metrics .slide__content, .layout-closing .slide__content { grid-template-columns: 1fr; }
+        .layout-two-columns .slide__content { grid-template-columns: 1.15fr 0.85fr; gap: var(--space-6); }
+
+        .column, .card, .highlight, .risk-block, .metric, .table-wrapper {
+            background: var(--color-surface-alt);
+            border: var(--border-thin);
+            border-radius: var(--radius-md);
+            padding: var(--space-5);
+        }
+
+        .card { box-shadow: var(--shadow-sm); }
+        .cards-grid, .metrics-grid, .compact-grid { display: grid; gap: var(--space-4); }
+        .cards-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .metrics-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .compact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+        .metric {
+            display: grid;
+            gap: var(--space-2);
+            align-content: start;
+            min-height: 11rem;
+        }
+
+        .metric__value { font-size: 3.2rem; line-height: 1; font-weight: var(--font-weight-bold); color: var(--color-primary); }
+        .metric__label { font-size: var(--font-size-sm); text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-ink-muted); }
+        .metric__detail { font-size: var(--font-size-sm); }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--badge-padding);
+            border-radius: var(--badge-radius);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-bold);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .badge--primary { background: var(--color-primary-soft); color: var(--color-primary); border-color: rgba(15, 76, 129, 0.18); }
+        .badge--success { background: var(--color-success-soft); color: var(--color-success); border-color: rgba(37, 109, 63, 0.18); }
+        .badge--warning { background: var(--color-warning-soft); color: var(--color-warning); border-color: rgba(138, 103, 0, 0.18); }
+        .badge--danger { background: var(--color-danger-soft); color: var(--color-danger); border-color: rgba(166, 58, 58, 0.18); }
+        .badge--info { background: var(--color-info-soft); color: var(--color-info); border-color: rgba(13, 94, 122, 0.18); }
+        .badge--neutral { background: #edf2f7; color: #425466; border-color: rgba(66, 84, 102, 0.16); }
+
+        .highlight { border-left: 0.35rem solid var(--color-accent); background: #fcf8f0; }
+        .risk-block { border-left: 0.35rem solid var(--color-danger); background: #fcf4f4; }
+        .risk-block__title, .highlight__title, .card__title { margin-bottom: var(--space-2); font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); }
+
+        .table-wrapper { overflow: hidden; padding: 0; }
+        table { width: 100%; border-collapse: collapse; background: var(--color-surface); }
+        thead { background: var(--table-header-bg); }
+        th, td { padding: 1rem 1.1rem; text-align: left; vertical-align: top; border-bottom: var(--border-thin); }
+        tbody tr:nth-child(even) { background: var(--table-row-alt); }
+        tbody tr:last-child td { border-bottom: 0; }
+
+        .callout-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+        .kicker-box {
+            display: inline-block;
+            padding: var(--space-3) var(--space-4);
+            background: var(--color-primary-soft);
+            color: var(--color-primary);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .closing-panel { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: var(--space-6); align-items: end; }
+        .quote {
+            padding: var(--space-5);
+            border-left: 0.35rem solid var(--color-primary);
+            background: var(--color-primary-soft);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            font-size: var(--font-size-lg);
+        }
+
+        .page-number { font-variant-numeric: tabular-nums; }
+        .small-text, .small-text li { font-size: var(--font-size-sm); }
+        .epic-list { display: grid; gap: var(--space-3); }
+        .epic-item h4 { margin-bottom: var(--space-2); }
+        .epic-item p { font-size: var(--font-size-sm); color: var(--color-ink-muted); }
+
+        @media (max-width: 1360px) {
+            body { padding: var(--space-4); }
+            .slide { min-height: auto; }
+            .layout-two-columns .slide__content, .closing-panel, .cards-grid, .metrics-grid, .compact-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 900px) {
+            .slide { padding: var(--space-5); border-radius: var(--radius-md); }
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 2.2rem; }
+            h3 { font-size: 1.6rem; }
+            .layout-two-columns .slide__content, .closing-panel, .cards-grid, .metrics-grid, .compact-grid { grid-template-columns: 1fr; }
+        }
+
+        @media print {
+            @page { size: 16:9 landscape; margin: 0.6cm; }
+            html, body { background: #ffffff; }
+            body { padding: 0; }
+            .presentation { gap: 0; }
+            .slide {
+                width: 100%;
+                min-height: 0;
+                height: 100%;
+                page-break-after: always;
+                border-radius: 0;
+                box-shadow: none;
+                border: 1px solid #cfd8e3;
+                margin: 0;
+                break-after: page;
+            }
+            .slide:hover { transform: none; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <main class="presentation">
+        <section class="slide layout-cover" aria-label="Portada">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 0 · Descubrimiento</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Presentación ejecutiva de descubrimiento</div>
+                <h1>Visión, alcance y backlog propuesto del MVP</h1>
+                <div class="divider"></div>
+                <p class="lead">Síntesis de visión de producto, mapa de épicas, volumen funcional identificado y propuesta de alcance para salida inicial API-first.</p>
+                <div class="cover-meta">
+                    <span class="badge badge--primary">Proyecto PMOA</span>
+                    <span class="badge badge--info">HTML autónomo</span>
+                    <span class="badge badge--success">Estado completado</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Descubrimiento · business-analyst · 2026-05-01</span>
+                <span class="page-number">01</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-agenda" aria-label="Agenda">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Agenda</div>
+                <h2>Qué cubre esta síntesis</h2>
+                <ol class="agenda-list">
+                    <li>Visión del producto y problema de negocio a resolver.</li>
+                    <li>Dimensión del alcance funcional identificado en discovery.</li>
+                    <li>Mapa de épicas y features para MVP y evolución posterior.</li>
+                    <li>Backlog priorizado, definición de MVP y límites de alcance.</li>
+                </ol>
+                <div class="callout-row">
+                    <span class="kicker-box">Objetivo: alinear alcance inicial</span>
+                    <span class="kicker-box">Decisión esperada: validar MVP propuesto</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Agenda ejecutiva</span>
+                <span class="page-number">02</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-two-columns" aria-label="Vision del producto">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
+            </header>
+            <div class="slide__content">
+                <div class="column">
+                    <div class="eyebrow">Visión del producto</div>
+                    <h2>PMOA busca convertir conocimiento operativo disperso en memoria reutilizable y auditable</h2>
+                    <p class="lead">La plataforma se concibe como un backend API-first para capturar, clasificar, validar, recuperar, persistir y depurar memorias operativas con trazabilidad completa basada en Git/GitHub.</p>
+                    <ul class="content-list">
+                        <li>Reduce pérdida de conocimiento y baja reutilización.</li>
+                        <li>Mejora consistencia de respuesta entre agentes y operadores.</li>
+                        <li>Hace verificable origen, cambios, validación y depuración.</li>
+                    </ul>
+                </div>
+                <aside class="column">
+                    <div class="highlight">
+                        <div class="highlight__title">Propuesta MVP</div>
+                        <p>Repositorio único de memorias, sin UI dedicada, con creación manual o desde casos, búsqueda semántica, validación por criticidad y exposición por API REST.</p>
+                    </div>
+                    <div class="risk-block" style="margin-top: 1rem;">
+                        <div class="risk-block__title">Fuera de alcance inicial</div>
+                        <p>UI dedicada, multi-repositorio, visibilidad fina por memoria, automatización total de aprobación crítica y orquestación multiagente completa.</p>
+                    </div>
+                </aside>
+            </div>
+            <footer class="slide__footer">
+                <span>Mensaje clave: foco en memoria operativa confiable</span>
+                <span class="page-number">03</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-metrics" aria-label="Metricas discovery">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Dimensión funcional identificada</div>
+                <h2>Discovery consolidó una base funcional amplia con un núcleo MVP acotado</h2>
+                <div class="metrics-grid">
+                    <article class="metric">
+                        <div class="metric__label">Épicas identificadas</div>
+                        <div class="metric__value">16</div>
+                        <div class="metric__detail">12 orientadas a MVP y 4 diferidas a Post-MVP.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Features mapeadas</div>
+                        <div class="metric__value">60</div>
+                        <div class="metric__detail">Cobertura funcional desde captura hasta auditoría y depuración.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Historias de usuario</div>
+                        <div class="metric__value">29</div>
+                        <div class="metric__detail">28 dentro del alcance analizado y 1 explícitamente fuera del MVP.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Historias MVP</div>
+                        <div class="metric__value">21</div>
+                        <div class="metric__detail">Historias Must de R1-MVP en el backlog priorizado.</div>
+                    </article>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Fuente: visión, épicas/features, historias y backlog</span>
+                <span class="page-number">04</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-two-columns" aria-label="Epicas MVP parte 1">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
+            </header>
+            <div class="slide__content">
+                <div class="column epic-list small-text">
+                    <div class="eyebrow">Épicas y features · MVP I</div>
+                    <div class="epic-item"><h4>EP-001 Gestión de casos operativos</h4><p>Alta de casos, metadatos operativos, soporte sin memoria previa y cierre con resultado.</p></div>
+                    <div class="epic-item"><h4>EP-002 Modelo canónico de memoria</h4><p>Plantilla base, tipos de origen, metadatos obligatorios y reglas de nomenclatura/ubicación.</p></div>
+                    <div class="epic-item"><h4>EP-003 Captura y generación de memoria</h4><p>Creación manual, creación desde caso, borrador editable y versión inicial controlada.</p></div>
+                    <div class="epic-item"><h4>EP-004 Clasificación y extracción estructurada</h4><p>Clasificación por dominio/tipo, extracción mínima, etiquetado e identificación de criticidad.</p></div>
+                    <div class="epic-item"><h4>EP-005 Recuperación y reutilización</h4><p>Búsqueda semántica, filtros estructurados, ranking de coincidencias y reutilización en caso activo.</p></div>
+                    <div class="epic-item"><h4>EP-006 Relacionamiento y grafo de dominios</h4><p>Relaciones entre memorias, dominios dinámicos, vínculo caso-memoria y navegación contextual.</p></div>
+                </div>
+                <aside class="column">
+                    <div class="card">
+                        <div class="card__title">Lectura ejecutiva</div>
+                        <p>El primer bloque funcional cubre la captura del conocimiento, su estructura estándar y la capacidad de recuperarlo con contexto operativo.</p>
+                    </div>
+                    <div class="highlight" style="margin-top: 1rem;">
+                        <div class="highlight__title">Valor para negocio</div>
+                        <p>Estas épicas atacan el problema principal: convertir experiencia operativa dispersa en conocimiento reutilizable con mínimo esfuerzo adicional.</p>
+                    </div>
+                </aside>
+            </div>
+            <footer class="slide__footer">
+                <span>Épicas 1 a 6</span>
+                <span class="page-number">05</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-two-columns" aria-label="Epicas MVP parte 2">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
+            </header>
+            <div class="slide__content">
+                <div class="column epic-list small-text">
+                    <div class="eyebrow">Épicas y features · MVP II</div>
+                    <div class="epic-item"><h4>EP-007 Validación y aprobación</h4><p>Validación estructural, validación funcional básica, PR manual para críticas y estados de validación.</p></div>
+                    <div class="epic-item"><h4>EP-008 Persistencia Git y versionado</h4><p>Repositorio único, commits de cambios, flujo Git completo e integración inicial con GitHub.</p></div>
+                    <div class="epic-item"><h4>EP-009 Atención operativa multiagente</h4><p>Registro de agentes, trazabilidad de aportes, consolidación de resolución y asociación con memorias.</p></div>
+                    <div class="epic-item"><h4>EP-010 Depuración y ciclo de vida</h4><p>Archivado, detección de duplicadas, fusión y eliminación controlada.</p></div>
+                    <div class="epic-item"><h4>EP-011 Auditoría y trazabilidad</h4><p>Historial de cambios, trazabilidad extremo a extremo, evidencias de validación y registro de depuración.</p></div>
+                    <div class="epic-item"><h4>EP-012 Plataforma API-first</h4><p>APIs de casos, memorias, búsqueda/recuperación y auditoría/depuración.</p></div>
+                </div>
+                <aside class="column">
+                    <div class="card">
+                        <div class="card__title">Núcleo operativo</div>
+                        <p>Este bloque asegura control, auditabilidad y consumo por integración, condición necesaria para una salida inicial sin interfaz dedicada.</p>
+                    </div>
+                    <div class="risk-block" style="margin-top: 1rem;">
+                        <div class="risk-block__title">Punto de control</div>
+                        <p>La revisión humana de memorias críticas y la operación basada en Git son dependencias funcionales explícitas del MVP.</p>
+                    </div>
+                </aside>
+            </div>
+            <footer class="slide__footer">
+                <span>Épicas 7 a 12</span>
+                <span class="page-number">06</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-two-columns" aria-label="Epicas Post-MVP">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
+            </header>
+            <div class="slide__content">
+                <div class="column epic-list small-text">
+                    <div class="eyebrow">Épicas y features · Post-MVP</div>
+                    <div class="epic-item"><h4>EP-013 Portabilidad Git</h4><p>Capa abstracta de proveedor, compatibilidad multi-proveedor y configuración portable por entorno.</p></div>
+                    <div class="epic-item"><h4>EP-014 Validación avanzada</h4><p>Reglas reforzadas por criticidad, segunda validación asistida y bloqueos de publicación por riesgo.</p></div>
+                    <div class="epic-item"><h4>EP-015 UI dedicada</h4><p>Consola de casos/memorias, exploración visual de grafo y bandeja de validación/depuración.</p></div>
+                    <div class="epic-item"><h4>EP-016 Escalamiento y gobierno</h4><p>Múltiples repositorios, políticas por segmento y federación de búsqueda.</p></div>
+                </div>
+                <aside class="column">
+                    <div class="highlight">
+                        <div class="highlight__title">Lectura estratégica</div>
+                        <p>El roadmap posterior mejora experiencia operativa, portabilidad y sofisticación de gobierno, pero no condiciona la viabilidad del primer release.</p>
+                    </div>
+                    <div class="card" style="margin-top: 1rem;">
+                        <div class="card__title">Cambio de etapa</div>
+                        <p>Estas capacidades deben tratarse como evolución aprobada, no como extensión implícita del MVP.</p>
+                    </div>
+                </aside>
+            </div>
+            <footer class="slide__footer">
+                <span>Épicas 13 a 16</span>
+                <span class="page-number">07</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-table" aria-label="Backlog priorizado y MVP">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Backlog priorizado</div>
+                <h2>El MVP queda definido como todas las historias Must de R1-MVP</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Release</th>
+                                <th>Objetivo</th>
+                                <th>Contenido principal</th>
+                                <th>Lectura ejecutiva</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>R1-MVP</strong></td>
+                                <td>Salida inicial a producción</td>
+                                <td>21 historias Must: alta, versionado, validación, búsqueda, API, archivado, trazabilidad y documentación.</td>
+                                <td><span class="badge badge--success">MVP</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>R2</strong></td>
+                                <td>Optimizar recuperación y gobierno</td>
+                                <td>Neo4j, Redis, duplicadas, fusión, health endpoints y navegación por grafo.</td>
+                                <td><span class="badge badge--warning">Después</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>R3</strong></td>
+                                <td>Capacidades avanzadas selectivas</td>
+                                <td>Eliminación definitiva, enriquecimiento avanzado y configuración de criticidad avanzada.</td>
+                                <td><span class="badge badge--info">Evolución</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="callout-row">
+                    <span class="kicker-box">MVP = backend operativo extremo a extremo sin UI</span>
+                    <span class="kicker-box">Prioridad basada en valor, dependencia y riesgo</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Definición formal de MVP</span>
+                <span class="page-number">08</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-two-columns" aria-label="Alcance MVP propuesto">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
+            </header>
+            <div class="slide__content">
+                <div class="column">
+                    <div class="eyebrow">Alcance propuesto</div>
+                    <h2>Qué entra en el MVP</h2>
+                    <ul class="content-list">
+                        <li>Creación de memorias desde caso y manual.</li>
+                        <li>Markdown + frontmatter como formato canónico.</li>
+                        <li>Persistencia versionada en Git/GitHub.</li>
+                        <li>Metadatos, búsqueda semántica y filtros estructurados.</li>
+                        <li>Validación humana por PR para memorias críticas.</li>
+                        <li>Estados de ciclo de vida, archivado y trazabilidad por API.</li>
+                    </ul>
+                </div>
+                <aside class="column">
+                    <div class="eyebrow">Diferido</div>
+                    <h2>Qué queda para después</h2>
+                    <ul class="content-list">
+                        <li>UI dedicada para usuarios finales.</li>
+                        <li>Portabilidad multi-proveedor Git y multi-repositorio.</li>
+                        <li>Visibilidad granular por memoria o segmento.</li>
+                        <li>Fusión avanzada, enriquecimiento avanzado y reglas críticas más profundas.</li>
+                        <li>Navegación visual de grafo y gobierno segmentado.</li>
+                    </ul>
+                </aside>
+            </div>
+            <footer class="slide__footer">
+                <span>Límite de alcance explícito</span>
+                <span class="page-number">09</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-closing" aria-label="Cierre">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Cierre y siguiente paso</div>
+                <div class="closing-panel">
+                    <div>
+                        <h2>Recomendación de discovery</h2>
+                        <p class="lead">Avanzar con un MVP acotado, API-first y sin UI, centrado en captura, recuperación, validación y trazabilidad de memoria operativa. El resto debe gestionarse como roadmap posterior o cambio formal de alcance.</p>
+                        <div class="callout-row" style="margin-top: 1.5rem;">
+                            <span class="badge badge--primary">Decisión solicitada</span>
+                            <span class="badge badge--neutral">Validar alcance R1-MVP</span>
+                        </div>
+                    </div>
+                    <div class="quote">
+                        Próximo paso sugerido: confirmar MVP con Product Owner y usar esta base para análisis funcional detallado, contratos API y trazabilidad de requerimientos.
+                    </div>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Call to action: aprobación de alcance MVP</span>
+                <span class="page-number">10</span>
+            </footer>
+        </section>
+    </main>
+</body>
+</html>

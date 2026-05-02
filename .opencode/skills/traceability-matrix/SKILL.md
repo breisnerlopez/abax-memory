@@ -1,0 +1,45 @@
+---
+name: traceability-matrix
+description: Creacion y mantenimiento de la matriz de trazabilidad que vincula requerimientos con casos de prueba, defectos y resultados para asegurar cobertura completa.
+
+---
+
+# Matriz de Trazabilidad
+
+## Estructura de la Matriz
+| Columna | Descripcion |
+|---|---|
+| ID Requerimiento | Identificador unico del requerimiento |
+| Descripcion | Resumen del requerimiento funcional |
+| ID Caso de Prueba | Casos de prueba asociados (TC-XXX) |
+| Estado del Test | Resultado de la ultima ejecucion |
+| ID Defecto | Defectos vinculados al requerimiento |
+| Cobertura | Porcentaje de cobertura del requerimiento |
+
+## Proceso de Gestion
+1. Registrar cada requerimiento aprobado en la matriz.
+2. Vincular los casos de prueba disenados a su requerimiento.
+3. Actualizar el estado del test despues de cada ejecucion.
+4. Asociar defectos encontrados al requerimiento correspondiente.
+5. Calcular la cobertura total antes de aprobar la release.
+6. Identificar requerimientos sin cobertura y planificar su testing.
+
+## Cuando usar esta habilidad
+- Al recibir requerimientos nuevos o modificados.
+- Al disenar casos de prueba para un ciclo de testing.
+- Al evaluar la cobertura de pruebas antes de una release.
+- Al auditar el cumplimiento de la cobertura de calidad.
+
+## coverage-analysis
+- Verificar que cada requerimiento tiene al menos un caso de prueba asociado.
+- Identificar requerimientos con cobertura insuficiente o nula.
+- Calcular el porcentaje de requerimientos con todos sus tests ejecutados.
+- Reportar la cobertura por modulo funcional y prioridad.
+- Priorizar la creacion de tests para requerimientos criticos sin cobertura.
+
+## maintenance-guidelines
+- Actualizar la matriz cada vez que se agreguen o modifiquen requerimientos.
+- Eliminar vinculos a casos de prueba obsoletos o eliminados.
+- Revisar la matriz como parte del refinamiento del sprint.
+- Mantener la matriz en una herramienta accesible para todo el equipo.
+- Usar la matriz como evidencia en auditorias de calidad.

@@ -1,0 +1,17 @@
+# github-actions-template
+
+## Ejemplo GitHub Actions basico
+```yaml
+name: CI
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+```

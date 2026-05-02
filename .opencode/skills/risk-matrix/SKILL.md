@@ -1,0 +1,27 @@
+---
+name: risk-matrix
+description: Identificacion, evaluacion y plan de mitigacion de riesgos del proyecto con clasificacion por probabilidad e impacto.
+
+---
+
+# Matriz de Riesgos
+
+## Formato de Matriz de Riesgos
+| ID | Riesgo | Probabilidad | Impacto | Nivel | Mitigacion | Responsable | Estado |
+|---|---|---|---|---|---|---|---|
+| R-001 | [Descripcion] | Alta/Media/Baja | Alto/Medio/Bajo | Critico/Alto/Medio/Bajo | [Accion] | [Rol] | Abierto |
+
+## Clasificacion
+- **Probabilidad x Impacto** = Nivel de riesgo.
+- Critico: accion inmediata requerida.
+- Alto: plan de mitigacion obligatorio.
+- Medio: monitoreo activo.
+- Bajo: aceptar y monitorear.
+
+## Categorias de riesgo
+- Tecnico, Funcional, Organizacional, Externo, Regulatorio.
+
+## Cuando usar esta habilidad
+- Al iniciar un proyecto (analisis inicial de riesgos).
+- En cada comite de proyecto (revision periodica).
+- Cuando se detecta un riesgo nuevo o materializado.

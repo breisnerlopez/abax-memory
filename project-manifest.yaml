@@ -1,0 +1,162 @@
+project:
+  name: Abax-Memory
+  description: Proyecto Abax-Memory
+  size: small
+  stack: angular-quarkus
+  target: opencode
+  team_scope: full
+  provider: openai
+  model_strategy: inherit
+  governance_model: lightweight
+  governance_name: Equipo Ligero
+team:
+  total_agents: 9
+  roles:
+    - id: project-manager
+      name: Project Manager
+      tier: "2"
+      category: management
+    - id: business-analyst
+      name: Business Analyst / Analista Funcional
+      tier: "1"
+      category: analysis
+    - id: tech-lead
+      name: Lider Tecnico
+      tier: "1"
+      category: technology
+    - id: developer-backend
+      name: Desarrollador Backend
+      tier: "1"
+      category: construction
+    - id: qa-functional
+      name: QA Funcional
+      tier: "1"
+      category: quality
+    - id: solution-architect
+      name: Arquitecto de Solucion
+      tier: "1"
+      category: architecture
+    - id: devops
+      name: DevOps / Release Engineer
+      tier: "1"
+      category: deployment
+    - id: developer-frontend
+      name: Desarrollador Frontend
+      tier: "1"
+      category: construction
+skills:
+  - id: acceptance-criteria
+    name: Criterios de Aceptacion
+  - id: accessibility-check
+    name: Verificacion de Accesibilidad
+  - id: api-consumption
+    name: Consumo e Integracion de APIs
+  - id: api-design
+    name: Diseno de APIs
+  - id: architecture-decision-records
+    name: ADR para Decisiones Arquitectonicas
+  - id: backend-implementation
+    name: Implementacion de Logica Backend
+  - id: business-rules-documentation
+    name: Documentacion de Reglas de Negocio
+  - id: change-control
+    name: Control de Cambios
+  - id: ci-cd-pipeline
+    name: Pipeline CI/CD
+  - id: code-review
+    name: Revision de Codigo
+  - id: coding-standards
+    name: Estandares y Convenciones de Codigo
+  - id: component-design
+    name: Diseno de Componentes UI
+  - id: containerization
+    name: Contenedorizacion y Orquestacion
+  - id: db-modeling
+    name: Modelado de Base de Datos
+  - id: defect-reporting
+    name: Reporte y Gestion de Defectos
+  - id: deliverable-registry
+    name: Registro y Control de Entregables
+  - id: deployment-plan
+    name: Plan de Despliegue
+  - id: environment-management
+    name: Gestion de Ambientes
+  - id: error-handling
+    name: Manejo de Errores y Excepciones
+  - id: frontend-implementation
+    name: Implementacion de Interfaces Frontend
+  - id: functional-analysis
+    name: Analisis Funcional
+  - id: impact-assessment
+    name: Evaluacion de Impacto de Cambios
+  - id: integration-design
+    name: Diseno de Integraciones entre Sistemas
+  - id: multi-stage-review
+    name: Revision en Multiples Etapas
+  - id: presentation-design
+    name: Diseno y Creacion de Presentaciones Ejecutivas
+  - id: prioritization
+    name: Priorizacion de Requerimientos y Backlog
+  - id: process-mapping
+    name: Mapeo de Procesos AS-IS/TO-BE
+  - id: project-planning
+    name: Planificacion de Proyectos
+  - id: project-tracking
+    name: Seguimiento y Control de Proyecto
+  - id: regression-testing
+    name: Pruebas de Regresion Manuales
+  - id: requirement-traceability
+    name: Trazabilidad de Requerimientos
+  - id: risk-matrix
+    name: Matriz de Riesgos
+  - id: stakeholder-management
+    name: Gestion de Stakeholders
+  - id: status-reporting
+    name: Reportes de Estado del Proyecto
+  - id: systematic-debugging
+    name: Debugging Sistematico
+  - id: task-decomposition
+    name: Descomposicion de Tareas
+  - id: technical-debt-management
+    name: Gestion de Deuda Tecnica
+  - id: technical-decomposition
+    name: Descomposicion Tecnica de Requerimientos
+  - id: technical-design
+    name: Diseno Tecnico
+  - id: test-case-design
+    name: Diseno de Casos de Prueba
+  - id: traceability-matrix
+    name: Matriz de Trazabilidad
+  - id: unit-testing
+    name: Pruebas Unitarias
+  - id: verification-before-completion
+    name: Verificacion Antes de Completar
+tools:
+  - id: create-dashboard
+    name: Generador de Dashboards de Proyecto
+  - id: create-document
+    name: Creador de Documentos
+  - id: create-presentation
+    name: Generador de Presentaciones
+  - id: db-migrate
+    name: Migracion de Base de Datos
+  - id: generate-diagram
+    name: Generador de Diagramas
+  - id: lint-code
+    name: Analizador de Codigo
+  - id: run-tests
+    name: Ejecutor de Tests
+criteria_applied: []
+warnings:
+  - project-manager funciona mejor con product-owner (no incluido)
+  - business-analyst funciona mejor con product-owner (no incluido)
+  - developer-backend funciona mejor con dba (no incluido)
+  - qa-functional funciona mejor con qa-lead (no incluido)
+  - developer-frontend funciona mejor con ux-designer (no incluido)
+  - project-manager funciona mejor con product-owner (no incluido)
+  - business-analyst funciona mejor con product-owner (no incluido)
+  - developer-backend funciona mejor con dba (no incluido)
+  - qa-functional funciona mejor con qa-lead (no incluido)
+  - developer-frontend funciona mejor con ux-designer (no incluido)
+generated_at: 2026-05-02T02:29:34.396Z
+generated_by: abax-swarm v0.1.0
