@@ -1,6 +1,7 @@
 com/btl/administrador/api/persistence/MemoryVersionRepository.class
 com/btl/administrador/api/persistence/inmemory/InMemoryProcessingJobRepository.class
 com/btl/administrador/api/persistence/postgres/PostgresProcessingJobRepository.class
+com/btl/administrador/api/resource/RootResource.class
 com/btl/administrador/api/integration/qdrant/InMemorySearchIndexer.class
 com/btl/administrador/api/service/StructuredExtractionService.class
 com/btl/administrador/api/dto/CreateCaseRequest.class

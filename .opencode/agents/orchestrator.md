@@ -3,15 +3,15 @@ description: Orquestador del proyecto Abax-Memory. Coordina 8 agentes siguiendo 
 mode: primary
 temperature: 0.3
 permission:
-  read: deny
-  edit: deny
-  glob: deny
-  grep: deny
-  bash: deny
+  read: allow
+  edit: allow
+  glob: allow
+  grep: allow
+  bash: allow
   task: allow
-  skill: deny
-  webfetch: deny
-  todowrite: deny
+  skill: allow
+  webfetch: allow
+  todowrite: allow
 ---
 
 # ROL: Orquestador de Proyecto — Abax-Memory

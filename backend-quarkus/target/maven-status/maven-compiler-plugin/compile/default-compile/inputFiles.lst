@@ -66,6 +66,7 @@
 /root/proyectos-personales/Abax-Memory/backend-quarkus/src/main/java/com/btl/administrador/api/resource/AuditResource.java
 /root/proyectos-personales/Abax-Memory/backend-quarkus/src/main/java/com/btl/administrador/api/resource/CaseResource.java
 /root/proyectos-personales/Abax-Memory/backend-quarkus/src/main/java/com/btl/administrador/api/resource/MemoryResource.java
+/root/proyectos-personales/Abax-Memory/backend-quarkus/src/main/java/com/btl/administrador/api/resource/RootResource.java
 /root/proyectos-personales/Abax-Memory/backend-quarkus/src/main/java/com/btl/administrador/api/resource/SearchResource.java
 /root/proyectos-personales/Abax-Memory/backend-quarkus/src/main/java/com/btl/administrador/api/security/MemoryRoles.java
 /root/proyectos-personales/Abax-Memory/backend-quarkus/src/main/java/com/btl/administrador/api/service/AuditService.java

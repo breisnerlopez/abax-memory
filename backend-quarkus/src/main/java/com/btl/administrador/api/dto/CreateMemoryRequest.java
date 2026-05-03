@@ -16,5 +16,5 @@ public record CreateMemoryRequest(
         List<String> tags,
         @NotBlank String contenidoMarkdown,
         @NotNull Map<String, String> metadata,
-        @NotNull Map<String, Object> frontmatter) {
+        Map<String, Object> frontmatter) {
 }

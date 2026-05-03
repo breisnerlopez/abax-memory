@@ -8,8 +8,8 @@ permission:
   edit: allow
   glob: allow
   grep: allow
-  bash: ask
-  webfetch: deny
+  bash: allow
+  webfetch: allow
   skill: allow
 ---
 

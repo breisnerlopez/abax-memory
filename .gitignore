@@ -1,0 +1,19 @@
+# GitHub CLI sensitive config (contains oauth tokens)
+.config/gh/hosts.yml
+
+# Maven build output
+backend-quarkus/target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files with secrets
+.env
+.env.local
+*.env

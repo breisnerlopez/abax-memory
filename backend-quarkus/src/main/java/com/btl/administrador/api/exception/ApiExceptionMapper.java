@@ -1,6 +1,7 @@
 package com.btl.administrador.api.exception;
 
 import com.btl.administrador.api.dto.ApiErrorResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.security.AuthenticationFailedException;
 import io.quarkus.security.ForbiddenException;
 import io.quarkus.security.UnauthorizedException;
@@ -65,6 +66,12 @@ public class ApiExceptionMapper implements ExceptionMapper<Exception> {
                     "HTTP method not allowed for this endpoint", List.of());
         }
 
+        if (isJsonProcessingError(exception)) {
+            LOG.warnv("Invalid JSON format: {0}", exception.getMessage());
+            return build(Response.Status.BAD_REQUEST.getStatusCode(), "INVALID_JSON",
+                    "Invalid JSON format", List.of());
+        }
+
         if (exception instanceof ApiException apiException) {
             return build(apiException.getStatus(), apiException.getCode(), apiException.getMessage(), List.of());
         }
@@ -78,6 +85,23 @@ public class ApiExceptionMapper implements ExceptionMapper<Exception> {
 
         LOG.errorv(exception, "Unexpected server error");
         return build(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "UNEXPECTED_ERROR", "Unexpected server error", List.of());
+    }
+
+    /**
+     * Traverses the exception cause chain to detect JSON processing errors.
+     * Quarkus wraps {@code JsonParseException} into {@code WebApplicationException}
+     * before it reaches any {@code ExceptionMapper}, so a simple {@code instanceof}
+     * check on the top-level exception is insufficient.
+     */
+    private boolean isJsonProcessingError(Throwable exception) {
+        Throwable current = exception;
+        while (current != null) {
+            if (current instanceof JsonProcessingException) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 
     private Response build(int status, String code, String message, List<String> details) {

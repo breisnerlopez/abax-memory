@@ -16,5 +16,5 @@ public record CreateMemoryFromCaseRequest(
         @NotEmpty List<String> domains,
         List<String> tags,
         Map<String, String> metadata,
-        @NotNull Map<String, Object> frontmatter) {
+        Map<String, Object> frontmatter) {
 }

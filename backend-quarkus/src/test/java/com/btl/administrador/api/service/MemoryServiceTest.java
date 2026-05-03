@@ -64,7 +64,7 @@ class MemoryServiceTest {
     }
 
     @Test
-    void createManual_highCriticality_submitsForReviewWithoutIndexJob() {
+    void createManual_highCriticality_submitsForReviewAndCreatesIndexJob() {
         ServiceTestSupport support = new ServiceTestSupport();
 
         MemoryResponse response = support.memoryService.createManual(new CreateMemoryRequest(
@@ -80,11 +80,17 @@ class MemoryServiceTest {
         assertThat(response.state()).isEqualTo(MemoryState.EN_REVISION);
         assertThat(response.processingStatus()).isEqualTo(ProcessingStatus.PENDING_GIT);
         assertThat(response.pullRequestRef()).startsWith("PR-");
-        assertThat(support.processingJobRepository.findByStatus(com.btl.administrador.api.domain.ProcessingJobStatus.PENDING)).isEmpty();
-        assertThat(support.auditService.findByEntityId(response.id()))
+        // ISSUE #3 fix: EN_REVISION memories now get indexed for semantic search
+        assertThat(support.processingJobRepository.findByStatus(com.btl.administrador.api.domain.ProcessingJobStatus.PENDING))
+                .hasSize(1)
                 .singleElement()
+                .satisfies(job -> {
+                    assertThat(job.memoryId).isEqualTo(response.id());
+                    assertThat(job.jobType).isEqualTo(ProcessingJobType.INDEX_MEMORY);
+                });
+        assertThat(support.auditService.findByEntityId(response.id()))
                 .extracting(event -> event.action())
-                .isEqualTo("MEMORY_SUBMITTED_FOR_REVIEW");
+                .anySatisfy(action -> assertThat(action).isEqualTo("MEMORY_SUBMITTED_FOR_REVIEW"));
     }
 
     @Test

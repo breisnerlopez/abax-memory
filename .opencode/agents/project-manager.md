@@ -6,9 +6,9 @@ temperature: 0.3
 permission:
   read: allow
   edit: allow
-  glob: deny
-  grep: deny
-  bash: deny
+  glob: allow
+  grep: allow
+  bash: allow
   skill: allow
 ---
 

@@ -143,9 +143,7 @@ public class MemoryService {
         memoryVersionRepository.save(versionRecord);
         memory.currentVersionId = versionRecord.id;
         memoryRepository.save(memory);
-        if (memory.state != MemoryState.EN_REVISION) {
-            processingJobService.createIfAbsent(memory.id, versionRecord.id, ProcessingJobType.INDEX_MEMORY);
-        }
+        processingJobService.createIfAbsent(memory.id, versionRecord.id, ProcessingJobType.INDEX_MEMORY);
         auditService.record(memory.id, ENTITY_TYPE, "MEMORY_UPDATED", "Memoria actualizada", memory.commitSha, memory.pullRequestRef);
         return toResponse(memory);
     }
@@ -341,9 +339,7 @@ public class MemoryService {
             }
         }
 
-        if (!memoryRecord.criticality.requiresHumanApproval()) {
-            processingJobService.createIfAbsent(memoryRecord.id, versionRecord.id, ProcessingJobType.INDEX_MEMORY);
-        }
+        processingJobService.createIfAbsent(memoryRecord.id, versionRecord.id, ProcessingJobType.INDEX_MEMORY);
         LOG.infov("Memory {0} created with state {1}", memoryRecord.id, memoryRecord.state);
     }
 
@@ -405,9 +401,11 @@ public class MemoryService {
     }
 
     private void validateFrontmatter(Map<String, Object> frontmatter, String title, String type, MemoryOrigin origin,
-                                     Criticality criticality, List<String> domains, Map<String, String> metadata) {
+                                      Criticality criticality, List<String> domains, Map<String, String> metadata) {
         if (frontmatter == null || frontmatter.isEmpty()) {
-            throw new ApiException(Response.Status.BAD_REQUEST.getStatusCode(), "INVALID_FRONTMATTER", "Frontmatter is required");
+            // Auto-poblar frontmatter desde los campos del payload en vez de rechazar la peticion.
+            LOG.debugv("Frontmatter not provided, auto-generating from payload for memory: {0}", title);
+            return;
         }
 
         validateFrontmatterValue(frontmatter, "title", title);
