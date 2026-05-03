@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presentación de Descubrimiento — Abax-Memory v2.0.0</title>
+<style>
+  /* ==========================================================
+     RESET + BASE
+     ========================================================== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: var(--font-body, "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    transition: background 200ms ease, color 200ms ease;
+  }
+  h1, h2, h3 { font-family: var(--font-heading, var(--font-body)); font-weight: 800; line-height: 1.1; }
+
+  /* ==========================================================
+     PRESET: CORPORATE MINIMAL
+     ========================================================== */
+  body {
+    --bg: #FFFFFF;
+    --bg-alt: #F5F5F7;
+    --text: #1a1a2e;
+    --text-muted: #4a4a5e;
+    --accent: #0066cc;
+    --accent-strong: #e94560;
+    --border: #d8d8e0;
+    --font-heading: "Inter", "Segoe UI", sans-serif;
+  }
+
+  /* ==========================================================
+     LAYOUT: SLIDE
+     ========================================================== */
+  .slide {
+    min-height: 100vh;
+    padding: 8vh 10vw;
+    display: grid;
+    align-content: start;
+    gap: 1.5rem;
+    page-break-after: always;
+    border-bottom: 1px solid var(--border);
+  }
+  .slide:last-child { border-bottom: none; }
+
+  .slide-eyebrow {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .slide h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
+  .slide h2 { font-size: clamp(2rem, 4vw, 3rem); }
+  .slide h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); color: var(--text-muted); font-weight: 600; }
+  .slide p, .slide li { font-size: clamp(1rem, 1.5vw, 1.125rem); max-width: 70ch; }
+
+  /* KPI block */
+  .kpi {
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--accent-strong);
+    letter-spacing: -0.03em;
+  }
+  .kpi-label { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* List */
+  ul, ol { padding-left: 1.5rem; display: grid; gap: 0.75rem; }
+  ul li::marker, ol li::marker { color: var(--accent); }
+
+  /* Table */
+  table { border-collapse: collapse; width: 100%; max-width: 60rem; }
+  th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+  th { font-weight: 700; color: var(--accent-strong); }
+  td { font-size: clamp(0.85rem, 1.2vw, 1rem); }
+
+  /* Card */
+  .card {
+    background: var(--bg-alt);
+    padding: 2rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    max-width: 42rem;
+  }
+
+  /* CTA block */
+  .cta {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 3rem 4rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .cta-question { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; }
+
+  /* Badge / Tag styles */
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .badge-must { background: #e94560; color: #fff; }
+  .badge-should { background: #f0ad4e; color: #1a1a2e; }
+  .badge-could { background: #5bc0de; color: #1a1a2e; }
+
+  /* Two-column layout */
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 64rem;
+  }
+
+  /* Print */
+  @media print {
+    .slide { min-height: auto; page-break-after: always; padding: 4vh 6vw; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SLIDE 1 — PORTADA
+     ============================================================ -->
+<section class="slide" aria-label="Portada">
+  <span class="slide-eyebrow">Fase 0 — Descubrimiento · 2026-05-03</span>
+  <h1>Abax-Memory v2.0.0</h1>
+  <h3>Motor de Memoria Genérico Multi-Dominio con IA</h3>
+  <p style="margin-top: 2rem; color: var(--text-muted);">
+    Presentación de Descubrimiento · Business Analyst · Audiencia: Sponsor
+  </p>
+</section>
+
+<!-- ============================================================
+     SLIDE 2 — AGENDA
+     ============================================================ -->
+<section class="slide" aria-label="Agenda">
+  <span class="slide-eyebrow">Agenda</span>
+  <h2>Qué vas a ver</h2>
+  <ol>
+    <li><strong>Propósito y diferencial competitivo</strong> — por qué evolucionar de v1 a v2 y cómo nos posicionamos frente a Mem0, Zep y Letta</li>
+    <li><strong>Usuario objetivo y roles del sistema</strong> — 5 roles dominio-agnósticos + 3 perfiles de dominio</li>
+    <li><strong>Visión del producto y épicas del MVP</strong> — 7 épicas Must, 3 épicas diferidas</li>
+    <li><strong>Cifras clave y MVP definido</strong> — 10 épicas, 85+ features, 69 historias, 66 Must, Quick Wins</li>
+    <li><strong>Criterios de éxito, alcance y próximos pasos</strong> — 13 criterios medibles, lo que entra y no entra, y la decisión que necesitamos</li>
+  </ol>
+</section>
+
+<!-- ============================================================
+     SLIDE 3 — PROPÓSITO: v1 → v2
+     ============================================================ -->
+<section class="slide" aria-label="Propósito de la evolución">
+  <span class="slide-eyebrow">Propósito</span>
+  <h2>¿Por qué evolucionar de v1 a v2?</h2>
+  <p style="color: var(--text-muted);">v1.0.0 (PMOA) demostró que el ranking semántico, la extracción de entidades, la auditoría y la gobernanza de memoria son viables. Pero quedó acotado a <strong>un solo dominio</strong>: IT Operations.</p>
+  <table>
+    <thead>
+      <tr><th>v1.0.0 (IT Ops)</th><th>v2.0.0 (Multi-dominio)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Dominio fijo: incidentes, runbooks, casos</td><td>Dominios dinámicos: legal, CRM, finanzas, agentes, IT ops</td></tr>
+      <tr><td>Tipos rígidos (incidente, runbook, procedimiento)</td><td>8 tipos genéricos (fact, preference, event, decision, task, procedure, note, entity)</td></tr>
+      <tr><td>Sin scoping multi-tenant nativo</td><td>scope con tenantId, userId, sessionId, namespace</td></tr>
+      <tr><td>Internals en español</td><td>English-Only internals — interoperable con ecosistemas IA</td></tr>
+      <tr><td>Solo API v1 (/api/v1/memorias)</td><td>Solo API v2 (/api/v2/memories) — v1 se descarta por completo</td></tr>
+      <tr><td>Audiencia: operadores IT</td><td>Audiencia: cualquier profesional con necesidad de memoria aumentada</td></tr>
+      <tr><td>Sin SDK ni integraciones con agentes</td><td>Diseñado para LangChain, LlamaIndex y SDKs</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================
+     SLIDE 4 — DIFERENCIAL COMPETITIVO
+     ============================================================ -->
+<section class="slide" aria-label="Diferencial competitivo">
+  <span class="slide-eyebrow">Posicionamiento</span>
+  <h2>Diferencial frente a Mem0, Zep y Letta</h2>
+  <p style="color: var(--text-muted);">Ningún competidor ofrece el nivel de <strong>gobernanza, auditoría y control de ciclo de vida</strong> que Abax-Memory ya tiene implementados.</p>
+  <table>
+    <thead>
+      <tr><th>Capacidad</th><th>Abax-Memory v2</th><th>Competidores</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Tipos de memoria</td><td>8 kinds universales</td><td>Limitados o fijos</td></tr>
+      <tr><td>Ciclo de vida</td><td>6 estados con reglas de transición</td><td>Binario o ausente</td></tr>
+      <tr><td>Relaciones</td><td>9 tipos estructurados con direccionalidad</td><td>No tipadas</td></tr>
+      <tr><td>Revisión humana</td><td>Workflow draft → pending → active</td><td>No existe</td></tr>
+      <tr><td>Auditoría</td><td>100% de mutaciones con diff antes/después</td><td>Parcial o ausente</td></tr>
+      <tr><td>RBAC</td><td>5 roles granulares</td><td>Básico</td></tr>
+      <tr><td>Multi-tenant</td><td>Scoping nativo con 4 dimensiones</td><td>Varía</td></tr>
+      <tr><td>English-Only</td><td>Internals estandarizados para ecosistemas IA</td><td>Mixto</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================
+     SLIDE 5 — USUARIO OBJETIVO
+     ============================================================ -->
+<section class="slide" aria-label="Usuario objetivo">
+  <span class="slide-eyebrow">Usuario objetivo</span>
+  <h2>Usuario Universal con IA — 5 roles, dominio-agnósticos</h2>
+  <p style="color: var(--text-muted);">v2.0.0 se diseña para cualquier profesional que necesite memoria aumentada. Los roles se gestionan vía Keycloak RBAC.</p>
+  <table>
+    <thead>
+      <tr><th>Rol</th><th>Necesidad principal</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Memory Operator</strong></td><td>Crear, clasificar y relacionar memorias en cualquier dominio</td></tr>
+      <tr><td><strong>Memory Reviewer</strong></td><td>Aprobar o rechazar memorias que requieren revisión humana</td></tr>
+      <tr><td><strong>Memory Consumer</strong></td><td>Consultar memoria relevante, confiable y actualizada</td></tr>
+      <tr><td><strong>Memory Administrator</strong></td><td>Depurar, archivar, fusionar y gestionar tenants</td></tr>
+      <tr><td><strong>Memory Auditor</strong></td><td>Verificar trazabilidad, cumplimiento y cobertura de conocimiento</td></tr>
+    </tbody>
+  </table>
+  <p style="color: var(--text-muted); margin-top: 1rem;"><strong>3 perfiles de dominio</strong> (configuraciones que adaptan el core sin modificar la API): Ops Profile (SRE, DevOps), Agent Profile (agentes IA, chatbots), Business Profile (CRM, Legal, Finanzas).</p>
+</section>
+
+<!-- ============================================================
+     SLIDE 6 — VISIÓN DEL PRODUCTO
+     ============================================================ -->
+<section class="slide" aria-label="Visión del producto">
+  <span class="slide-eyebrow">Visión del producto</span>
+  <h2>Motor de memoria aumentada para cualquier profesional</h2>
+  <div class="card">
+    <h3 style="color: var(--text); margin-bottom: 1rem;">Principios del core genérico</h3>
+    <ul>
+      <li><strong>8 kinds universales:</strong> fact, preference, event, decision, task, procedure, note, entity</li>
+      <li><strong>6 estados de ciclo de vida:</strong> draft → pending → active | rejected → archived → deleted</li>
+      <li><strong>9 tipos de relación:</strong> related_to, depends_on, caused_by, resolves, contradicts, supports, mentions, belongs_to, supersedes</li>
+      <li><strong>4 niveles de sensibilidad:</strong> public, internal, confidential, secret</li>
+      <li><strong>Scoping multi-tenant:</strong> tenantId + userId + sessionId + namespace</li>
+      <li><strong>English-Only internals:</strong> interoperable con ecosistemas internacionales de IA</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 7 — ÉPICAS MUST (7 épicas)
+     ============================================================ -->
+<section class="slide" aria-label="Épicas Must del MVP">
+  <span class="slide-eyebrow">Épicas Must del MVP</span>
+  <h2>7 épicas · ~65 features</h2>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Épica</th><th>Features</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>EP-001</strong></td><td>Motor de Memoria Genérico</td><td>8 kinds, 6 estados, 9 relaciones, entidades, metadatos, confidence, versionado</td></tr>
+      <tr><td><strong>EP-002</strong></td><td>Perfiles de Dominio</td><td>Mecanismo de configuración + 3 perfiles (Ops, Agent, Business)</td></tr>
+      <tr><td><strong>EP-003</strong></td><td>Scoping Multi-Tenant</td><td>Aislamiento por tenantId, userId, sessionId, namespace + cross-tenant admin</td></tr>
+      <tr><td><strong>EP-004</strong></td><td>API REST v2</td><td>CRUD memorias, relaciones, revisión, entidades, stats, health, OpenAPI 3.x, auth OIDC</td></tr>
+      <tr><td><strong>EP-005</strong></td><td>Búsqueda Semántica + Graph</td><td>Qdrant + OpenAI embeddings, 8 dimensiones de filtro, expandGraph, re-ranking</td></tr>
+      <tr><td><strong>EP-006</strong></td><td>Gobernanza y Trazabilidad</td><td>Auditoría 100%, visibilidad por estado, umbral de revisión, RBAC 5 roles</td></tr>
+      <tr><td><strong>EP-009</strong></td><td>Frontend Multi-Dominio</td><td>UI adaptativa: creación, búsqueda, revisión, administración, dashboards</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================
+     SLIDE 8 — ÉPICAS FUERA DEL MVP (Should/Could)
+     ============================================================ -->
+<section class="slide" aria-label="Épicas fuera del MVP">
+  <span class="slide-eyebrow">Épicas fuera del MVP</span>
+  <h2>3 épicas Should/Could diferidas</h2>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Épica</th><th>Prioridad</th><th>Justificación</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>EP-007</strong></td><td>Batch Ingestion</td><td><span class="badge badge-should">Should</span></td><td>Creación individual cubre el MVP. Diferido a v2.1+</td></tr>
+      <tr><td><strong>EP-010</strong></td><td>SDK Python Básico</td><td><span class="badge badge-should">Should</span></td><td>Producto funcional vía API REST v2. Diferido</td></tr>
+      <tr><td><strong>EP-008</strong></td><td>Migración v1→v2</td><td><span class="badge badge-could">Could</span></td><td>Script opcional. Solo si existen datos en v1</td></tr>
+    </tbody>
+  </table>
+  <p style="color: var(--text-muted); margin-top: 1rem;">Adicional: <strong>3 historias Should</strong> dentro de épicas Must, diferidas a R3: Rate limiting, Multi-hop traversal, Re-indexación masiva.</p>
+</section>
+
+<!-- ============================================================
+     SLIDE 9 — CIFRAS CLAVE
+     ============================================================ -->
+<section class="slide" aria-label="Cifras clave">
+  <span class="slide-eyebrow">Cifras clave</span>
+  <h2>El backlog en números</h2>
+  <div class="cols">
+    <div>
+      <table>
+        <thead><tr><th>Métrica</th><th>Valor</th></tr></thead>
+        <tbody>
+          <tr><td>Épicas totales</td><td><strong>10</strong></td></tr>
+          <tr><td>Features totales</td><td><strong>85+</strong></td></tr>
+          <tr><td>Historias de usuario</td><td><strong>69</strong></td></tr>
+          <tr><td>Historias Must para MVP</td><td><strong>66</strong> (95.7%)</td></tr>
+          <tr><td>Historias Should (R3)</td><td>3 (4.3%)</td></tr>
+          <tr><td>Features Must cubiertas</td><td>63/63 (100%)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <table>
+        <thead><tr><th>Talla</th><th>Cantidad</th><th>%</th></tr></thead>
+        <tbody>
+          <tr><td>S (1-3d)</td><td>21</td><td>30.4%</td></tr>
+          <tr><td>M (1-2sem)</td><td>31</td><td>44.9%</td></tr>
+          <tr><td>L (3-4sem)</td><td>17</td><td>24.6%</td></tr>
+          <tr><td>Quick Wins (S)</td><td><strong>16</strong></td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 10 — MVP DEFINIDO
+     ============================================================ -->
+<section class="slide" aria-label="MVP definido">
+  <span class="slide-eyebrow">MVP definido</span>
+  <h2>R1 + R2 = 66 historias Must</h2>
+  <div class="cols">
+    <div class="card">
+      <h3 style="color: var(--text);">R1 — MVP Core</h3>
+      <div class="kpi" style="font-size: 3rem;">43</div>
+      <p class="kpi-label">historias (62.3%)</p>
+      <p style="margin-top: 1rem;">Motor funcional, API completa, seguridad, gobernanza básica, UI mínima. Recall@10 ≥ 0.85. Datos multi-tenant aislados.</p>
+    </div>
+    <div class="card">
+      <h3 style="color: var(--text);">R2 — MVP Completo</h3>
+      <div class="kpi" style="font-size: 3rem;">23</div>
+      <p class="kpi-label">historias (33.3%)</p>
+      <p style="margin-top: 1rem;">Perfiles avanzados, búsqueda avanzada, gobernanza completa, frontend completo. NDCG@10 ≥ 0.80. Precisión top-1 ≥ 0.92.</p>
+    </div>
+  </div>
+  <p style="margin-top: 1rem; text-align: center; font-weight: 700;">Esfuerzo estimado MVP: 406-673 días-persona</p>
+</section>
+
+<!-- ============================================================
+     SLIDE 11 — QUICK WINS
+     ============================================================ -->
+<section class="slide" aria-label="Quick Wins">
+  <span class="slide-eyebrow">Quick Wins</span>
+  <h2>16 historias de alto valor + bajo esfuerzo (S)</h2>
+  <p style="color: var(--text-muted);">Estrategia: primeras 3-4 semanas de desarrollo para establecer la base del motor y generar confianza temprana.</p>
+  <div class="cols">
+    <div>
+      <ol>
+        <li>Clasificar memoria con kind universal</li>
+        <li>Metadatos extensibles (JSON libre)</li>
+        <li>Soft-delete (flag crítico día 1)</li>
+        <li>Modelo de confidence</li>
+        <li>Scope obligatorio en escritura</li>
+        <li>Defaults de sensibilidad por perfil</li>
+        <li>Vocabulario controlado por perfil</li>
+        <li>Health check</li>
+      </ol>
+    </div>
+    <div>
+      <ol start="9">
+        <li>English-Only en API</li>
+        <li>Estándares de error HTTP</li>
+        <li>Top-K configurable</li>
+        <li>Scoring transparente en resultados</li>
+        <li>Modelo de source tipado</li>
+        <li>Rechazar memoria en revisión</li>
+        <li>Herencia del core genérico</li>
+        <li>Documentación OpenAPI viva</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 12 — CRITERIOS DE ÉXITO
+     ============================================================ -->
+<section class="slide" aria-label="Criterios de éxito">
+  <span class="slide-eyebrow">Criterios de éxito</span>
+  <h2>13 criterios medibles y verificables</h2>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Criterio</th><th>Meta</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>CE-01</td><td>NDCG@10 en BEIR SciFact</td><td>≥ 0.80</td></tr>
+      <tr><td>CE-02</td><td>Recall@10 en BEIR SciFact</td><td>≥ 0.90</td></tr>
+      <tr><td>CE-03</td><td>Recall en LoCoMo (memoria conversacional)</td><td>≥ 0.80</td></tr>
+      <tr><td>CE-04</td><td>Latencia p95 búsqueda</td><td>&lt; 500ms</td></tr>
+      <tr><td>CE-05</td><td>Precisión top-1 suite interna</td><td>≥ 0.92</td></tr>
+      <tr><td>CE-06</td><td>Cobertura 8 kinds</td><td>100% (8/8)</td></tr>
+      <tr><td>CE-07</td><td>Aislamiento multi-tenant</td><td>100%</td></tr>
+      <tr><td>CE-08</td><td>Visibilidad por estado (sin falsos positivos)</td><td>100%</td></tr>
+      <tr><td>CE-09</td><td>Trazabilidad de mutaciones</td><td>100%</td></tr>
+      <tr><td>CE-10</td><td>English-Only compliance</td><td>100%</td></tr>
+      <tr><td>CE-11</td><td>Operaciones sobre 9 relaciones</td><td>9/9 tipos</td></tr>
+      <tr><td>CE-12</td><td>Batch 100 memorias atómico</td><td>≥ 99% (Should)</td></tr>
+      <tr><td>CE-13</td><td>Migración v1→v2</td><td>100% muestra (Could)</td></tr>
+    </tbody>
+  </table>
+  <p style="color: var(--text-muted);">R1 cubre 8/13 criterios. R2 agrega CE-01, CE-03, CE-05. CE-12 y CE-13 son Should/Could.</p>
+</section>
+
+<!-- ============================================================
+     SLIDE 13 — ALCANCE
+     ============================================================ -->
+<section class="slide" aria-label="Alcance">
+  <span class="slide-eyebrow">Alcance</span>
+  <h2>Lo que entra y lo que NO entra en v2.0.0</h2>
+  <div class="cols">
+    <div>
+      <h3 style="color: #2d7d46;">DENTRO del alcance</h3>
+      <ul>
+        <li>Motor genérico: 8 kinds, 6 estados, 9 relaciones, 4 sensibilidades</li>
+        <li>3 perfiles de dominio (Ops, Agent, Business)</li>
+        <li>Scoping multi-tenant 4D</li>
+        <li>API REST v2 completa + OpenAPI 3.x</li>
+        <li>Búsqueda semántica + expandGraph + re-ranking</li>
+        <li>Gobernanza: auditoría 100%, revisión humana, RBAC 5 roles</li>
+        <li>Frontend multi-dominio adaptativo</li>
+        <li>English-Only en todos los identificadores</li>
+        <li>Stack flexible con ADR</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="color: #c0392b;">FUERA del alcance</h3>
+      <ul>
+        <li>API v1 — descartada por completo</li>
+        <li>Backward compatibility con v1</li>
+        <li>Federación multi-repositorio</li>
+        <li>SDKs multi-lenguaje (solo Python diferido)</li>
+        <li>Benchmarks públicos completos</li>
+        <li>Automatización total de revisión humana</li>
+        <li>Orquestación multi-agente</li>
+        <li>Catálogo cerrado de dominios</li>
+        <li>Localización / i18n de la API</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 14 — API v1 + STACK
+     ============================================================ -->
+<section class="slide" aria-label="API v1 y Stack">
+  <span class="slide-eyebrow">Decisiones técnicas clave</span>
+  <h2>API v1 descartada · Stack flexible con ADR</h2>
+  <div class="cols">
+    <div class="card">
+      <h3 style="color: var(--text);">API v1</h3>
+      <p style="margin-top: 0.5rem;">Decisión del sponsor (2026-05-03): v1.0.0 está cerrado. Nadie usa v1 en producción.</p>
+      <ul>
+        <li>No coexiste con v2</li>
+        <li>No hay período de transición</li>
+        <li>Solo <code>/api/v2/</code></li>
+        <li>Sin dependencia de código ni esquemas heredados</li>
+        <li>Migración v1→v2 es script externo opcional</li>
+      </ul>
+      <p style="margin-top: 0.5rem; font-weight: 700;">Beneficio: libertad total de stack.</p>
+    </div>
+    <div class="card">
+      <h3 style="color: var(--text);">Stack</h3>
+      <p style="margin-top: 0.5rem;">Restricción R-01: se permite cambiar componentes si se justifica mediante ADR.</p>
+      <ul>
+        <li>Backend: Quarkus o alternativa (ADR)</li>
+        <li>Base vectorial: Qdrant o alternativa (ADR)</li>
+        <li>Embeddings: OpenAI o alternativa (ADR)</li>
+        <li>BD relacional: PostgreSQL</li>
+        <li>Auth: Keycloak (OIDC)</li>
+        <li>Infra: Docker + Caddy + HTTPS</li>
+      </ul>
+      <p style="margin-top: 0.5rem; font-weight: 700;">Decisión final en Fase 3 (Diseño Técnico).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 15 — PRÓXIMOS PASOS
+     ============================================================ -->
+<section class="slide" aria-label="Próximos pasos">
+  <span class="slide-eyebrow">Próximos pasos</span>
+  <h2>Fases del proyecto</h2>
+  <table>
+    <thead>
+      <tr><th>Fase</th><th>Nombre</th><th>Entregables clave</th><th>Estado</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>0</strong></td><td>Descubrimiento</td><td>Visión, épicas, features, historias, backlog priorizado</td><td style="color: #2d7d46; font-weight: 700;">COMPLETADO</td></tr>
+      <tr><td><strong>1</strong></td><td>Inicio</td><td>Refinamiento de perfiles con expertos, setup de ambiente, ADR de stack</td><td>Pendiente</td></tr>
+      <tr><td><strong>2</strong></td><td>Análisis Funcional</td><td>Especificación detallada API v2, modelo de datos, reglas de negocio</td><td>Pendiente</td></tr>
+      <tr><td><strong>3</strong></td><td>Diseño Técnico</td><td>Arquitectura, ADRs, modelo de BD, contratos OpenAPI finales</td><td>Pendiente</td></tr>
+      <tr><td><strong>4</strong></td><td>Construcción</td><td>R1 (MVP Core) → R2 (MVP Completo) → R3 (Enhancements)</td><td>Pendiente</td></tr>
+      <tr><td><strong>5</strong></td><td>UAT</td><td>Validación contra 13 criterios de éxito, benchmarks, tests de seguridad</td><td>Pendiente</td></tr>
+      <tr><td><strong>6</strong></td><td>Estabilización</td><td>Corrección de defectos, ajustes de rendimiento, documentación final</td><td>Pendiente</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================
+     SLIDE 16 — DECISIÓN SOLICITADA (CTA)
+     ============================================================ -->
+<section class="slide" aria-label="Decisión solicitada">
+  <span class="slide-eyebrow">Decisión solicitada</span>
+  <h2>¿Refleja correctamente tu necesidad?</h2>
+  <div class="cta" style="margin-top: 1rem;">
+    <ol style="color: var(--bg); padding-left: 2rem; display: grid; gap: 1rem;">
+      <li style="font-size: 1.1rem;"><strong>¿La visión del motor genérico multi-dominio con IA captura lo que tenías en mente?</strong></li>
+      <li style="font-size: 1.1rem;"><strong>¿Épicas, features o historias que falten o sobren?</strong> ¿Alguna capacidad crítica no cubierta en las 85+ features?</li>
+      <li style="font-size: 1.1rem;"><strong>¿De acuerdo con la priorización?</strong> R1 (43 Core) + R2 (23 Completan MVP) = 66 historias.</li>
+      <li style="font-size: 1.1rem;"><strong>¿De acuerdo con lo que queda fuera?</strong> Batch ingestion, SDK Python y migración v1→v2 diferidos a v2.1+.</li>
+      <li style="font-size: 1.1rem;"><strong>¿Stack flexible con ADR?</strong> ¿Fijar stack ahora o decisión técnica documentada en Fase 3?</li>
+    </ol>
+  </div>
+  <p style="margin-top: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+    <strong>Próximo hito:</strong> Fase 1 — Inicio. Refinamiento de perfiles de dominio, setup de ambiente de desarrollo, y ADR de stack.
+  </p>
+</section>
+
+</body>
+</html>
