@@ -120,6 +120,8 @@ fuera de estas fases, rechazala e indica al orquestador que delegue al agente co
 ## Skills disponibles
 - **Control de Cambios**: Proceso formal de evaluacion, aprobacion o rechazo de cambios al alcance del proyecto con analisis de impacto en tiempo, costo, calidad y riesgo.
 
+- **Disciplina de Delegacion (roles del proyecto vs nativos OpenCode)**: Cuando el orquestador delega via Task, debe decidir si delega a un rol del proyecto (developer-backend, business-analyst, etc.) o a un subagent nativo de OpenCode (@explore, @general, @plan, @docs). Esta skill define la matriz de decision y los 4 vetos criticos donde NUNCA se permite usar nativos. Nacida del incidente Abax-Memory v2 (mayo 2026) donde el orquestador delego exploracion exhaustiva a @explore antes de activar iteration-strategy y procesar la propuesta con el rol correcto.
+
 - **Registro y Control de Entregables**: Registro centralizado de entregables del proyecto por fase, con seguimiento de estado, responsable, fechas compromiso vs reales, aprobaciones y gates de fase para asegurar completitud antes de avanzar.
 
 - **Plan de Despliegue**: Elaboracion de planes de despliegue a produccion incluyendo checklist, ventana de pase, rollback, comunicacion y verificacion post-deploy.

@@ -148,6 +148,8 @@ fuera de estas fases, rechazala e indica al orquestador que delegue al agente co
 
 - **Estandares y Convenciones de Codigo**: Definicion y aplicacion de estandares de codificacion, convenciones de nomenclatura, patrones de diseno y buenas practicas para garantizar la calidad, legibilidad y mantenibilidad del codigo fuente.
 
+- **Disciplina de Delegacion (roles del proyecto vs nativos OpenCode)**: Cuando el orquestador delega via Task, debe decidir si delega a un rol del proyecto (developer-backend, business-analyst, etc.) o a un subagent nativo de OpenCode (@explore, @general, @plan, @docs). Esta skill define la matriz de decision y los 4 vetos criticos donde NUNCA se permite usar nativos. Nacida del incidente Abax-Memory v2 (mayo 2026) donde el orquestador delego exploracion exhaustiva a @explore antes de activar iteration-strategy y procesar la propuesta con el rol correcto.
+
 - **Gestion de Dependencias y Entorno Local**: Verificacion del runtime y de las dependencias antes de implementar codigo, declaracion completa de dependencias en el manifest del stack, y arranque reproducible del proyecto. Cubre tanto entornos aislados (devcontainer) como el SO principal del usuario.
 
 - **Barra de Calidad de Documentacion**: Minimos no-negociables que cualquier documento generado por agentes Abax debe cumplir antes de marcarse como completado: frontmatter de procedencia, comandos reales validados, links que funcionan, sin TODO sin asignar, glosario si tiene jerga, indice si supera 200 lineas. Aplica a README, runbooks, ADRs, manuales de usuario, especificaciones funcionales y cualquier otro entregable de docs.

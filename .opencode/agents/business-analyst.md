@@ -144,6 +144,8 @@ fuera de estas fases, rechazala e indica al orquestador que delegue al agente co
 
 - **Control de Cambios**: Proceso formal de evaluacion, aprobacion o rechazo de cambios al alcance del proyecto con analisis de impacto en tiempo, costo, calidad y riesgo.
 
+- **Disciplina de Delegacion (roles del proyecto vs nativos OpenCode)**: Cuando el orquestador delega via Task, debe decidir si delega a un rol del proyecto (developer-backend, business-analyst, etc.) o a un subagent nativo de OpenCode (@explore, @general, @plan, @docs). Esta skill define la matriz de decision y los 4 vetos criticos donde NUNCA se permite usar nativos. Nacida del incidente Abax-Memory v2 (mayo 2026) donde el orquestador delego exploracion exhaustiva a @explore antes de activar iteration-strategy y procesar la propuesta con el rol correcto.
+
 - **Barra de Calidad de Documentacion**: Minimos no-negociables que cualquier documento generado por agentes Abax debe cumplir antes de marcarse como completado: frontmatter de procedencia, comandos reales validados, links que funcionan, sin TODO sin asignar, glosario si tiene jerga, indice si supera 200 lineas. Aplica a README, runbooks, ADRs, manuales de usuario, especificaciones funcionales y cualquier otro entregable de docs.
 
 - **Protocolo de actualizacion de documentacion existente (anti-overwrite)**: Cuando un agente recibe una Task que apunta a un archivo de documentacion que YA EXISTE, NUNCA debe sobreescribirlo silenciosamente. Esta skill le da el procedimiento exacto: leer primero, preservar estructura, agregar bloque de cambios o crear archivo paralelo. Nacida del incidente Abax-Memory v2 (mayo 2026) donde el BA sobreescribio 8 entregables de v1 al recibir Tasks de v2 sin instruccion explicita de preservacion.

@@ -81,6 +81,8 @@ skills:
     name: Modelado de Base de Datos
   - id: defect-reporting
     name: Reporte y Gestion de Defectos
+  - id: delegation-discipline
+    name: Disciplina de Delegacion (roles del proyecto vs nativos OpenCode)
   - id: deliverable-registry
     name: Registro y Control de Entregables
   - id: dependency-management
@@ -179,5 +181,5 @@ warnings:
   - developer-backend funciona mejor con dba (no incluido)
   - qa-functional funciona mejor con qa-lead (no incluido)
   - developer-frontend funciona mejor con ux-designer (no incluido)
-generated_at: 2026-05-03T18:03:56.352Z
+generated_at: 2026-05-03T18:34:10.214Z
 generated_by: abax-swarm v0.1.0

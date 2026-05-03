@@ -146,6 +146,8 @@ fuera de estas fases, rechazala e indica al orquestador que delegue al agente co
 
 - **Modelado de Base de Datos**: Diseno de modelos de datos relacionales normalizados, incluyendo entidades, relaciones, constraints, indices y diagramas ER en Mermaid.
 
+- **Disciplina de Delegacion (roles del proyecto vs nativos OpenCode)**: Cuando el orquestador delega via Task, debe decidir si delega a un rol del proyecto (developer-backend, business-analyst, etc.) o a un subagent nativo de OpenCode (@explore, @general, @plan, @docs). Esta skill define la matriz de decision y los 4 vetos criticos donde NUNCA se permite usar nativos. Nacida del incidente Abax-Memory v2 (mayo 2026) donde el orquestador delego exploracion exhaustiva a @explore antes de activar iteration-strategy y procesar la propuesta con el rol correcto.
+
 - **Planificacion de Despliegue a Produccion**: Gobierno y rubrica del plan de despliegue. Antes de cualquier accion real contra un ambiente productivo, el equipo produce un plan que cubre dónde se publica, cómo se expone (URL, dominio, TLS), cómo se monitorea, cómo se revierte y cómo se comunica al usuario final. El plan es bloqueante: ningun deploy ocurre sin aprobacion explicita del usuario sponsor.
 
 - **Barra de Calidad de Documentacion**: Minimos no-negociables que cualquier documento generado por agentes Abax debe cumplir antes de marcarse como completado: frontmatter de procedencia, comandos reales validados, links que funcionan, sin TODO sin asignar, glosario si tiene jerga, indice si supera 200 lineas. Aplica a README, runbooks, ADRs, manuales de usuario, especificaciones funcionales y cualquier otro entregable de docs.
