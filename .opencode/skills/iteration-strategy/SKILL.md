@@ -6,19 +6,38 @@ description: Cuando el orquestador detecta que un proyecto cerrado recibe nueva 
 
 # Estrategia de Iteracion (v2/v3 sobre proyecto cerrado)
 
-## Atajo de deteccion (lee 3 archivos sin delegar)
+## Atajo de deteccion: primera Task al @business-analyst
 
-Antes de delegar nada (especialmente NO delegar exploracion exhaustiva
-a `@explore`), el orquestador lee directamente:
+El orquestador en OpenCode NO tiene `read` (es coordinador puro,
+`permission.read: deny`). Por lo tanto la lectura inicial de contexto
+DEBE delegarse — el atajo correcto es **una sola Task al
+`@business-analyst`** (NO a `@explore` ni `@general`) que lea en bloque:
 
-1. `project-manifest.yaml` (raiz del proyecto) — te da nombre, tamano, stack,
-   equipo, modo, fases. Es 1 sola lectura, 5 segundos.
-2. `docs/bitacora.md` (si existe) — te da estado: cerrado/en curso/fase actual.
-3. `CHANGELOG.md` (si existe) — te da releases publicados (v1.0.0 listada → cerrada).
+1. `project-manifest.yaml` (raiz) — nombre, tamano, stack, equipo, modo, fases
+2. `docs/bitacora.md` (si existe) — estado del proyecto, ultima fase
+3. `CHANGELOG.md` (si existe) — releases publicados (busca `## [X.Y.Z]`)
+4. El archivo de propuesta o input que el usuario menciono (si aplica)
 
-Con esos 3 archivos tienes el 80% del contexto del proyecto. Solo despues
-decide si necesitas delegar exploracion adicional a `@explore` (skill
-`delegation-discipline` define cuando es OK).
+El BA tiene esta skill (`iteration-strategy`) cargada — al recibir esa Task
+detectara automaticamente si aplica iteracion mayor y reportara cual
+estrategia (A/B/C/D) recomienda.
+
+Por que NO `@explore` o `@general`:
+- No tienen `iteration-strategy` cargada — leerian sin activar la deteccion.
+- No tienen `existing-docs-update-protocol` ni `documentation-quality-bar`.
+- El reporte queda diluido sin autoria de un rol del proyecto.
+
+Esta Task da el 80% del contexto en 1 sola delegacion. El orquestador
+espera el reporte y procede segun lo que el BA recomiende.
+
+### Para el orquestador en Claude Code (que SI puede `read`)
+
+En claude-code el orquestador es la sesion misma del usuario y tiene
+acceso a `read`. Puede leer los 3-4 archivos directamente. Pero la
+recomendacion sigue siendo delegar al `@business-analyst` para que
+aplique consistentemente la skill `iteration-strategy` y produzca el
+reporte estructurado — la diferencia es solo de viabilidad tecnica,
+no de buena practica.
 
 ## Cuando esta skill aplica (activacion bloqueante)
 

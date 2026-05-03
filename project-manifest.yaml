@@ -181,5 +181,5 @@ warnings:
   - developer-backend funciona mejor con dba (no incluido)
   - qa-functional funciona mejor con qa-lead (no incluido)
   - developer-frontend funciona mejor con ux-designer (no incluido)
-generated_at: 2026-05-03T18:34:10.214Z
+generated_at: 2026-05-03T18:57:17.026Z
 generated_by: abax-swarm v0.1.0

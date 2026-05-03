@@ -23,6 +23,9 @@ Pregunta 5: ¿La Task es exploracion/lookup/research read-only?
   `@plan` para bosquejo, `@general` para sintesis multi-area)
 - NO → rol del proyecto por default (caso ambiguo, default seguro)
 
-Pregunta 6 (atajo): ¿Necesitas info del proyecto en general?
-- LEE `project-manifest.yaml`, `docs/bitacora.md`, `CHANGELOG.md`
-  DIRECTAMENTE sin delegar. Es el camino mas corto.
+Pregunta 6 (atajo): ¿Necesitas info del proyecto en general (primera vez)?
+- DELEGA a `@business-analyst` UNA Task con la lectura conjunta de
+  `project-manifest.yaml`, `docs/bitacora.md`, `CHANGELOG.md` + el
+  archivo de input del usuario. El BA tiene `iteration-strategy`
+  cargada y reporta condiciones detectadas + estrategia recomendada.
+  NO `@general` ni `@explore` para esto.
