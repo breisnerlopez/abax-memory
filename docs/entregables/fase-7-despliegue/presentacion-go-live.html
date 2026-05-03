@@ -1,0 +1,1345 @@
+<!-- Fase: 7-Despliegue, Entregable: Presentacion Go-Live Readiness, Responsable: project-manager, Fecha: 2026-05-02, Estado: Completado -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMOA — Presentación Go-Live Readiness</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --color-bg: #f3f6fa;
+            --color-surface: #ffffff;
+            --color-surface-alt: #eef3f8;
+            --color-ink: #16202b;
+            --color-ink-muted: #516173;
+            --color-line: #d7e0ea;
+            --color-primary: #0f4c81;
+            --color-primary-soft: #dceaf6;
+            --color-secondary: #1e6f5c;
+            --color-secondary-soft: #dbefe9;
+            --color-accent: #b97816;
+            --color-accent-soft: #f9ecd6;
+            --color-danger: #a63a3a;
+            --color-danger-soft: #f7e1e1;
+            --color-warning: #8a6700;
+            --color-warning-soft: #f7efc8;
+            --color-success: #256d3f;
+            --color-success-soft: #ddf0e3;
+            --color-info: #0d5e7a;
+            --color-info-soft: #dceff6;
+
+            --font-family-base: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            --font-family-mono: "Consolas", "Courier New", monospace;
+            --font-size-xxs: 0.7rem;
+            --font-size-xs: 0.82rem;
+            --font-size-sm: 0.95rem;
+            --font-size-md: 1.08rem;
+            --font-size-lg: 1.35rem;
+            --font-size-xl: 2rem;
+            --font-size-2xl: 2.9rem;
+            --font-size-3xl: 4rem;
+            --line-height-tight: 1.15;
+            --line-height-base: 1.45;
+            --line-height-loose: 1.7;
+            --font-weight-regular: 400;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.5rem;
+            --space-6: 2rem;
+            --space-7: 3rem;
+            --space-8: 4rem;
+
+            --radius-sm: 0.35rem;
+            --radius-md: 0.7rem;
+            --radius-lg: 1rem;
+            --border-thin: 1px solid var(--color-line);
+            --border-strong: 1px solid rgba(15, 76, 129, 0.28);
+            --shadow-sm: 0 0.4rem 1rem rgba(20, 35, 52, 0.08);
+            --shadow-md: 0 0.9rem 2rem rgba(20, 35, 52, 0.12);
+            --badge-padding: 0.35rem 0.7rem;
+            --badge-radius: 999px;
+            --table-header-bg: #e8f0f7;
+            --table-row-alt: #f8fbfd;
+            --slide-width: 1280px;
+            --slide-height: 720px;
+            --transition-base: 220ms ease;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: var(--color-bg);
+            color: var(--color-ink);
+            font-family: var(--font-family-base);
+            line-height: var(--line-height-base);
+        }
+
+        body { padding: var(--space-6); }
+
+        .presentation {
+            display: grid;
+            gap: var(--space-6);
+            justify-content: center;
+        }
+
+        .slide {
+            position: relative;
+            width: min(100%, var(--slide-width));
+            min-height: var(--slide-height);
+            margin: 0 auto;
+            padding: var(--space-7);
+            background: var(--color-surface);
+            border: var(--border-thin);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: var(--space-5);
+            transition: transform var(--transition-base), box-shadow var(--transition-base);
+        }
+
+        .slide:hover {
+            transform: translateY(-0.2rem);
+            box-shadow: 0 1.2rem 2.4rem rgba(20, 35, 52, 0.14);
+        }
+
+        .slide::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 0.4rem;
+            background: var(--color-primary);
+        }
+
+        .slide__header, .slide__footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-4);
+            color: var(--color-ink-muted);
+            font-size: var(--font-size-xs);
+        }
+
+        .slide__header {
+            padding-bottom: var(--space-3);
+            border-bottom: var(--border-thin);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .slide__footer {
+            padding-top: var(--space-3);
+            border-top: var(--border-thin);
+        }
+
+        .slide__content {
+            display: grid;
+            gap: var(--space-5);
+            align-content: start;
+        }
+
+        .project-name {
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+
+        h1, h2, h3, h4, p, ul, ol, blockquote { margin: 0; }
+
+        h1 {
+            font-size: var(--font-size-3xl);
+            line-height: var(--line-height-tight);
+        }
+
+        h2 {
+            font-size: var(--font-size-2xl);
+            line-height: var(--line-height-tight);
+        }
+
+        h3 {
+            font-size: var(--font-size-xl);
+            line-height: 1.2;
+        }
+
+        h4 {
+            font-size: var(--font-size-lg);
+            line-height: 1.25;
+        }
+
+        p, li, td, th { font-size: var(--font-size-md); }
+
+        .eyebrow {
+            color: var(--color-primary);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-bold);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .lead {
+            max-width: 52rem;
+            font-size: var(--font-size-lg);
+            color: var(--color-ink-muted);
+        }
+
+        .muted { color: var(--color-ink-muted); }
+        .accent { color: var(--color-primary); }
+
+        .divider {
+            width: 6rem;
+            height: 0.28rem;
+            background: var(--color-primary);
+            border-radius: 999px;
+        }
+
+        .layout-cover .slide__content {
+            align-content: center;
+            gap: var(--space-6);
+        }
+
+        .cover-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-3);
+        }
+
+        .layout-agenda .agenda-list,
+        .content-list,
+        .check-list {
+            display: grid;
+            gap: var(--space-3);
+            padding-left: 1.25rem;
+        }
+
+        .agenda-list li::marker,
+        .content-list li::marker,
+        .check-list li::marker {
+            color: var(--color-primary);
+        }
+
+        .layout-content .slide__content,
+        .layout-table .slide__content,
+        .layout-metrics .slide__content,
+        .layout-closing .slide__content {
+            grid-template-columns: 1fr;
+        }
+
+        .layout-two-columns .slide__content {
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: var(--space-6);
+        }
+
+        .column, .card, .highlight, .risk-block, .metric, .table-wrapper {
+            background: var(--color-surface-alt);
+            border: var(--border-thin);
+            border-radius: var(--radius-md);
+            padding: var(--space-5);
+        }
+
+        .card { box-shadow: var(--shadow-sm); }
+
+        .cards-grid, .metrics-grid {
+            display: grid;
+            gap: var(--space-4);
+        }
+
+        .cards-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .metrics-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+        .metric {
+            display: grid;
+            gap: var(--space-2);
+            align-content: start;
+            min-height: 11rem;
+        }
+
+        .metric__value {
+            font-size: 3.2rem;
+            line-height: 1;
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+
+        .metric__label {
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-ink-muted);
+        }
+
+        .metric__detail { font-size: var(--font-size-sm); }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--badge-padding);
+            border-radius: var(--badge-radius);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-bold);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .badge--primary { background: var(--color-primary-soft); color: var(--color-primary); border-color: rgba(15, 76, 129, 0.18); }
+        .badge--success { background: var(--color-success-soft); color: var(--color-success); border-color: rgba(37, 109, 63, 0.18); }
+        .badge--warning { background: var(--color-warning-soft); color: var(--color-warning); border-color: rgba(138, 103, 0, 0.18); }
+        .badge--danger { background: var(--color-danger-soft); color: var(--color-danger); border-color: rgba(166, 58, 58, 0.18); }
+        .badge--info { background: var(--color-info-soft); color: var(--color-info); border-color: rgba(13, 94, 122, 0.18); }
+        .badge--neutral { background: #edf2f7; color: #425466; border-color: rgba(66, 84, 102, 0.16); }
+
+        .highlight {
+            border-left: 0.35rem solid var(--color-accent);
+            background: #fcf8f0;
+        }
+
+        .highlight--success {
+            border-left: 0.35rem solid var(--color-success);
+            background: #f6faf7;
+        }
+
+        .risk-block {
+            border-left: 0.35rem solid var(--color-danger);
+            background: #fcf4f4;
+        }
+
+        .risk-block__title, .highlight__title, .card__title {
+            margin-bottom: var(--space-2);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .table-wrapper {
+            overflow: hidden;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--color-surface);
+        }
+
+        thead { background: var(--table-header-bg); }
+
+        th, td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: var(--border-thin);
+            font-size: var(--font-size-sm);
+        }
+
+        tbody tr:nth-child(even) { background: var(--table-row-alt); }
+        tbody tr:last-child td { border-bottom: 0; }
+
+        .callout-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-3);
+            align-items: center;
+        }
+
+        .kicker-box {
+            display: inline-block;
+            padding: var(--space-3) var(--space-4);
+            background: var(--color-primary-soft);
+            color: var(--color-primary);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .kicker-box--success {
+            background: var(--color-success-soft);
+            color: var(--color-success);
+        }
+
+        .kicker-box--warning {
+            background: var(--color-warning-soft);
+            color: var(--color-warning);
+        }
+
+        .closing-panel {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: var(--space-6);
+            align-items: end;
+        }
+
+        .quote {
+            padding: var(--space-5);
+            border-left: 0.35rem solid var(--color-primary);
+            background: var(--color-primary-soft);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            font-size: var(--font-size-lg);
+        }
+
+        .page-number { font-variant-numeric: tabular-nums; }
+
+        .step-indicator {
+            display: flex;
+            gap: var(--space-1);
+            align-items: center;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.75rem;
+            height: 1.75rem;
+            border-radius: 50%;
+            background: var(--color-primary);
+            color: #ffffff;
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .step-label {
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-ink);
+        }
+
+        .step-line {
+            width: 1.5rem;
+            height: 2px;
+            background: var(--color-line);
+        }
+
+        .gantt-mermaid {
+            background: #ffffff;
+            border: var(--border-thin);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-xs);
+            white-space: pre;
+            overflow-x: auto;
+            line-height: 1.6;
+            color: var(--color-ink-muted);
+        }
+
+        @media (max-width: 1360px) {
+            body { padding: var(--space-4); }
+            .slide { min-height: auto; }
+            .layout-two-columns .slide__content,
+            .closing-panel,
+            .cards-grid,
+            .metrics-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 900px) {
+            .slide {
+                padding: var(--space-5);
+                border-radius: var(--radius-md);
+            }
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 2.2rem; }
+            h3 { font-size: 1.6rem; }
+            .layout-two-columns .slide__content,
+            .closing-panel,
+            .cards-grid,
+            .metrics-grid { grid-template-columns: 1fr; }
+        }
+
+        @media print {
+            @page { size: 16:9 landscape; margin: 0.6cm; }
+            html, body { background: #ffffff; }
+            body { padding: 0; }
+            .presentation { gap: 0; }
+            .slide {
+                width: 100%;
+                min-height: 0;
+                height: 100%;
+                page-break-after: always;
+                border-radius: 0;
+                box-shadow: none;
+                border: 1px solid #cfd8e3;
+                margin: 0;
+                break-after: page;
+            }
+            .slide:hover { transform: none; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <main class="presentation">
+
+        <!-- SLIDE 01 — PORTADA -->
+        <section class="slide layout-cover" aria-label="Portada Go-Live Readiness">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 7 · Despliegue</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Decisión de Pase a Producción</div>
+                <h1>Presentación<br>Go-Live Readiness</h1>
+                <div class="divider"></div>
+                <p class="lead">Release R1-MVP preparado para despliegue en servidor cloud privado. Se requiere decisión formal del Comité Directivo para autorizar el pase a producción.</p>
+                <div class="cover-meta">
+                    <span class="badge badge--primary">Proyecto PMOA / Abax-Memory</span>
+                    <span class="badge badge--success">UAT Aceptado — 100%</span>
+                    <span class="badge badge--info">Decisión Requerida</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Go-Live Readiness · 2026-05-02</span>
+                <span class="page-number">01</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 02 — AGENDA -->
+        <section class="slide layout-agenda" aria-label="Agenda de la presentación">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 7 · Despliegue · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Estructura de la sesión</div>
+                <h2>Agenda</h2>
+                <ol class="agenda-list">
+                    <li>Resumen ejecutivo del producto R1-MVP</li>
+                    <li>Estado de fases previas (Fase 0 a Fase 6)</li>
+                    <li>Checklist pre-go-live: condiciones de salida</li>
+                    <li>Plan de despliegue y secuencia de ejecución</li>
+                    <li>Plan de rollback y criterios de activación</li>
+                    <li>Riesgos de go-live y mitigaciones activas</li>
+                    <li>Cronograma de go-live y responsables</li>
+                    <li>Decisión recomendada</li>
+                </ol>
+                <div class="callout-row">
+                    <span class="kicker-box">Duración estimada: 25 min</span>
+                    <span class="kicker-box">Audiencia: Comité Directivo</span>
+                    <span class="kicker-box">Resultado esperado: Aprobación Go-Live</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Layout: agenda</span>
+                <span class="page-number">02</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 03 — RESUMEN DEL PRODUCTO -->
+        <section class="slide layout-two-columns" aria-label="Resumen del producto R1-MVP">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 7 · Despliegue · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="column">
+                    <div class="eyebrow">¿Qué se despliega?</div>
+                    <h2>R1-MVP: Backend de Memoria Operativa</h2>
+                    <p class="lead">Plataforma backend API-first para capturar, estructurar, validar, recuperar y auditar conocimiento operativo reutilizable por agentes.</p>
+                    <ul class="content-list">
+                        <li><strong>8 módulos funcionales</strong> — Gestión de memorias, API operativa, búsqueda semántica, persistencia, gobierno, depuración, acceso y contrato API.</li>
+                        <li><strong>13 endpoints REST</strong> — Altas, consultas, búsqueda semántica, aprobación, archivado, trazabilidad y gestión de casos.</li>
+                        <li><strong>Stack tecnológico</strong>: Quarkus Java 21, PostgreSQL, Git/GitHub, Qdrant, Keycloak OIDC, Kubernetes.</li>
+                    </ul>
+                    <div class="highlight">
+                        <div class="highlight__title">Propuesta de valor del MVP</div>
+                        <p>Repositorio único de memoria operativa con trazabilidad Git, búsqueda semántica y gobierno por criticidad, sin UI dedicada.</p>
+                    </div>
+                </div>
+                <aside class="column">
+                    <div class="card">
+                        <div class="card__title">Alcance R1-MVP</div>
+                        <p class="muted"><strong>17 historias de usuario Must</strong> sobre 8 épicas. Cobertura funcional completa de creación, consulta, búsqueda, gobierno y depuración de memorias.</p>
+                    </div>
+                    <div class="card" style="margin-top: 1rem;">
+                        <div class="card__title">Fuera de alcance</div>
+                        <p class="muted">Sin UI dedicada, sin Neo4j/Redis/Kafka en MVP, sin multi-repositorio. R2 diferido con 15 criterios adicionales.</p>
+                    </div>
+                    <div class="risk-block" style="margin-top: 1rem;">
+                        <div class="risk-block__title">Limitaciones conocidas (no bloqueantes)</div>
+                        <p>Adapters en memoria para tests automatizados; entorno integrado OIDC+PostgreSQL real requiere smoke test; pruebas de rendimiento diferidas a estabilización.</p>
+                    </div>
+                </aside>
+            </div>
+            <footer class="slide__footer">
+                <span>Layout: dos columnas</span>
+                <span class="page-number">03</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 04 — ESTADO DE FASES PREVIAS (TABLA) -->
+        <section class="slide layout-table" aria-label="Estado de fases previas">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 7 · Despliegue · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Trazabilidad de ejecución</div>
+                <h2>Estado de Fases Previas — Fase 0 a Fase 6</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fase</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Resultado Clave</th>
+                                <th>Gate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>0</td>
+                                <td>Descubrimiento</td>
+                                <td><span class="badge badge--success">Completado</span></td>
+                                <td>Visión, backlog priorizado, épicas y 17 HU Must definidas</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Inicio</td>
+                                <td><span class="badge badge--success">Completado</span></td>
+                                <td>Acta de constitución, cronograma base, 20 riesgos identificados</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Análisis Funcional</td>
+                                <td><span class="badge badge--success">Completado</span></td>
+                                <td>61 criterios de aceptación, especificación funcional, reglas de negocio</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Diseño Técnico</td>
+                                <td><span class="badge badge--success">Completado</span></td>
+                                <td>Arquitectura definitiva, contratos API, modelo de datos, baseline MVP</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Construcción</td>
+                                <td><span class="badge badge--success">Completado</span></td>
+                                <td>Backend Quarkus, 9 defectos corregidos, suite 54 tests unitarios, BUILD SUCCESS</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>Pruebas QA</td>
+                                <td><span class="badge badge--success">Completado</span></td>
+                                <td>49/49 casos funcionales aprobados, 100% cobertura, 0 defectos abiertos</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>UAT</td>
+                                <td><span class="badge badge--success">ACEPTADO</span></td>
+                                <td>61/61 CA aprobados (100%), 0 fallidos, 0 bloqueados, acta firmada</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="callout-row">
+                    <span class="kicker-box kciker-box--success">Todas las fases previas completadas y aprobadas</span>
+                    <span class="kicker-box">Próximo gate: Go-Live (Fase 7)</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Layout: tabla</span>
+                <span class="page-number">04</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 05 — MÉTRICAS DE CALIDAD DEL PRODUCTO -->
+        <section class="slide layout-metrics" aria-label="Métricas de calidad R1-MVP">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 7 · Despliegue · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Evidencia de calidad</div>
+                <h2>Métricas del Producto R1-MVP</h2>
+                <div class="metrics-grid">
+                    <article class="metric">
+                        <div class="metric__label">CA UAT Aprobados</div>
+                        <div class="metric__value">61/61</div>
+                        <div class="metric__detail">Criterios de aceptación verificados: 100% de aprobación.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Tests Automatizados</div>
+                        <div class="metric__value">54</div>
+                        <div class="metric__detail">BUILD SUCCESS, 0 failures, 0 errors, 0 skipped.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Casos QA Funcionales</div>
+                        <div class="metric__value">49/49</div>
+                        <div class="metric__detail">100% aprobados. Suite completa con trazabilidad a CA.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Defectos Críticos</div>
+                        <div class="metric__value">0</div>
+                        <div class="metric__detail">Cero defectos Blocker o Critical abiertos al cierre de QA.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Endpoints API</div>
+                        <div class="metric__value">13</div>
+                        <div class="metric__detail">Verificados con contrato funcional. Respuestas de error consistentes.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Módulos MVP</div>
+                        <div class="metric__value">8/8</div>
+                        <div class="metric__detail">Gestión, API, Búsqueda, Persistencia, Gobierno, Depuración, Acceso, Contrato.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Defectos Corregidos</div>
+                        <div class="metric__value">9</div>
+                        <div class="metric__detail">BUG-QA-001 a BUG-QA-009 corregidos y verificados en Fase 4.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Release</div>
+                        <div class="metric__value">R1</div>
+                        <div class="metric__detail">MVP listo. 15 criterios R2 diferidos sin impacto en go-live.</div>
+                    </article>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Layout: métricas</span>
+                <span class="page-number">05</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 06 — CHECKLIST PRE-GO-LIVE -->
+        <section class="slide layout-table" aria-label="Checklist pre-go-live">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 7 · Despliegue · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Condiciones de salida a producción</div>
+                <h2>Checklist Pre-Go-Live</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Condición</th>
+                                <th>Estado</th>
+                                <th>Evidencia / Observación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CK-01</td>
+                                <td>Acta UAT aprobada y firmada por Product Owner</td>
+                                <td><span class="badge badge--success">Cumplido</span></td>
+                                <td>Acta v1.0 — 2026-05-02. Decisión: ACEPTADO.</td>
+                            </tr>
+                            <tr>
+                                <td>CK-02</td>
+                                <td>Suite automatizada con BUILD SUCCESS (0 fallos)</td>
+                                <td><span class="badge badge--success">Cumplido</span></td>
+                                <td>54 tests, 0 failures. Evidencia EV-RE-001.</td>
+                            </tr>
+                            <tr>
+                                <td>CK-03</td>
+                                <td>Cero defectos críticos abiertos (Blocker/Critical)</td>
+                                <td><span class="badge badge--success">Cumplido</span></td>
+                                <td>0 defectos funcionales abiertos al cierre QA.</td>
+                            </tr>
+                            <tr>
+                                <td>CK-04</td>
+                                <td>Pipeline CI/CD verde en staging</td>
+                                <td><span class="badge badge--warning">Pendiente</span></td>
+                                <td>Requiere habilitar entorno de staging cloud privado antes del go-live.</td>
+                            </tr>
+                            <tr>
+                                <td>CK-05</td>
+                                <td>Scripts de base de datos revisados y validados</td>
+                                <td><span class="badge badge--warning">Pendiente</span></td>
+                                <td>Migraciones PostgreSQL y Qdrant a ejecutar en ventana pre-deploy.</td>
+                            </tr>
+                            <tr>
+                                <td>CK-06</td>
+                                <td>Plan de rollback documentado y probado</td>
+                                <td><span class="badge badge--warning">Pendiente</span></td>
+                                <td>Definido en este documento (Slide 08). Requiere dry-run en staging.</td>
+                            </tr>
+                            <tr>
+                                <td>CK-07</td>
+                                <td>Smoke tests definidos para post-deploy</td>
+                                <td><span class="badge badge--warning">Pendiente</span></td>
+                                <td>Validación de 5 endpoints críticos + health checks.</td>
+                            </tr>
+                            <tr>
+                                <td>CK-08</td>
+                                <td>Comunicación a stakeholders y soporte programada</td>
+                                <td><span class="badge badge--warning">Pendiente</span></td>
+                                <td>Notificar 24h antes. Equipo de soporte asignado para hiper-care.</td>
+                            </tr>
+                            <tr>
+                                <td>CK-09</td>
+                                <td>Monitoreo y alertamiento configurados en producción</td>
+                                <td><span class="badge badge--warning">Pendiente</span></td>
+                                <td>Dashboards de health, latencia, errores 5xx, y alertas por umbral.</td>
+                            </tr>
+                            <tr>
+                                <td>CK-10</td>
+                                <td>Credenciales y secretos gestionados en vault seguro</td>
+                                <td><span class="badge badge--warning">Pendiente</span></td>
+                                <td>GitHub token, Qdrant API key, DB credentials, OIDC client secret.</td>
+                            </tr>
+                            <tr>
+                                <td>CK-11</td>
+                                <td>Configuración de ambiente productivo validada (paridad)</td>
+                                <td><span class="badge badge--warning">Pendiente</span></td>
+                                <td>Variables de entorno, conectividad, versiones de servicios.</td>
+                            </tr>
+                            <tr>
+                                <td>CK-12</td>
+                                <td>Rollback probado en entorno pre-productivo</td>
+                                <td><span class="badge badge--warning">Pendiente</span></td>
+                                <td>Ejecutar dry-run de rollback antes de la ventana de pase.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="callout-row">
+                    <span class="kicker-box kciker-box--success">4 condiciones cumplidas</span>
+                    <span class="kicker-box kicker-box--warning">8 condiciones pendientes (ejecución pre-go-live)</span>
+                    <span class="badge badge--info">Sin bloqueantes</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Layout: tabla</span>
+                <span class="page-number">06</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 07 — PLAN DE DESPLIEGUE -->
+        <section class="slide layout-content" aria-label="Plan de despliegue">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 7 · Despliegue · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Secuencia de ejecución</div>
+                <h2>Plan de Despliegue a Producción</h2>
+                <p class="lead">Despliegue en servidor cloud privado con Kubernetes. Backend Quarkus + PostgreSQL + Qdrant + Keycloak OIDC. Ventana estimada: 2 horas.</p>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Paso</th>
+                                <th>Responsable</th>
+                                <th>Duración</th>
+                                <th>Dependencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td><strong>Pre-deploy:</strong> Validar checklist CK-01 a CK-12. Confirmar disponibilidad de equipo.</td>
+                                <td>Project Manager</td>
+                                <td>30 min</td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td><strong>Aprovisionar infraestructura:</strong> Crear/verificar namespace Kubernetes, PVCs, secrets. Levantar PostgreSQL y Qdrant.</td>
+                                <td>DevOps</td>
+                                <td>20 min</td>
+                                <td>Paso 1</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td><strong>Migraciones de BD:</strong> Ejecutar scripts de schema PostgreSQL. Inicializar colecciones Qdrant.</td>
+                                <td>DevOps / Tech Lead</td>
+                                <td>15 min</td>
+                                <td>Paso 2</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td><strong>Configurar Keycloak:</strong> Realm, clientes OIDC, roles RBAC, secretos.</td>
+                                <td>DevOps</td>
+                                <td>15 min</td>
+                                <td>Paso 2</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td><strong>Deploy backend:</strong> Desplegar imagen Quarkus en Kubernetes. Configurar probes de salud. Conectar a DB, Qdrant, OIDC, GitHub.</td>
+                                <td>DevOps / Tech Lead</td>
+                                <td>15 min</td>
+                                <td>Pasos 3, 4</td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td><strong>Smoke tests:</strong> Ejecutar validación de 5 endpoints críticos: health, POST /api/memorias, GET /api/memorias, POST /api/busquedas/semantica, POST /api/memorias/{id}/aprobar.</td>
+                                <td>QA Lead</td>
+                                <td>15 min</td>
+                                <td>Paso 5</td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td><strong>Comunicación:</strong> Notificar go-live exitoso a stakeholders, equipo de soporte y usuarios MVP.</td>
+                                <td>Project Manager</td>
+                                <td>10 min</td>
+                                <td>Paso 6 (éxito)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="highlight">
+                    <div class="highlight__title">Ventana de despliegue propuesta</div>
+                    <p><strong>Fecha:</strong> 2026-05-03 · <strong>Horario:</strong> 22:00–00:00 (UTC-5) · <strong>Duración máxima:</strong> 2 horas · <strong>Ventana de rollback:</strong> 30 minutos adicionales si se activa.</p>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Layout: contenido</span>
+                <span class="page-number">07</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 08 — PLAN DE ROLLBACK -->
+        <section class="slide layout-content" aria-label="Plan de rollback">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 7 · Despliegue · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Estrategia de reversión</div>
+                <h2>Plan de Rollback</h2>
+                <p class="lead">La estrategia de rollback se basa en revertir a la versión anterior (o estado limpio) de cada componente con scripts predefinidos. Tiempo máximo de rollback: 30 minutos.</p>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Componente</th>
+                                <th>Estrategia</th>
+                                <th>Procedimiento</th>
+                                <th>Tiempo est.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Backend Quarkus</td>
+                                <td>Kubernetes rollback</td>
+                                <td><code>kubectl rollout undo deployment/abax-memory</code></td>
+                                <td>2 min</td>
+                            </tr>
+                            <tr>
+                                <td>PostgreSQL</td>
+                                <td>Migración DOWN</td>
+                                <td>Ejecutar scripts de rollback de schema (pre-generados)</td>
+                                <td>5 min</td>
+                            </tr>
+                            <tr>
+                                <td>Qdrant</td>
+                                <td>Recrear colección vacía</td>
+                                <td>Eliminar colección y recrear desde snapshot pre-deploy</td>
+                                <td>5 min</td>
+                            </tr>
+                            <tr>
+                                <td>Keycloak</td>
+                                <td>Restaurar realm</td>
+                                <td>Importar realm desde exportación pre-deploy</td>
+                                <td>5 min</td>
+                            </tr>
+                            <tr>
+                                <td>Secrets / Config</td>
+                                <td>Revertir ConfigMaps</td>
+                                <td>Aplicar versión anterior de ConfigMaps y Secrets</td>
+                                <td>3 min</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="risk-block">
+                    <div class="risk-block__title">Criterios de activación de rollback</div>
+                    <ul class="content-list">
+                        <li>Falla en smoke tests post-deploy (cualquier endpoint crítico con error 5xx).</li>
+                        <li>Error en migración de base de datos que no puede resolverse en caliente.</li>
+                        <li>Health check del backend en estado DOWN por más de 5 minutos.</li>
+                        <li>Incidencia de severidad Blocker detectada en los primeros 30 minutos.</li>
+                        <li>Pérdida de conectividad con GitHub API que impida operaciones core.</li>
+                    </ul>
+                </div>
+
+                <div class="highlight highlight--success">
+                    <div class="highlight__title">Decisión de rollback</div>
+                    <p>El <strong>Project Manager</strong> es la autoridad de decisión de rollback, con consulta obligatoria al Tech Lead y DevOps Lead. Si no hay consenso en 5 minutos, el PM tiene voto dirimente.</p>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Layout: contenido</span>
+                <span class="page-number">08</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 09 — RIESGOS DE GO-LIVE -->
+        <section class="slide layout-table" aria-label="Riesgos de go-live">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 7 · Despliegue · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Gestión proactiva</div>
+                <h2>Riesgos de Go-Live — Top 6</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Riesgo</th>
+                                <th>Prob.</th>
+                                <th>Impacto</th>
+                                <th>Mitigación Activa</th>
+                                <th>Contingencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>R-013</td>
+                                <td>Despliegue falla por diferencias entre ambientes</td>
+                                <td><span class="badge badge--warning">Media</span></td>
+                                <td><span class="badge badge--danger">Alto</span></td>
+                                <td>Checklist de paridad, variables documentadas, dry-run en staging</td>
+                                <td>Rollback inmediato + reprogamación de ventana</td>
+                            </tr>
+                            <tr>
+                                <td>R-019</td>
+                                <td>Criterios de go-live no formalmente acordados</td>
+                                <td><span class="badge badge--neutral">Baja</span></td>
+                                <td><span class="badge badge--danger">Alto</span></td>
+                                <td>Checklist CK-01 a CK-12 presentado en esta sesión para aprobación</td>
+                                <td>Posponer go-live hasta completar checklist</td>
+                            </tr>
+                            <tr>
+                                <td>R-006</td>
+                                <td>Exposición de secretos o credenciales</td>
+                                <td><span class="badge badge--warning">Media</span></td>
+                                <td><span class="badge badge--danger">Alto</span></td>
+                                <td>Gestión en vault seguro, rotación, mínimo privilegio, escaneo pre-deploy</td>
+                                <td>Revocar y rotar credenciales, auditoría de accesos</td>
+                            </tr>
+                            <tr>
+                                <td>R-018</td>
+                                <td>Monitoreo insuficiente impide detectar fallas tempranas</td>
+                                <td><span class="badge badge--warning">Media</span></td>
+                                <td><span class="badge badge--danger">Alto</span></td>
+                                <td>Dashboards pre-configurados, alertas por umbral, guardia activa en hiper-care</td>
+                                <td>Monitoreo manual reforzado y guardias temporales</td>
+                            </tr>
+                            <tr>
+                                <td>R-007</td>
+                                <td>Controles de acceso insuficientes en producción</td>
+                                <td><span class="badge badge--neutral">Baja</span></td>
+                                <td><span class="badge badge--danger">Alto</span></td>
+                                <td>Matriz RBAC verificada, pruebas de autorización en smoke tests</td>
+                                <td>Bloquear endpoints afectados y aplicar restricción temporal</td>
+                            </tr>
+                            <tr>
+                                <td>R-002</td>
+                                <td>Degradación de Qdrant impacta búsqueda semantica</td>
+                                <td><span class="badge badge--warning">Media</span></td>
+                                <td><span class="badge badge--danger">Alto</span></td>
+                                <td>Sizing validado, límites de recursos en Kubernetes, health probes</td>
+                                <td>Degradar búsqueda semántica; mantener operatividad de endpoints transaccionales</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="callout-row">
+                    <span class="badge badge--info">Riesgos del proyecto original: 20</span>
+                    <span class="badge badge--danger">Críticos: 5</span>
+                    <span class="badge badge--warning">Altos: 11</span>
+                    <span class="badge badge--neutral">Medios: 4</span>
+                    <span class="kicker-box">Mitigaciones activas para go-live: verificadas</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Layout: tabla</span>
+                <span class="page-number">09</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 10 — RESPONSABLES -->
+        <section class="slide layout-table" aria-label="Responsables go-live">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 7 · Despliegue · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Matriz de responsabilidades</div>
+                <h2>Responsables de Go-Live</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rol</th>
+                                <th>Responsable</th>
+                                <th>Responsabilidad Go-Live</th>
+                                <th>Tipo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Project Manager</td>
+                                <td>project-manager</td>
+                                <td>Autoridad de decisión Go/No-Go. Coordinación general. Comunicación a stakeholders. Decisión de rollback.</td>
+                                <td><span class="badge badge--primary">Accountable</span></td>
+                            </tr>
+                            <tr>
+                                <td>DevOps</td>
+                                <td>devops</td>
+                                <td>Ejecución del despliegue. Aprovisionamiento de infraestructura. Configuración de secretos. Pipeline CI/CD.</td>
+                                <td><span class="badge badge--info">Responsible</span></td>
+                            </tr>
+                            <tr>
+                                <td>Tech Lead</td>
+                                <td>tech-lead</td>
+                                <td>Supervisión técnica del deploy. Validación de migraciones. Soporte en troubleshooting. Consultor para decisión de rollback.</td>
+                                <td><span class="badge badge--info">Responsible</span></td>
+                            </tr>
+                            <tr>
+                                <td>QA Lead</td>
+                                <td>qa-lead</td>
+                                <td>Ejecución de smoke tests post-deploy. Validación de endpoints críticos. Reporte de resultados.</td>
+                                <td><span class="badge badge--info">Responsible</span></td>
+                            </tr>
+                            <tr>
+                                <td>Product Owner</td>
+                                <td>product-owner</td>
+                                <td>Aprobación final de go-live. Validación de que el producto desplegado cumple expectativas de negocio. Firma de acta UAT.</td>
+                                <td><span class="badge badge--success">Approve</span></td>
+                            </tr>
+                            <tr>
+                                <td>Business Analyst</td>
+                                <td>business-analyst</td>
+                                <td>Consultado para criterios de aceptación funcionales. Trazabilidad de requerimientos en verificación post-deploy.</td>
+                                <td><span class="badge badge--neutral">Consulted</span></td>
+                            </tr>
+                            <tr>
+                                <td>Change Manager</td>
+                                <td>change-manager</td>
+                                <td>Comunicación a usuarios y áreas impactadas. Gestión de adopción post-go-live.</td>
+                                <td><span class="badge badge--neutral">Informed</span></td>
+                            </tr>
+                            <tr>
+                                <td>Security</td>
+                                <td>security</td>
+                                <td>Verificación de secretos. Escaneo de vulnerabilidades. Validación RBAC en producción.</td>
+                                <td><span class="badge badge--neutral">Consulted</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="highlight">
+                    <div class="highlight__title">Escalamiento durante go-live</div>
+                    <p><strong>Nivel 1:</strong> DevOps + Tech Lead (troubleshooting técnico) → <strong>Nivel 2:</strong> Project Manager (decisión de rollback) → <strong>Nivel 3:</strong> Product Owner + Comité Directivo (decisión de cancelación de ventana).</p>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Layout: tabla</span>
+                <span class="page-number">10</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 11 — CRONOGRAMA GO-LIVE -->
+        <section class="slide layout-content" aria-label="Cronograma go-live">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 7 · Despliegue · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Línea de tiempo</div>
+                <h2>Cronograma de Go-Live — Hito Fase 7</h2>
+                <p class="lead">Ventana de despliegue planificada para 2026-05-03. El cronograma completo del proyecto muestra la Fase 7 como el puente entre UAT aceptado y la estabilización en producción.</p>
+
+                <div class="gantt-mermaid">
+                    gantt
+                        title PMOA / Abax-Memory — Cronograma Go-Live (Fase 7)
+                        dateFormat  YYYY-MM-DD
+                        axisFormat  %d-%b
+
+                        section Pre-Go-Live
+                        Aprobacion Comite Directivo (hoy)             :a1, 2026-05-02, 1d
+                        Habilitar staging cloud privado               :a2, 2026-05-02, 1d
+                        Pipeline CI/CD staging verde                  :a3, after a2, 1d
+                        Dry-run rollback en staging                   :a4, after a3, 1d
+                        Checklist CK-01 a CK-12 completado            :a5, after a4, 1d
+
+                        section Ventana de Despliegue
+                        Aprovisionar infraestructura                  :b1, 2026-05-03, 1d
+                        Migraciones BD + Keycloak                     :b2, 2026-05-03, 1d
+                        Deploy backend Quarkus                        :b3, 2026-05-03, 1d
+                        Smoke tests QA                                :b4, 2026-05-03, 1d
+                        Hito: Go-Live exitoso                         :milestone, m7, after b4, 0d
+                        Comunicacion a stakeholders                   :b5, after b4, 1d
+
+                        section Post-Go-Live (Fase 8)
+                        Hiper-care / monitoreo activo                 :c1, after b5, 10d
+                        Hito: Operacion estabilizada                  :milestone, m8, after c1, 0d
+
+                        section Fase 9 - Cierre
+                        Cierre formal del proyecto                    :d1, after m8, 5d
+                        Hito: Proyecto cerrado                        :milestone, m9, after d1, 0d
+                </div>
+
+                <div class="callout-row">
+                    <span class="kicker-box">Hoy: Decisión Go/No-Go</span>
+                    <span class="kicker-box">Mañana: Ventana de despliegue 22:00–00:00</span>
+                    <span class="kicker-box">+10 días: Estabilización (Fase 8)</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Layout: contenido</span>
+                <span class="page-number">11</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 12 — DECISIÓN RECOMENDADA -->
+        <section class="slide layout-closing" aria-label="Decisión recomendada">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 7 · Despliegue · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Propuesta al Comité Directivo</div>
+                <div class="closing-panel">
+                    <div>
+                        <h2>Decisión Recomendada</h2>
+                        <div class="divider" style="margin: var(--space-4) 0;"></div>
+                        <p class="lead" style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--color-success);">APROBAR el pase a producción de R1-MVP</p>
+                        <p class="lead" style="margin-top: var(--space-4);">El producto PMOA / Abax-Memory R1-MVP cumple con todas las condiciones de aceptación: 61/61 criterios UAT aprobados, 0 defectos críticos, suite automatizada BUILD SUCCESS, y acta UAT firmada. Los riesgos de go-live están identificados y mitigados. El plan de despliegue y rollback están definidos.</p>
+
+                        <div class="highlight highlight--success" style="margin-top: var(--space-4);">
+                            <div class="highlight__title">Condiciones de la aprobación</div>
+                            <ol class="content-list">
+                                <li>Completar checklist CK-04 a CK-12 antes de la ventana de despliegue.</li>
+                                <li>Ejecutar dry-run de rollback en staging previo al deploy productivo.</li>
+                                <li>Mantener equipo de hiper-care activo durante Fase 8 (estabilización).</li>
+                                <li>Escalar cualquier incidencia Blocker al Project Manager en ≤ 15 min.</li>
+                                <li>Programar pruebas de rendimiento en Fase 8 como condición de cierre.</li>
+                            </ol>
+                        </div>
+
+                        <div class="callout-row" style="margin-top: var(--space-4);">
+                            <span class="badge badge--success">Recomendación: GO</span>
+                            <span class="badge badge--primary">Ventana: 2026-05-03 22:00 UTC-5</span>
+                            <span class="badge badge--neutral">Próximo hito: Estabilización</span>
+                        </div>
+                    </div>
+                    <div class="quote">
+                        <strong>Pregunta al Comité:</strong><br><br>
+                        ¿Autoriza el Comité Directivo el pase a producción del release R1-MVP de PMOA / Abax-Memory en la ventana del 2026-05-03, bajo las condiciones y plan de rollback presentados?
+                    </div>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Layout: cierre · Decisión requerida</span>
+                <span class="page-number">12</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 13 — ANEXO: TRAZABILIDAD DE ENTREGABLES -->
+        <section class="slide layout-table" aria-label="Anexo de trazabilidad">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 7 · Despliegue · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Anexo</div>
+                <h2>Trazabilidad de Entregables por Fase</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fase</th>
+                                <th>Entregable Clave</th>
+                                <th>Ruta</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>0</td>
+                                <td>Visión del Producto</td>
+                                <td><span class="muted">docs/entregables/fase-0-descubrimiento/vision-producto.md</span></td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Acta de Constitución</td>
+                                <td><span class="muted">docs/entregables/fase-1-inicio/acta-de-constitucion.md</span></td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>Matriz de Riesgos (20 riesgos)</td>
+                                <td><span class="muted">docs/entregables/fase-1-inicio/matriz-riesgos-inicial.md</span></td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>61 Criterios de Aceptación</td>
+                                <td><span class="muted">docs/entregables/fase-2-analisis/criterios-aceptacion.md</span></td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Documento de Arquitectura</td>
+                                <td><span class="muted">docs/entregables/fase-3-diseno-tecnico/documento-arquitectura.md</span></td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Código Fuente Implementado</td>
+                                <td><span class="muted">docs/entregables/fase-4-construccion/codigo-fuente-implementado.md</span></td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>Reporte de Ejecución QA (49/49)</td>
+                                <td><span class="muted">docs/entregables/fase-5-pruebas-qa/reporte-ejecucion-pruebas.md</span></td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>Acta de Aceptación UAT</td>
+                                <td><span class="muted">docs/entregables/fase-6-uat/acta-aceptacion-uat.md</span></td>
+                                <td><span class="badge badge--success">ACEPTADO</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>7</strong></td>
+                                <td><strong>Presentación Go-Live Readiness</strong></td>
+                                <td><span class="muted">docs/entregables/fase-7-despliegue/presentacion-go-live.html</span></td>
+                                <td><span class="badge badge--primary">Este documento</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="callout-row">
+                    <span class="kicker-box">Trazabilidad completa: requerimiento → CA → caso QA → UAT → go-live</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Anexo · Trazabilidad</span>
+                <span class="page-number">13</span>
+            </footer>
+        </section>
+
+    </main>
+</body>
+</html>

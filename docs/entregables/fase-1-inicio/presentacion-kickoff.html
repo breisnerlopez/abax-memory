@@ -1,0 +1,797 @@
+<!-- Fase: 1-Inicio, Entregable: Presentacion de Kickoff, Responsable: project-manager, Fecha: 2026-05-01, Estado: Completado -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMOA / Abax-Memory - Presentación de Kickoff</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --color-bg: #f3f6fa;
+            --color-surface: #ffffff;
+            --color-surface-alt: #eef3f8;
+            --color-ink: #16202b;
+            --color-ink-muted: #516173;
+            --color-line: #d7e0ea;
+            --color-primary: #0f4c81;
+            --color-primary-soft: #dceaf6;
+            --color-secondary: #1e6f5c;
+            --color-secondary-soft: #dbefe9;
+            --color-accent: #b97816;
+            --color-accent-soft: #f9ecd6;
+            --color-danger: #a63a3a;
+            --color-danger-soft: #f7e1e1;
+            --color-warning: #8a6700;
+            --color-warning-soft: #f7efc8;
+            --color-success: #256d3f;
+            --color-success-soft: #ddf0e3;
+            --color-info: #0d5e7a;
+            --color-info-soft: #dceff6;
+
+            --font-family-base: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            --font-family-mono: "Consolas", "Courier New", monospace;
+            --font-size-xxs: 0.7rem;
+            --font-size-xs: 0.82rem;
+            --font-size-sm: 0.95rem;
+            --font-size-md: 1.08rem;
+            --font-size-lg: 1.35rem;
+            --font-size-xl: 2rem;
+            --font-size-2xl: 2.9rem;
+            --font-size-3xl: 4rem;
+            --line-height-tight: 1.15;
+            --line-height-base: 1.45;
+            --line-height-loose: 1.7;
+            --font-weight-regular: 400;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.5rem;
+            --space-6: 2rem;
+            --space-7: 3rem;
+            --space-8: 4rem;
+
+            --radius-sm: 0.35rem;
+            --radius-md: 0.7rem;
+            --radius-lg: 1rem;
+            --border-thin: 1px solid var(--color-line);
+            --border-strong: 1px solid rgba(15, 76, 129, 0.28);
+            --shadow-sm: 0 0.4rem 1rem rgba(20, 35, 52, 0.08);
+            --shadow-md: 0 0.9rem 2rem rgba(20, 35, 52, 0.12);
+
+            --badge-padding: 0.35rem 0.7rem;
+            --badge-radius: 999px;
+            --table-header-bg: #e8f0f7;
+            --table-row-alt: #f8fbfd;
+            --slide-width: 1280px;
+            --slide-height: 720px;
+            --transition-base: 220ms ease;
+        }
+
+        * { box-sizing: border-box; }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--color-bg);
+            color: var(--color-ink);
+            font-family: var(--font-family-base);
+            line-height: var(--line-height-base);
+        }
+
+        body { padding: var(--space-6); }
+
+        .presentation {
+            display: grid;
+            gap: var(--space-6);
+            justify-content: center;
+        }
+
+        .slide {
+            position: relative;
+            width: min(100%, var(--slide-width));
+            min-height: var(--slide-height);
+            margin: 0 auto;
+            padding: var(--space-7);
+            background: var(--color-surface);
+            border: var(--border-thin);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: var(--space-5);
+            transition: transform var(--transition-base), box-shadow var(--transition-base);
+        }
+
+        .slide:hover {
+            transform: translateY(-0.2rem);
+            box-shadow: 0 1.2rem 2.4rem rgba(20, 35, 52, 0.14);
+        }
+
+        .slide::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 0.4rem;
+            background: var(--color-primary);
+        }
+
+        .slide__header,
+        .slide__footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-4);
+            color: var(--color-ink-muted);
+            font-size: var(--font-size-xs);
+        }
+
+        .slide__header {
+            padding-bottom: var(--space-3);
+            border-bottom: var(--border-thin);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .slide__footer {
+            padding-top: var(--space-3);
+            border-top: var(--border-thin);
+        }
+
+        .slide__content {
+            display: grid;
+            gap: var(--space-5);
+            align-content: start;
+        }
+
+        .project-name {
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+
+        h1, h2, h3, h4, p, ul, ol, blockquote { margin: 0; }
+        h1 { font-size: var(--font-size-3xl); line-height: var(--line-height-tight); }
+        h2 { font-size: var(--font-size-2xl); line-height: var(--line-height-tight); }
+        h3 { font-size: var(--font-size-xl); line-height: 1.2; }
+        h4 { font-size: var(--font-size-lg); line-height: 1.25; }
+        p, li, td, th { font-size: var(--font-size-md); }
+
+        .eyebrow {
+            color: var(--color-primary);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-bold);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .lead {
+            max-width: 52rem;
+            font-size: var(--font-size-lg);
+            color: var(--color-ink-muted);
+        }
+
+        .muted { color: var(--color-ink-muted); }
+        .accent { color: var(--color-primary); }
+
+        .divider {
+            width: 6rem;
+            height: 0.28rem;
+            background: var(--color-primary);
+            border-radius: 999px;
+        }
+
+        .layout-cover .slide__content {
+            align-content: center;
+            gap: var(--space-6);
+        }
+
+        .cover-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-3);
+        }
+
+        .layout-agenda .agenda-list,
+        .content-list,
+        .check-list {
+            display: grid;
+            gap: var(--space-3);
+            padding-left: 1.25rem;
+        }
+
+        .agenda-list li::marker,
+        .content-list li::marker,
+        .check-list li::marker {
+            color: var(--color-primary);
+        }
+
+        .layout-content .slide__content,
+        .layout-table .slide__content,
+        .layout-metrics .slide__content,
+        .layout-closing .slide__content {
+            grid-template-columns: 1fr;
+        }
+
+        .layout-two-columns .slide__content {
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: var(--space-6);
+        }
+
+        .column,
+        .card,
+        .highlight,
+        .risk-block,
+        .metric,
+        .table-wrapper {
+            background: var(--color-surface-alt);
+            border: var(--border-thin);
+            border-radius: var(--radius-md);
+            padding: var(--space-5);
+        }
+
+        .card { box-shadow: var(--shadow-sm); }
+
+        .cards-grid,
+        .metrics-grid {
+            display: grid;
+            gap: var(--space-4);
+        }
+
+        .cards-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .metrics-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+        .metric {
+            display: grid;
+            gap: var(--space-2);
+            align-content: start;
+            min-height: 11rem;
+        }
+
+        .metric__value {
+            font-size: 3.2rem;
+            line-height: 1;
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+
+        .metric__label {
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-ink-muted);
+        }
+
+        .metric__detail { font-size: var(--font-size-sm); }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--badge-padding);
+            border-radius: var(--badge-radius);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-bold);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .badge--primary { background: var(--color-primary-soft); color: var(--color-primary); border-color: rgba(15, 76, 129, 0.18); }
+        .badge--success { background: var(--color-success-soft); color: var(--color-success); border-color: rgba(37, 109, 63, 0.18); }
+        .badge--warning { background: var(--color-warning-soft); color: var(--color-warning); border-color: rgba(138, 103, 0, 0.18); }
+        .badge--danger { background: var(--color-danger-soft); color: var(--color-danger); border-color: rgba(166, 58, 58, 0.18); }
+        .badge--info { background: var(--color-info-soft); color: var(--color-info); border-color: rgba(13, 94, 122, 0.18); }
+        .badge--neutral { background: #edf2f7; color: #425466; border-color: rgba(66, 84, 102, 0.16); }
+
+        .highlight {
+            border-left: 0.35rem solid var(--color-accent);
+            background: #fcf8f0;
+        }
+
+        .risk-block {
+            border-left: 0.35rem solid var(--color-danger);
+            background: #fcf4f4;
+        }
+
+        .risk-block__title,
+        .highlight__title,
+        .card__title {
+            margin-bottom: var(--space-2);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .table-wrapper {
+            overflow: hidden;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--color-surface);
+        }
+
+        thead { background: var(--table-header-bg); }
+
+        th,
+        td {
+            padding: 1rem 1.1rem;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: var(--border-thin);
+        }
+
+        tbody tr:nth-child(even) { background: var(--table-row-alt); }
+        tbody tr:last-child td { border-bottom: 0; }
+
+        .callout-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-3);
+            align-items: center;
+        }
+
+        .kicker-box {
+            display: inline-block;
+            padding: var(--space-3) var(--space-4);
+            background: var(--color-primary-soft);
+            color: var(--color-primary);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .closing-panel {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: var(--space-6);
+            align-items: end;
+        }
+
+        .quote {
+            padding: var(--space-5);
+            border-left: 0.35rem solid var(--color-primary);
+            background: var(--color-primary-soft);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            font-size: var(--font-size-lg);
+        }
+
+        .page-number { font-variant-numeric: tabular-nums; }
+
+        .mermaid-block {
+            margin: 0;
+            padding: var(--space-5);
+            border-radius: var(--radius-md);
+            background: #16202b;
+            color: #eef3f8;
+            font-family: var(--font-family-mono);
+            font-size: 0.92rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            border: 1px solid rgba(215, 224, 234, 0.18);
+        }
+
+        .mini-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: var(--space-4);
+        }
+
+        @media (max-width: 1360px) {
+            body { padding: var(--space-4); }
+            .slide { min-height: auto; }
+            .layout-two-columns .slide__content,
+            .closing-panel,
+            .cards-grid,
+            .metrics-grid,
+            .mini-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 900px) {
+            .slide { padding: var(--space-5); border-radius: var(--radius-md); }
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 2.2rem; }
+            h3 { font-size: 1.6rem; }
+            .layout-two-columns .slide__content,
+            .closing-panel,
+            .cards-grid,
+            .metrics-grid,
+            .mini-grid { grid-template-columns: 1fr; }
+        }
+
+        @media print {
+            @page { size: 16:9 landscape; margin: 0.6cm; }
+            html, body { background: #ffffff; }
+            body { padding: 0; }
+            .presentation { gap: 0; }
+            .slide {
+                width: 100%;
+                min-height: 0;
+                height: 100%;
+                page-break-after: always;
+                border-radius: 0;
+                box-shadow: none;
+                border: 1px solid #cfd8e3;
+                margin: 0;
+                break-after: page;
+            }
+            .slide:hover { transform: none; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <main class="presentation">
+        <section class="slide layout-cover" aria-label="Portada kickoff">
+            <header class="slide__header">
+                <span class="project-name">PMOA / Abax-Memory</span>
+                <span>Fase 1 · Inicio</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Kickoff del proyecto</div>
+                <h1>Inicio formal del MVP de memoria operativa</h1>
+                <div class="divider"></div>
+                <p class="lead">Proyecto backend API-first para capturar, validar, buscar y gobernar memorias operativas reutilizables, con alcance de Fase 0 ya aprobado y preparación de línea base para ejecución.</p>
+                <div class="cover-meta">
+                    <span class="badge badge--primary">Proyecto PMOA</span>
+                    <span class="badge badge--info">Audiencia ejecutivo-técnica</span>
+                    <span class="badge badge--success">Fase 0 aprobada</span>
+                    <span class="badge badge--warning">Baseline preliminar</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Presentación de Kickoff · 2026-05-01</span>
+                <span class="page-number">01</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-agenda" aria-label="Agenda">
+            <header class="slide__header">
+                <span class="project-name">PMOA / Abax-Memory</span>
+                <span>Fase 1 · Inicio · 2026-05-01</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Agenda</div>
+                <h2>Qué alineamos hoy</h2>
+                <ol class="agenda-list">
+                    <li>Objetivo del proyecto y contexto aprobado.</li>
+                    <li>Alcance MVP, exclusiones y criterio de éxito.</li>
+                    <li>Equipo, riesgos iniciales y dependencias críticas.</li>
+                    <li>Cronograma preliminar, hitos y siguientes pasos.</li>
+                </ol>
+                <div class="callout-row">
+                    <span class="kicker-box">Duración estimada: 30 min</span>
+                    <span class="kicker-box">Salida esperada: alineación y validación de baseline</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Kickoff</span>
+                <span class="page-number">02</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-two-columns" aria-label="Objetivo y contexto">
+            <header class="slide__header">
+                <span class="project-name">PMOA / Abax-Memory</span>
+                <span>Objetivo y contexto</span>
+            </header>
+            <div class="slide__content">
+                <div class="column">
+                    <div class="eyebrow">Objetivo</div>
+                    <h2>Poner en marcha un MVP auditable y reutilizable</h2>
+                    <p class="lead">El objetivo es habilitar un proceso confiable para transformar casos y conocimiento operativo en memorias reutilizables, con validación por criticidad, trazabilidad Git y consumo por API.</p>
+                    <ul class="content-list">
+                        <li>Reducir pérdida de conocimiento operativo y respuestas inconsistentes.</li>
+                        <li>Permitir recuperación semántica y filtrada de memorias útiles.</li>
+                        <li>Asegurar trazabilidad de origen, cambios, aprobación y depuración.</li>
+                    </ul>
+                </div>
+                <aside class="column">
+                    <div class="card">
+                        <div class="card__title">Contexto aprobado</div>
+                        <p class="muted">Fase 0 ya cerró con visión, épicas y backlog priorizado aprobados. El proyecto inicia con enfoque backend, API-first y sin UI dedicada en el MVP.</p>
+                    </div>
+                    <div class="highlight" style="margin-top: 1rem;">
+                        <div class="highlight__title">Criterios de éxito iniciales</div>
+                        <p>&ge;95% de memorias con metadatos completos, 100% de memorias críticas con validación humana y &ge;30% de mejora esperada en localización de conocimiento versus línea base.</p>
+                    </div>
+                </aside>
+            </div>
+            <footer class="slide__footer">
+                <span>Resumen ejecutivo</span>
+                <span class="page-number">03</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-two-columns" aria-label="Alcance aprobado">
+            <header class="slide__header">
+                <span class="project-name">PMOA / Abax-Memory</span>
+                <span>Alcance aprobado MVP</span>
+            </header>
+            <div class="slide__content">
+                <div class="column">
+                    <div class="eyebrow">Incluye</div>
+                    <h2>Capacidades comprometidas en R1-MVP</h2>
+                    <ul class="content-list">
+                        <li>Alta de memorias desde caso y manual en Markdown + frontmatter.</li>
+                        <li>Versionado y auditoría en Git/GitHub.</li>
+                        <li>API REST para crear, consultar, listar, aprobar y archivar.</li>
+                        <li>Metadatos en PostgreSQL y búsqueda semántica con Qdrant.</li>
+                        <li>Clasificación, criticidad, estados y validación humana por PR.</li>
+                    </ul>
+                </div>
+                <aside class="column">
+                    <div class="card">
+                        <div class="card__title">Fuera de alcance en MVP</div>
+                        <ul class="content-list">
+                            <li>UI dedicada para usuarios finales.</li>
+                            <li>Visibilidad granular por memoria o permisos finos.</li>
+                            <li>Automatización total de aprobación humana.</li>
+                            <li>Multi-repositorio y portabilidad Git avanzada.</li>
+                        </ul>
+                    </div>
+                    <div class="risk-block" style="margin-top: 1rem;">
+                        <div class="risk-block__title">Gobernanza de alcance</div>
+                        <p>Cualquier solicitud adicional se tratará por control formal de cambios; no se aprueban ampliaciones sin evaluación de impacto en tiempo, costo, calidad y riesgo.</p>
+                    </div>
+                </aside>
+            </div>
+            <footer class="slide__footer">
+                <span>Baseline funcional</span>
+                <span class="page-number">04</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-table" aria-label="Equipo y roles">
+            <header class="slide__header">
+                <span class="project-name">PMOA / Abax-Memory</span>
+                <span>Equipo y gobierno</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Estructura de trabajo</div>
+                <h2>Roles clave para ejecución en cascada</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rol</th>
+                                <th>Responsabilidad principal</th>
+                                <th>Entregables foco</th>
+                                <th>Interacción crítica</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Product Owner</td>
+                                <td>Prioridad de negocio, validación de alcance y criterios de éxito.</td>
+                                <td>Alcance, backlog, aprobaciones funcionales.</td>
+                                <td>PM / BA</td>
+                            </tr>
+                            <tr>
+                                <td>Project Manager</td>
+                                <td>Plan, seguimiento, riesgos, dependencias y control de cambios.</td>
+                                <td>Cronograma, reportes, governance.</td>
+                                <td>Todos los leads</td>
+                            </tr>
+                            <tr>
+                                <td>Business Analyst</td>
+                                <td>Detalle funcional, reglas y trazabilidad de requerimientos.</td>
+                                <td>Especificación funcional.</td>
+                                <td>PO / QA</td>
+                            </tr>
+                            <tr>
+                                <td>Tech Lead + Backend</td>
+                                <td>Diseño técnico, APIs, integraciones y construcción.</td>
+                                <td>Diseño técnico y desarrollo MVP.</td>
+                                <td>BA / DevOps</td>
+                            </tr>
+                            <tr>
+                                <td>QA Lead</td>
+                                <td>Estrategia de pruebas, evidencia y sign-off de calidad.</td>
+                                <td>Plan QA, ejecución y reporte.</td>
+                                <td>BA / PM</td>
+                            </tr>
+                            <tr>
+                                <td>DevOps / Change</td>
+                                <td>Ambientes, despliegue, control operativo y pase a producción.</td>
+                                <td>Readiness, deployment, rollback.</td>
+                                <td>PM / Tech Lead</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Matriz RACI resumida</span>
+                <span class="page-number">05</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-table" aria-label="Riesgos iniciales">
+            <header class="slide__header">
+                <span class="project-name">PMOA / Abax-Memory</span>
+                <span>Riesgos iniciales</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Matriz de riesgos</div>
+                <h2>Riesgos abiertos desde el arranque</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Riesgo</th>
+                                <th>Probabilidad</th>
+                                <th>Impacto</th>
+                                <th>Mitigación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>R-01</td>
+                                <td>Demora en definición final de política de criticidad y aprobación humana.</td>
+                                <td><span class="badge badge--warning">Media</span></td>
+                                <td><span class="badge badge--danger">Alto</span></td>
+                                <td>Workshop temprano con PO/BA; congelar reglas mínimas antes de diseño técnico.</td>
+                            </tr>
+                            <tr>
+                                <td>R-02</td>
+                                <td>Disponibilidad tardía de ambientes y credenciales para GitHub, PostgreSQL y Qdrant.</td>
+                                <td><span class="badge badge--warning">Media</span></td>
+                                <td><span class="badge badge--danger">Alto</span></td>
+                                <td>Gestionar accesos en semana 1; seguimiento quincenal hasta habilitación completa.</td>
+                            </tr>
+                            <tr>
+                                <td>R-03</td>
+                                <td>Desalineación entre contrato API esperado y necesidades funcionales definitivas.</td>
+                                <td><span class="badge badge--info">Media</span></td>
+                                <td><span class="badge badge--warning">Medio</span></td>
+                                <td>Validación cruzada BA + Tech Lead antes de cerrar diseño técnico.</td>
+                            </tr>
+                            <tr>
+                                <td>R-04</td>
+                                <td>Incremento de alcance por pedidos de UI o gobierno avanzado fuera del MVP.</td>
+                                <td><span class="badge badge--warning">Media</span></td>
+                                <td><span class="badge badge--danger">Alto</span></td>
+                                <td>Reforzar exclusiones del MVP y activar control formal de cambios.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Seguimiento quincenal de riesgos</span>
+                <span class="page-number">06</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-content" aria-label="Cronograma preliminar">
+            <header class="slide__header">
+                <span class="project-name">PMOA / Abax-Memory</span>
+                <span>Cronograma preliminar e hitos</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Línea base inicial</div>
+                <h2>Secuencia propuesta de fases e hitos</h2>
+                <pre class="mermaid-block">gantt
+    title PMOA / Abax-Memory - Cronograma preliminar MVP
+    dateFormat  YYYY-MM-DD
+    axisFormat  %d-%b
+    section Inicio
+    Kickoff y baseline inicial          :done, a1, 2026-05-01, 2026-05-08
+    section Análisis
+    Análisis funcional                  :a2, after a1, 10d
+    Diseño técnico                      :a3, after a2, 10d
+    section Ejecución
+    Construcción MVP                    :a4, after a3, 30d
+    QA integral                         :a5, after a4, 10d
+    UAT                                 :a6, after a5, 10d
+    section Cierre de release
+    Despliegue productivo               :milestone, a7, after a6, 1d
+    Estabilización                      :a8, after a7, 10d
+    Cierre formal                       :a9, after a8, 5d</pre>
+                <div class="mini-grid">
+                    <div class="highlight">
+                        <div class="highlight__title">Hitos clave</div>
+                        <ul class="content-list">
+                            <li>09-May: baseline de inicio aprobada.</li>
+                            <li>23-May: especificación funcional cerrada.</li>
+                            <li>06-Jun: diseño técnico aprobado.</li>
+                            <li>31-Jul: QA completo.</li>
+                            <li>18-Ago: go-live objetivo.</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <div class="card__title">Dependencias secuenciales</div>
+                        <p class="muted">El proyecto opera con dependencias Finish-to-Start entre análisis, diseño, construcción, QA, UAT y despliegue; no se libera sin QA completo ni sign-off de negocio.</p>
+                    </div>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Baseline sujeta a refinamiento en Fase 1</span>
+                <span class="page-number">07</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-metrics" aria-label="Dependencias críticas">
+            <header class="slide__header">
+                <span class="project-name">PMOA / Abax-Memory</span>
+                <span>Dependencias críticas</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Condiciones habilitantes</div>
+                <h2>Qué debe ocurrir para sostener el plan</h2>
+                <div class="metrics-grid">
+                    <article class="metric">
+                        <div class="metric__label">Repositorio GitHub</div>
+                        <div class="metric__value">W1</div>
+                        <div class="metric__detail">Acceso, ramas y flujo PR habilitados durante semana 1.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Política criticidad</div>
+                        <div class="metric__value">W2</div>
+                        <div class="metric__detail">Reglas mínimas cerradas para no bloquear especificación y QA.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Ambientes base</div>
+                        <div class="metric__value">3</div>
+                        <div class="metric__detail">Dev, QA y Prod definidos con responsables y accesos.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Integraciones MVP</div>
+                        <div class="metric__value">4</div>
+                        <div class="metric__detail">GitHub, PostgreSQL, Qdrant y modelo de embeddings operativos.</div>
+                    </article>
+                </div>
+                <div class="callout-row">
+                    <span class="badge badge--danger">Bloqueante a escalar: accesos y ambientes</span>
+                    <span class="badge badge--primary">Seguimiento: comité semanal</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Control de dependencias</span>
+                <span class="page-number">08</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-closing" aria-label="Próximos pasos">
+            <header class="slide__header">
+                <span class="project-name">PMOA / Abax-Memory</span>
+                <span>Próximos pasos</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Cierre</div>
+                <div class="closing-panel">
+                    <div>
+                        <h2>Acciones inmediatas posteriores al kickoff</h2>
+                        <ul class="content-list" style="margin-top: 1rem;">
+                            <li>Confirmar baseline de cronograma y calendario de comités semanales.</li>
+                            <li>Cerrar responsables nominados por rol y circuito de aprobación.</li>
+                            <li>Levantar accesos, ambientes y dependencias técnicas antes de fin de semana 1.</li>
+                            <li>Iniciar especificación funcional con foco en contrato API y criticidad.</li>
+                        </ul>
+                        <div class="callout-row" style="margin-top: 1.5rem;">
+                            <span class="badge badge--primary">Solicitud al comité</span>
+                            <span class="badge badge--success">Validar enfoque y baseline preliminar</span>
+                        </div>
+                    </div>
+                    <div class="quote">
+                        Decisión requerida: confirmar alcance MVP, dependencias habilitantes y cronograma preliminar para avanzar a análisis funcional sin desvíos tempranos.
+                    </div>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Call to action</span>
+                <span class="page-number">09</span>
+            </footer>
+        </section>
+    </main>
+</body>
+</html>

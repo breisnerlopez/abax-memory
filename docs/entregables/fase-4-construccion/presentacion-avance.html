@@ -1,0 +1,516 @@
+<!-- Fase: 4-Construccion, Entregable: Presentacion de Avance, Responsable: project-manager, Fecha: 2026-05-01, Estado: Completado. -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMOA - Presentacion de Avance Fase 4</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --color-bg: #f3f6fa;
+            --color-surface: #ffffff;
+            --color-surface-alt: #eef3f8;
+            --color-ink: #16202b;
+            --color-ink-muted: #516173;
+            --color-line: #d7e0ea;
+            --color-primary: #0f4c81;
+            --color-primary-soft: #dceaf6;
+            --color-secondary: #1e6f5c;
+            --color-secondary-soft: #dbefe9;
+            --color-accent: #b97816;
+            --color-accent-soft: #f9ecd6;
+            --color-danger: #a63a3a;
+            --color-danger-soft: #f7e1e1;
+            --color-warning: #8a6700;
+            --color-warning-soft: #f7efc8;
+            --color-success: #256d3f;
+            --color-success-soft: #ddf0e3;
+            --color-info: #0d5e7a;
+            --color-info-soft: #dceff6;
+            --font-family-base: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            --font-family-mono: "Consolas", "Courier New", monospace;
+            --font-size-xxs: 0.7rem;
+            --font-size-xs: 0.82rem;
+            --font-size-sm: 0.95rem;
+            --font-size-md: 1.08rem;
+            --font-size-lg: 1.35rem;
+            --font-size-xl: 2rem;
+            --font-size-2xl: 2.9rem;
+            --font-size-3xl: 4rem;
+            --line-height-tight: 1.15;
+            --line-height-base: 1.45;
+            --line-height-loose: 1.7;
+            --font-weight-regular: 400;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.5rem;
+            --space-6: 2rem;
+            --space-7: 3rem;
+            --space-8: 4rem;
+            --radius-sm: 0.35rem;
+            --radius-md: 0.7rem;
+            --radius-lg: 1rem;
+            --border-thin: 1px solid var(--color-line);
+            --border-strong: 1px solid rgba(15, 76, 129, 0.28);
+            --shadow-sm: 0 0.4rem 1rem rgba(20, 35, 52, 0.08);
+            --shadow-md: 0 0.9rem 2rem rgba(20, 35, 52, 0.12);
+            --badge-padding: 0.35rem 0.7rem;
+            --badge-radius: 999px;
+            --table-header-bg: #e8f0f7;
+            --table-row-alt: #f8fbfd;
+            --slide-width: 1280px;
+            --slide-height: 720px;
+            --transition-base: 220ms ease;
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: var(--color-bg);
+            color: var(--color-ink);
+            font-family: var(--font-family-base);
+            line-height: var(--line-height-base);
+        }
+        body { padding: var(--space-6); }
+        .presentation {
+            display: grid;
+            gap: var(--space-6);
+            justify-content: center;
+        }
+        .slide {
+            position: relative;
+            width: min(100%, var(--slide-width));
+            min-height: var(--slide-height);
+            margin: 0 auto;
+            padding: var(--space-7);
+            background: var(--color-surface);
+            border: var(--border-thin);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: var(--space-5);
+            transition: transform var(--transition-base), box-shadow var(--transition-base);
+        }
+        .slide:hover {
+            transform: translateY(-0.2rem);
+            box-shadow: 0 1.2rem 2.4rem rgba(20, 35, 52, 0.14);
+        }
+        .slide::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 0.4rem;
+            background: var(--color-primary);
+        }
+        .slide__header, .slide__footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-4);
+            color: var(--color-ink-muted);
+            font-size: var(--font-size-xs);
+        }
+        .slide__header {
+            padding-bottom: var(--space-3);
+            border-bottom: var(--border-thin);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .slide__footer {
+            padding-top: var(--space-3);
+            border-top: var(--border-thin);
+        }
+        .slide__content {
+            display: grid;
+            gap: var(--space-5);
+            align-content: start;
+        }
+        .project-name { font-weight: var(--font-weight-bold); color: var(--color-primary); }
+        h1, h2, h3, h4, p, ul, ol, blockquote { margin: 0; }
+        h1 { font-size: var(--font-size-3xl); line-height: var(--line-height-tight); }
+        h2 { font-size: var(--font-size-2xl); line-height: var(--line-height-tight); }
+        h3 { font-size: var(--font-size-xl); line-height: 1.2; }
+        h4 { font-size: var(--font-size-lg); line-height: 1.25; }
+        p, li, td, th { font-size: var(--font-size-md); }
+        .eyebrow {
+            color: var(--color-primary);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-bold);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+        .lead { max-width: 56rem; font-size: var(--font-size-lg); color: var(--color-ink-muted); }
+        .muted { color: var(--color-ink-muted); }
+        .divider { width: 6rem; height: 0.28rem; background: var(--color-primary); border-radius: 999px; }
+        .layout-cover .slide__content { align-content: center; gap: var(--space-6); }
+        .cover-meta, .callout-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-3);
+            align-items: center;
+        }
+        .agenda-list, .content-list, .check-list {
+            display: grid;
+            gap: var(--space-3);
+            padding-left: 1.25rem;
+        }
+        .agenda-list li::marker, .content-list li::marker, .check-list li::marker { color: var(--color-primary); }
+        .layout-content .slide__content, .layout-table .slide__content, .layout-metrics .slide__content, .layout-closing .slide__content { grid-template-columns: 1fr; }
+        .layout-two-columns .slide__content { grid-template-columns: 1.15fr 0.85fr; gap: var(--space-6); }
+        .column, .card, .highlight, .risk-block, .metric, .table-wrapper {
+            background: var(--color-surface-alt);
+            border: var(--border-thin);
+            border-radius: var(--radius-md);
+            padding: var(--space-5);
+        }
+        .card { box-shadow: var(--shadow-sm); }
+        .cards-grid, .metrics-grid { display: grid; gap: var(--space-4); }
+        .cards-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .metrics-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .metric {
+            display: grid;
+            gap: var(--space-2);
+            align-content: start;
+            min-height: 11rem;
+        }
+        .metric__value {
+            font-size: 3.2rem;
+            line-height: 1;
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+        .metric__label {
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-ink-muted);
+        }
+        .metric__detail { font-size: var(--font-size-sm); }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--badge-padding);
+            border-radius: var(--badge-radius);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-bold);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+        .badge--primary { background: var(--color-primary-soft); color: var(--color-primary); border-color: rgba(15, 76, 129, 0.18); }
+        .badge--success { background: var(--color-success-soft); color: var(--color-success); border-color: rgba(37, 109, 63, 0.18); }
+        .badge--warning { background: var(--color-warning-soft); color: var(--color-warning); border-color: rgba(138, 103, 0, 0.18); }
+        .badge--danger { background: var(--color-danger-soft); color: var(--color-danger); border-color: rgba(166, 58, 58, 0.18); }
+        .badge--info { background: var(--color-info-soft); color: var(--color-info); border-color: rgba(13, 94, 122, 0.18); }
+        .badge--neutral { background: #edf2f7; color: #425466; border-color: rgba(66, 84, 102, 0.16); }
+        .highlight { border-left: 0.35rem solid var(--color-accent); background: #fcf8f0; }
+        .risk-block { border-left: 0.35rem solid var(--color-danger); background: #fcf4f4; }
+        .risk-block__title, .highlight__title, .card__title { margin-bottom: var(--space-2); font-size: var(--font-size-lg); font-weight: var(--font-weight-bold); }
+        .table-wrapper { overflow: hidden; padding: 0; }
+        table { width: 100%; border-collapse: collapse; background: var(--color-surface); }
+        thead { background: var(--table-header-bg); }
+        th, td {
+            padding: 1rem 1.1rem;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: var(--border-thin);
+        }
+        tbody tr:nth-child(even) { background: var(--table-row-alt); }
+        tbody tr:last-child td { border-bottom: 0; }
+        .kicker-box {
+            display: inline-block;
+            padding: var(--space-3) var(--space-4);
+            background: var(--color-primary-soft);
+            color: var(--color-primary);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+        }
+        .closing-panel {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: var(--space-6);
+            align-items: end;
+        }
+        .quote {
+            padding: var(--space-5);
+            border-left: 0.35rem solid var(--color-primary);
+            background: var(--color-primary-soft);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            font-size: var(--font-size-lg);
+        }
+        .page-number { font-variant-numeric: tabular-nums; }
+        @media (max-width: 1360px) {
+            body { padding: var(--space-4); }
+            .slide { min-height: auto; }
+            .layout-two-columns .slide__content, .closing-panel, .cards-grid, .metrics-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 900px) {
+            .slide { padding: var(--space-5); border-radius: var(--radius-md); }
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 2.2rem; }
+            h3 { font-size: 1.6rem; }
+            .layout-two-columns .slide__content, .closing-panel, .cards-grid, .metrics-grid { grid-template-columns: 1fr; }
+        }
+        @media print {
+            @page { size: 16:9 landscape; margin: 0.6cm; }
+            html, body { background: #ffffff; }
+            body { padding: 0; }
+            .presentation { gap: 0; }
+            .slide {
+                width: 100%;
+                min-height: 0;
+                height: 100%;
+                page-break-after: always;
+                border-radius: 0;
+                box-shadow: none;
+                border: 1px solid #cfd8e3;
+                margin: 0;
+                break-after: page;
+            }
+            .slide:hover { transform: none; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <main class="presentation">
+        <section class="slide layout-cover" aria-label="Portada">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 4 · Construccion</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Reporte ejecutivo de avance</div>
+                <h1>Avance real de construccion backend MVP</h1>
+                <div class="divider"></div>
+                <p class="lead">La fase ya cuenta con implementacion documentada de codigo fuente y pruebas unitarias. El avance es sustantivo, pero la evidencia de build y ejecucion sigue bloqueada por limitaciones del entorno.</p>
+                <div class="cover-meta">
+                    <span class="badge badge--primary">Proyecto PMOA</span>
+                    <span class="badge badge--success">Implementacion documentada</span>
+                    <span class="badge badge--warning">Build/Test pendiente de ejecucion</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Presentacion de Avance</span>
+                <span class="page-number">01</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-agenda" aria-label="Agenda">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 4 · 2026-05-01</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Agenda</div>
+                <h2>Temas cubiertos</h2>
+                <ol class="agenda-list">
+                    <li>Resumen ejecutivo y avance verificado documentalmente</li>
+                    <li>Componentes MVP implementados en backend</li>
+                    <li>Pruebas unitarias, evidencia disponible y limites del entorno</li>
+                    <li>Riesgos, bloqueos y discrepancias de verificacion</li>
+                    <li>Proximos pasos para habilitar gate de QA</li>
+                </ol>
+                <div class="callout-row">
+                    <span class="kicker-box">Mensaje central: hay implementacion, no aun validacion ejecutada</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Agenda</span>
+                <span class="page-number">02</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-metrics" aria-label="Metricas clave">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 4 · Construccion</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Resumen ejecutivo</div>
+                <h2>Indicadores del avance actual</h2>
+                <div class="metrics-grid">
+                    <article class="metric">
+                        <div class="metric__label">Endpoints MVP</div>
+                        <div class="metric__value">11</div>
+                        <div class="metric__detail">Casos, memorias, aprobacion, archivado, relaciones, busqueda y auditoria.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Paquetes backend</div>
+                        <div class="metric__value">8</div>
+                        <div class="metric__detail">resource, service, domain, dto, persistence, integrations y exception.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Pruebas implementadas</div>
+                        <div class="metric__value">13</div>
+                        <div class="metric__detail">Cobertura sobre logica critica, busqueda, worker e integralidad Markdown.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Ejecucion real</div>
+                        <div class="metric__value">0</div>
+                        <div class="metric__detail">No fue posible correr Maven ni Java en el entorno actual.</div>
+                    </article>
+                </div>
+                <div class="highlight">
+                    <div class="highlight__title">Estado PM</div>
+                    <p>Construccion con progreso tangible en artefactos y trazabilidad documental, pero sin evidencia automatizada reproducible todavia.</p>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Metricas de avance</span>
+                <span class="page-number">03</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-two-columns" aria-label="Componentes implementados">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 4 · Construccion</span>
+            </header>
+            <div class="slide__content">
+                <div class="column">
+                    <div class="eyebrow">Construccion realizada</div>
+                    <h2>Componentes y flujos implementados</h2>
+                    <ul class="content-list">
+                        <li>Modulo Quarkus con `pom.xml`, `application.properties` y estructura por capas.</li>
+                        <li>Flujos de alta de casos y memorias, incluida creacion desde caso.</li>
+                        <li>Validacion de criticidad con desvio a revision humana para memorias altas/criticas.</li>
+                        <li>Persistencia canonica Markdown + frontmatter, auditoria, archivado y relaciones.</li>
+                        <li>Procesamiento asincrono MVP para indexacion y busqueda semantica con filtros.</li>
+                    </ul>
+                </div>
+                <aside class="column">
+                    <div class="card">
+                        <div class="card__title">Supuestos de MVP</div>
+                        <p class="muted">Se utilizaron adaptadores en memoria para repositorios, Git/GitHub y Qdrant, preservando contrato funcional sin cambios fisicos de infraestructura aun aprobados.</p>
+                    </div>
+                    <div class="risk-block" style="margin-top: 1rem;">
+                        <div class="risk-block__title">Limite actual</div>
+                        <p>La implementacion demuestra diseno ejecutado, pero aun no valida integracion real con PostgreSQL, GitHub, Qdrant ni hardening de seguridad.</p>
+                    </div>
+                </aside>
+            </div>
+            <footer class="slide__footer">
+                <span>Alcance construido</span>
+                <span class="page-number">04</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-content" aria-label="Pruebas y verificacion">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 4 · Construccion</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Calidad y evidencia</div>
+                <h2>Pruebas unitarias listas, ejecucion pendiente</h2>
+                <ul class="content-list">
+                    <li>`MemoryServiceTest`: altas, revision humana, aprobacion y validaciones negativas.</li>
+                    <li>`SearchServiceTest`: `topK`, filtros estructurados y exclusion/inclusion de archivadas.</li>
+                    <li>`ProcessingWorkerServiceTest`: procesamiento `INDEX_MEMORY` y manejo de fallas.</li>
+                    <li>`MarkdownCanonicalServiceTest`: render canonico, sanitizacion y trazabilidad `sourceCaseId`.</li>
+                    <li>Helper `ServiceTestSupport` para aislamiento sin infraestructura externa.</li>
+                </ul>
+                <div class="highlight">
+                    <div class="highlight__title">Evidencia disponible vs faltante</div>
+                    <p>Disponible: 13 escenarios implementados y documentados. Faltante: resultado ejecutado de `mvn test` / `mvn verify`, reporte de cobertura y build reproducible.</p>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Pruebas unitarias</span>
+                <span class="page-number">05</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-table" aria-label="Riesgos y bloqueos">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 4 · Construccion</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Control del proyecto</div>
+                <h2>Riesgos, bloqueos y discrepancias vigentes</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Situacion</th>
+                                <th>Impacto</th>
+                                <th>Mitigacion / accion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>R-01</td>
+                                <td>Sin Java/Maven en entorno actual; no se puede ejecutar build ni tests.</td>
+                                <td><span class="badge badge--danger">Alto</span></td>
+                                <td>Validar en CI o entorno local con JDK 21+ y Maven; adjuntar evidencia reproducible.</td>
+                            </tr>
+                            <tr>
+                                <td>R-02</td>
+                                <td>La revision de codigo existente reporta falta de codigo visible en el repositorio inspeccionado.</td>
+                                <td><span class="badge badge--warning">Medio-Alto</span></td>
+                                <td>Reemitir revision tecnica sobre la version que contenga efectivamente `backend-quarkus/` y tests.</td>
+                            </tr>
+                            <tr>
+                                <td>R-03</td>
+                                <td>Persistencia, GitHub y Qdrant permanecen como adaptadores en memoria.</td>
+                                <td><span class="badge badge--warning">Medio</span></td>
+                                <td>Planificar migraciones Flyway, integraciones reales y aprobaciones de arquitectura/DBA.</td>
+                            </tr>
+                            <tr>
+                                <td>R-04</td>
+                                <td>Seguridad OIDC/JWT/RBAC y hardening no cuentan aun con evidencia final de salida.</td>
+                                <td><span class="badge badge--warning">Medio</span></td>
+                                <td>Incorporar hardening tecnico antes del gate QA, con pruebas y revision dedicada.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Riesgos y bloqueos</span>
+                <span class="page-number">06</span>
+            </footer>
+        </section>
+
+        <section class="slide layout-closing" aria-label="Cierre y proximos pasos">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 4 · Construccion · 2026-05-01</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Siguiente ciclo</div>
+                <div class="closing-panel">
+                    <div>
+                        <h2>Proximos pasos y decision solicitada</h2>
+                        <p class="lead">Se solicita mantener la fase en estado de construccion controlada hasta obtener evidencia de ejecucion tecnica. No corresponde aun liberar a QA sin cerrar build y pruebas.</p>
+                        <div class="callout-row" style="margin-top: 1.5rem;">
+                            <span class="badge badge--primary">1. Ejecutar `mvn test` / `mvn verify`</span>
+                            <span class="badge badge--info">2. Rehacer revision de codigo</span>
+                            <span class="badge badge--success">3. Preparar integraciones reales</span>
+                        </div>
+                    </div>
+                    <div class="quote">
+                        Decision recomendada: reconocer avance real de implementacion, pero mantener bloqueado el pase a QA hasta contar con evidencia automatizada y nueva revision tecnica.
+                    </div>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Cierre ejecutivo</span>
+                <span class="page-number">07</span>
+            </footer>
+        </section>
+    </main>
+</body>
+</html>

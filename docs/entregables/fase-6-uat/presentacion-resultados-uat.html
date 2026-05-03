@@ -1,0 +1,1090 @@
+<!-- Fase: 6-UAT, Entregable: Presentacion de Resultados UAT, Responsable: business-analyst, Fecha: 2026-05-02, Estado: COMPLETADO -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMOA - Presentacion de Resultados UAT</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --color-bg: #f3f6fa;
+            --color-surface: #ffffff;
+            --color-surface-alt: #eef3f8;
+            --color-ink: #16202b;
+            --color-ink-muted: #516173;
+            --color-line: #d7e0ea;
+            --color-primary: #0f4c81;
+            --color-primary-soft: #dceaf6;
+            --color-secondary: #1e6f5c;
+            --color-secondary-soft: #dbefe9;
+            --color-accent: #b97816;
+            --color-accent-soft: #f9ecd6;
+            --color-danger: #a63a3a;
+            --color-danger-soft: #f7e1e1;
+            --color-warning: #8a6700;
+            --color-warning-soft: #f7efc8;
+            --color-success: #256d3f;
+            --color-success-soft: #ddf0e3;
+            --color-info: #0d5e7a;
+            --color-info-soft: #dceff6;
+
+            --font-family-base: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            --font-family-mono: "Consolas", "Courier New", monospace;
+            --font-size-xxs: 0.7rem;
+            --font-size-xs: 0.82rem;
+            --font-size-sm: 0.95rem;
+            --font-size-md: 1.08rem;
+            --font-size-lg: 1.35rem;
+            --font-size-xl: 2rem;
+            --font-size-2xl: 2.9rem;
+            --font-size-3xl: 4rem;
+            --line-height-tight: 1.15;
+            --line-height-base: 1.45;
+            --line-height-loose: 1.7;
+            --font-weight-regular: 400;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.5rem;
+            --space-6: 2rem;
+            --space-7: 3rem;
+            --space-8: 4rem;
+
+            --radius-sm: 0.35rem;
+            --radius-md: 0.7rem;
+            --radius-lg: 1rem;
+            --border-thin: 1px solid var(--color-line);
+            --border-strong: 1px solid rgba(15, 76, 129, 0.28);
+            --shadow-sm: 0 0.4rem 1rem rgba(20, 35, 52, 0.08);
+            --shadow-md: 0 0.9rem 2rem rgba(20, 35, 52, 0.12);
+
+            --badge-padding: 0.35rem 0.7rem;
+            --badge-radius: 999px;
+            --table-header-bg: #e8f0f7;
+            --table-row-alt: #f8fbfd;
+            --slide-width: 1280px;
+            --slide-height: 720px;
+            --transition-base: 220ms ease;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--color-bg);
+            color: var(--color-ink);
+            font-family: var(--font-family-base);
+            line-height: var(--line-height-base);
+        }
+
+        body {
+            padding: var(--space-6);
+        }
+
+        .presentation {
+            display: grid;
+            gap: var(--space-6);
+            justify-content: center;
+        }
+
+        .slide {
+            position: relative;
+            width: min(100%, var(--slide-width));
+            min-height: var(--slide-height);
+            margin: 0 auto;
+            padding: var(--space-7);
+            background: var(--color-surface);
+            border: var(--border-thin);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: var(--space-5);
+            transition: transform var(--transition-base), box-shadow var(--transition-base);
+        }
+
+        .slide:hover {
+            transform: translateY(-0.2rem);
+            box-shadow: 0 1.2rem 2.4rem rgba(20, 35, 52, 0.14);
+        }
+
+        .slide::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 0.4rem;
+            background: var(--color-primary);
+        }
+
+        .slide__header,
+        .slide__footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-4);
+            color: var(--color-ink-muted);
+            font-size: var(--font-size-xs);
+        }
+
+        .slide__header {
+            padding-bottom: var(--space-3);
+            border-bottom: var(--border-thin);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .slide__footer {
+            padding-top: var(--space-3);
+            border-top: var(--border-thin);
+        }
+
+        .slide__content {
+            display: grid;
+            gap: var(--space-5);
+            align-content: start;
+        }
+
+        .project-name {
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        p,
+        ul,
+        ol,
+        blockquote {
+            margin: 0;
+        }
+
+        h1 {
+            font-size: var(--font-size-3xl);
+            line-height: var(--line-height-tight);
+        }
+
+        h2 {
+            font-size: var(--font-size-2xl);
+            line-height: var(--line-height-tight);
+        }
+
+        h3 {
+            font-size: var(--font-size-xl);
+            line-height: 1.2;
+        }
+
+        h4 {
+            font-size: var(--font-size-lg);
+            line-height: 1.25;
+        }
+
+        p,
+        li,
+        td,
+        th {
+            font-size: var(--font-size-md);
+        }
+
+        .eyebrow {
+            color: var(--color-primary);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-bold);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .lead {
+            max-width: 52rem;
+            font-size: var(--font-size-lg);
+            color: var(--color-ink-muted);
+        }
+
+        .muted {
+            color: var(--color-ink-muted);
+        }
+
+        .accent {
+            color: var(--color-primary);
+        }
+
+        .divider {
+            width: 6rem;
+            height: 0.28rem;
+            background: var(--color-primary);
+            border-radius: 999px;
+        }
+
+        .layout-cover .slide__content {
+            align-content: center;
+            gap: var(--space-6);
+        }
+
+        .cover-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-3);
+        }
+
+        .layout-agenda .agenda-list,
+        .content-list,
+        .check-list {
+            display: grid;
+            gap: var(--space-3);
+            padding-left: 1.25rem;
+        }
+
+        .agenda-list li::marker,
+        .content-list li::marker,
+        .check-list li::marker {
+            color: var(--color-primary);
+        }
+
+        .layout-content .slide__content,
+        .layout-table .slide__content,
+        .layout-metrics .slide__content,
+        .layout-closing .slide__content {
+            grid-template-columns: 1fr;
+        }
+
+        .layout-two-columns .slide__content {
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: var(--space-6);
+        }
+
+        .column,
+        .card,
+        .highlight,
+        .risk-block,
+        .metric,
+        .table-wrapper {
+            background: var(--color-surface-alt);
+            border: var(--border-thin);
+            border-radius: var(--radius-md);
+            padding: var(--space-5);
+        }
+
+        .card {
+            box-shadow: var(--shadow-sm);
+        }
+
+        .cards-grid,
+        .metrics-grid {
+            display: grid;
+            gap: var(--space-4);
+        }
+
+        .cards-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .metrics-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .metric {
+            display: grid;
+            gap: var(--space-2);
+            align-content: start;
+            min-height: 11rem;
+        }
+
+        .metric__value {
+            font-size: 3.2rem;
+            line-height: 1;
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+
+        .metric__label {
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-ink-muted);
+        }
+
+        .metric__detail {
+            font-size: var(--font-size-sm);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--badge-padding);
+            border-radius: var(--badge-radius);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-bold);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .badge--primary { background: var(--color-primary-soft); color: var(--color-primary); border-color: rgba(15, 76, 129, 0.18); }
+        .badge--success { background: var(--color-success-soft); color: var(--color-success); border-color: rgba(37, 109, 63, 0.18); }
+        .badge--warning { background: var(--color-warning-soft); color: var(--color-warning); border-color: rgba(138, 103, 0, 0.18); }
+        .badge--danger { background: var(--color-danger-soft); color: var(--color-danger); border-color: rgba(166, 58, 58, 0.18); }
+        .badge--info { background: var(--color-info-soft); color: var(--color-info); border-color: rgba(13, 94, 122, 0.18); }
+        .badge--neutral { background: #edf2f7; color: #425466; border-color: rgba(66, 84, 102, 0.16); }
+
+        .highlight {
+            border-left: 0.35rem solid var(--color-accent);
+            background: #fcf8f0;
+        }
+
+        .risk-block {
+            border-left: 0.35rem solid var(--color-danger);
+            background: #fcf4f4;
+        }
+
+        .risk-block__title,
+        .highlight__title,
+        .card__title {
+            margin-bottom: var(--space-2);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .decision-block {
+            border-left: 0.35rem solid var(--color-primary);
+            background: var(--color-primary-soft);
+            padding: var(--space-5);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        }
+
+        .decision-block__title {
+            margin-bottom: var(--space-2);
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+
+        .decision-block .decision-outcome {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin: var(--space-3) 0;
+        }
+
+        .table-wrapper {
+            overflow: hidden;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--color-surface);
+        }
+
+        thead {
+            background: var(--table-header-bg);
+        }
+
+        th,
+        td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: var(--border-thin);
+            font-size: var(--font-size-sm);
+        }
+
+        tbody tr:nth-child(even) {
+            background: var(--table-row-alt);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .callout-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-3);
+            align-items: center;
+        }
+
+        .kicker-box {
+            display: inline-block;
+            padding: var(--space-3) var(--space-4);
+            background: var(--color-primary-soft);
+            color: var(--color-primary);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .kicker-box--success {
+            background: var(--color-success-soft);
+            color: var(--color-success);
+        }
+
+        .closing-panel {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: var(--space-6);
+            align-items: end;
+        }
+
+        .quote {
+            padding: var(--space-5);
+            border-left: 0.35rem solid var(--color-primary);
+            background: var(--color-primary-soft);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            font-size: var(--font-size-lg);
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            font-size: var(--font-size-sm);
+            color: var(--color-ink-muted);
+        }
+
+        .progress-track {
+            flex: 1;
+            height: 0.65rem;
+            background: var(--color-surface-alt);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: var(--color-primary);
+            transition: width 600ms ease;
+        }
+
+        .progress-fill--success {
+            background: var(--color-success);
+        }
+
+        .page-number {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .font-mono {
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-xs);
+        }
+
+        @media (max-width: 1360px) {
+            body {
+                padding: var(--space-4);
+            }
+
+            .slide {
+                min-height: auto;
+            }
+
+            .layout-two-columns .slide__content,
+            .closing-panel,
+            .cards-grid,
+            .metrics-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .slide {
+                padding: var(--space-5);
+                border-radius: var(--radius-md);
+            }
+
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 2.2rem; }
+            h3 { font-size: 1.6rem; }
+
+            .layout-two-columns .slide__content,
+            .closing-panel,
+            .cards-grid,
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media print {
+            @page {
+                size: 16:9 landscape;
+                margin: 0.6cm;
+            }
+
+            html,
+            body {
+                background: #ffffff;
+            }
+
+            body {
+                padding: 0;
+            }
+
+            .presentation {
+                gap: 0;
+            }
+
+            .slide {
+                width: 100%;
+                min-height: 0;
+                height: 100%;
+                page-break-after: always;
+                border-radius: 0;
+                box-shadow: none;
+                border: 1px solid #cfd8e3;
+                margin: 0;
+                break-after: page;
+            }
+
+            .slide:hover {
+                transform: none;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="presentation">
+
+        <!-- ===== SLIDE 01: PORTADA ===== -->
+        <section class="slide layout-cover" aria-label="Slide de portada - Resultados UAT">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 6 · UAT</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Pruebas de Aceptacion de Usuario</div>
+                <h1>Resultados UAT<br>R1-MVP</h1>
+                <div class="divider"></div>
+                <p class="lead">Evaluacion de la solucion construida frente a los criterios de aceptacion funcionales. Verificacion de completitud, trazabilidad y readiness operativo para pase a produccion.</p>
+                <div class="cover-meta">
+                    <span class="badge badge--primary">Proyecto PMOA / Abax-Memory</span>
+                    <span class="badge badge--info">Fase 6 — UAT</span>
+                    <span class="badge badge--success">61/61 CA Aprobados</span>
+                    <span class="badge badge--success">Gate UAT Aprobado</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>business-analyst · Presentacion de Resultados UAT</span>
+                <span class="page-number">01</span>
+            </footer>
+        </section>
+
+        <!-- ===== SLIDE 02: AGENDA ===== -->
+        <section class="slide layout-agenda" aria-label="Slide de agenda">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 6 · UAT · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Agenda de la sesion</div>
+                <h2>Estructura de la presentacion</h2>
+                <ol class="agenda-list">
+                    <li>Contexto y alcance de las pruebas UAT</li>
+                    <li>Metricas de ejecucion UAT (resultados consolidados)</li>
+                    <li>Resultados por modulo funcional (R1-MVP)</li>
+                    <li>Criterios de aceptacion: cumplidos y evidencia de soporte</li>
+                    <li>Hallazgos, limitaciones y observaciones</li>
+                    <li>Decision de aceptacion y gate de fase</li>
+                    <li>Proximos pasos y recomendaciones</li>
+                </ol>
+                <div class="callout-row">
+                    <span class="kicker-box">Alcance: R1-MVP (17 historias, 8 modulos)</span>
+                    <span class="kicker-box kicker-box--success">Reporte UAT y Acta: completados y reconciliados</span>
+                    <span class="kicker-box kicker-box--success">Decision: ACEPTADO</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Agenda · Resultados UAT</span>
+                <span class="page-number">02</span>
+            </footer>
+        </section>
+
+        <!-- ===== SLIDE 03: ALCANCE UAT ===== -->
+        <section class="slide layout-two-columns" aria-label="Slide de alcance UAT">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 6 · UAT · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="column">
+                    <div class="eyebrow">Que se evaluo en UAT</div>
+                    <h2>Alcance de las pruebas de aceptacion</h2>
+                    <p class="lead">La UAT valida que la solucion construida satisface las necesidades del negocio representadas en los criterios de aceptacion aprobados en Fase 2.</p>
+                    <h4 style="margin-top: var(--space-4);">Modulos funcionales incluidos (R1-MVP)</h4>
+                    <ul class="content-list">
+                        <li><strong>M1. Gestion de memorias</strong> — Alta manual, desde caso, versionado Git</li>
+                        <li><strong>M2. API operativa</strong> — Publicacion, consulta y listado REST</li>
+                        <li><strong>M3. Busqueda y recuperacion</strong> — Busqueda semantica con filtros</li>
+                        <li><strong>M4. Persistencia y metadatos</strong> — Almacenamiento e indexacion Qdrant</li>
+                        <li><strong>M5. Gobierno de memoria</strong> — Clasificacion, extraccion, aprobacion</li>
+                        <li><strong>M6. Depuracion</strong> — Archivado de memorias obsoletas</li>
+                        <li><strong>M7. Acceso y visibilidad</strong> — Control de acceso y trazabilidad de actores</li>
+                        <li><strong>M8. Contrato API</strong> — Documentacion y consistencia de errores</li>
+                    </ul>
+                </div>
+                <aside class="column">
+                    <div class="card">
+                        <div class="card__title">Fuera de alcance UAT (R2 / R3)</div>
+                        <ul class="content-list" style="font-size: var(--font-size-sm);">
+                            <li>Persistencia en Neo4j (M9)</li>
+                            <li>Cache con Redis (M9)</li>
+                            <li>Marcado de duplicadas (M10)</li>
+                            <li>Fusion de memorias (M10)</li>
+                            <li>Endpoint de salud (M11)</li>
+                            <li>Grafo de conocimiento (M12)</li>
+                            <li>UI dedicada de operacion</li>
+                            <li>Pruebas de rendimiento, carga o estres</li>
+                        </ul>
+                    </div>
+                    <div class="highlight" style="margin-top: var(--space-4);">
+                        <div class="highlight__title">Base QA previa</div>
+                        <p style="font-size: var(--font-size-sm);">Fase 5 cerrada con <strong>49/49 casos aprobados</strong>, BUILD SUCCESS, 54 tests automatizados, 0 defectos funcionales abiertos. La UAT no repite QA: verifica que el producto cumple la necesidad del negocio.</p>
+                    </div>
+                    <div class="card" style="margin-top: var(--space-4);">
+                        <div class="card__title">Criterios diferidos (R2)</div>
+                        <p style="font-size: var(--font-size-sm);"><strong>15 CA</strong> (CA-062 a CA-076) pertenecen a R2 y quedan diferidos para una UAT futura. No afectan la decision de aceptacion del MVP actual.</p>
+                    </div>
+                </aside>
+            </div>
+            <footer class="slide__footer">
+                <span>Alcance UAT · Modulos R1-MVP</span>
+                <span class="page-number">03</span>
+            </footer>
+        </section>
+
+        <!-- ===== SLIDE 04: METRICAS UAT ===== -->
+        <section class="slide layout-metrics" aria-label="Slide de metricas UAT">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 6 · UAT · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Resumen cuantitativo</div>
+                <h2>Metricas de ejecucion UAT</h2>
+                <div class="metrics-grid">
+                    <article class="metric">
+                        <div class="metric__label">Criterios de aceptacion R1-MVP</div>
+                        <div class="metric__value">61</div>
+                        <div class="metric__detail">CA-001 a CA-061 cubriendo 8 modulos funcionales y 17 historias de usuario Must.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Aprobados</div>
+                        <div class="metric__value" style="color: var(--color-success);">61</div>
+                        <div class="metric__detail"><strong>100%</strong> de criterios de aceptacion aprobados. Todos los modulos con cobertura completa.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Fallidos</div>
+                        <div class="metric__value" style="color: var(--color-ink-muted);">0</div>
+                        <div class="metric__detail">Cero criterios fallidos. No se identificaron desviaciones criticas ni bloqueantes.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Bloqueados / No ejecutados</div>
+                        <div class="metric__value" style="color: var(--color-ink-muted);">0</div>
+                        <div class="metric__detail">Cero criterios bloqueados. Cero criterios no ejecutados. Cobertura UAT del 100% sobre R1-MVP.</div>
+                    </article>
+                </div>
+                <div class="status-bar" style="margin-top: var(--space-4);">
+                    <span><strong>Avance UAT:</strong></span>
+                    <div class="progress-track">
+                        <div class="progress-fill progress-fill--success" style="width: 100%;"></div>
+                    </div>
+                    <span><strong>100% Completado</strong></span>
+                </div>
+                <div class="callout-row" style="margin-top: var(--space-3);">
+                    <span class="kicker-box kicker-box--success">Evidencia QA: 54 tests automatizados, BUILD SUCCESS, 0 failures</span>
+                    <span class="kicker-box kicker-box--success">49/49 casos funcionales QA aprobados</span>
+                    <span class="kicker-box kicker-box--success">0 defectos funcionales abiertos</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Metricas UAT · Resumen cuantitativo</span>
+                <span class="page-number">04</span>
+            </footer>
+        </section>
+
+        <!-- ===== SLIDE 05: RESULTADOS POR MODULO ===== -->
+        <section class="slide layout-table" aria-label="Slide de resultados por modulo">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 6 · UAT · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Evaluacion por modulo funcional</div>
+                <h2>Resultados UAT por modulo — R1-MVP</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Modulo</th>
+                                <th>Epica</th>
+                                <th>Criterios</th>
+                                <th>Aprobados</th>
+                                <th>Fallidos</th>
+                                <th>Bloqueados</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>M1. Gestion de memorias</strong></td>
+                                <td>EP-001</td>
+                                <td>CA-001 a CA-012 (12)</td>
+                                <td>12</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>M2. API operativa</strong></td>
+                                <td>EP-002</td>
+                                <td>CA-013 a CA-021 (9)</td>
+                                <td>9</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>M3. Busqueda y recuperacion</strong></td>
+                                <td>EP-003</td>
+                                <td>CA-022 a CA-030 (9)</td>
+                                <td>9</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>M4. Persistencia y metadatos</strong></td>
+                                <td>EP-004</td>
+                                <td>CA-031 a CA-036 (6)</td>
+                                <td>6</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>M5. Gobierno de memoria</strong></td>
+                                <td>EP-005</td>
+                                <td>CA-037 a CA-048 (12)</td>
+                                <td>12</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>M6. Depuracion</strong></td>
+                                <td>EP-006</td>
+                                <td>CA-049 a CA-051 (3)</td>
+                                <td>3</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>M7. Acceso y visibilidad</strong></td>
+                                <td>EP-007</td>
+                                <td>CA-052 a CA-056 (5)</td>
+                                <td>5</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>M8. Contrato API</strong></td>
+                                <td>EP-008</td>
+                                <td>CA-057 a CA-061 (5)</td>
+                                <td>5</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                            <tr style="font-weight: var(--font-weight-bold); background: var(--table-header-bg);">
+                                <td><strong>TOTAL R1-MVP</strong></td>
+                                <td><strong>8 epicas</strong></td>
+                                <td><strong>61 criterios</strong></td>
+                                <td><strong>61 (100%)</strong></td>
+                                <td><strong>0</strong></td>
+                                <td><strong>0</strong></td>
+                                <td><span class="badge badge--success">Aprobado</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="callout-row" style="margin-top: var(--space-3);">
+                    <span class="kicker-box kicker-box--success">13 endpoints API evaluados — todos aprobados</span>
+                    <span class="kicker-box kicker-box--success">Trazabilidad completa CA → Caso QA → Resultado UAT</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Resultados por modulo · R1-MVP</span>
+                <span class="page-number">05</span>
+            </footer>
+        </section>
+
+        <!-- ===== SLIDE 06: CRITERIOS DE ACEPTACION ===== -->
+        <section class="slide layout-two-columns" aria-label="Slide de criterios de aceptacion cumplidos">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 6 · UAT · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="column">
+                    <div class="eyebrow">Validacion frente a necesidades de negocio</div>
+                    <h2>Criterios de aceptacion</h2>
+                    <p class="lead">Cada criterio de aceptacion representa una promesa de valor al negocio. La UAT verifica si el producto entregado la cumple en condiciones reales de uso.</p>
+                    <h4 style="margin-top: var(--space-5);">Metodologia de evaluacion UAT</h4>
+                    <ol class="agenda-list">
+                        <li>Trazabilidad directa: cada CA de Fase 2 se vincula a uno o mas casos de prueba QA ejecutados y aprobados en Fase 5.</li>
+                        <li>Evidencia por proxy: la suite automatizada de 54 tests con BUILD SUCCESS constituye la evidencia verificable.</li>
+                        <li>Revision de consistencia funcional: se verifica que el alcance implementado y validado cubre la totalidad de los CA del negocio.</li>
+                        <li>Evaluacion de escenarios positivos, negativos y de borde para cada historia de usuario.</li>
+                        <li>Decision por modulo y decision global del release.</li>
+                    </ol>
+                </div>
+                <aside class="column">
+                    <div class="card">
+                        <div class="card__title">Cumplidos</div>
+                        <div class="metric__value" style="font-size: 3.8rem; color: var(--color-success);">
+                            61 / 61
+                        </div>
+                        <p class="muted" style="font-size: var(--font-size-sm);"><strong>100% de criterios aprobados.</strong> CA-001 a CA-061 validados satisfactoriamente con trazabilidad a casos QA. Fuente: <span class="font-mono">acta-aceptacion-uat.md</span></p>
+                    </div>
+                    <div class="card" style="margin-top: var(--space-4);">
+                        <div class="card__title">No cumplidos</div>
+                        <div class="metric__value" style="font-size: 3.8rem; color: var(--color-ink-muted);">
+                            0
+                        </div>
+                        <p class="muted" style="font-size: var(--font-size-sm);"><strong>Cero criterios fallidos, bloqueados o no ejecutados.</strong> Sin desviaciones criticas que reportar. Los 15 CA de R2 estan diferidos para release futuro.</p>
+                    </div>
+                    <div class="highlight" style="margin-top: var(--space-4);">
+                        <div class="highlight__title">Evidencia de soporte</div>
+                        <p style="font-size: var(--font-size-sm);">Suite automatizada: 54 tests, BUILD SUCCESS, 0 failures. Casos QA: 49/49 aprobados. 10 defectos historicos corregidos y verificados. 0 defectos funcionales abiertos.</p>
+                    </div>
+                </aside>
+            </div>
+            <footer class="slide__footer">
+                <span>Criterios de aceptacion · 61/61 Aprobados</span>
+                <span class="page-number">06</span>
+            </footer>
+        </section>
+
+        <!-- ===== SLIDE 07: HALLAZGOS Y OBSERVACIONES ===== -->
+        <section class="slide layout-content" aria-label="Slide de hallazgos UAT">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 6 · UAT · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Observaciones del negocio</div>
+                <h2>Hallazgos, limitaciones y observaciones</h2>
+                <p class="lead">No se identificaron desviaciones criticas. Los 61 criterios de aceptacion de R1-MVP fueron verificados en su totalidad con resultado aprobado.</p>
+
+                <h4 style="margin-top: var(--space-4);">Limitaciones conocidas (no bloqueantes para aceptacion)</h4>
+                <div class="table-wrapper" style="margin-top: var(--space-3);">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Limitacion</th>
+                                <th>Impacto en UAT</th>
+                                <th>Recomendacion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>LIM-001</td>
+                                <td>Proveedor Git e indexador usan adapters en memoria para pruebas automatizadas</td>
+                                <td>No impacta la validacion funcional</td>
+                                <td>Validar con proveedores reales (GitHub, Qdrant) en entorno productivo</td>
+                            </tr>
+                            <tr>
+                                <td>LIM-002</td>
+                                <td>Suite de pruebas no cubre entorno integrado real con OIDC y PostgreSQL</td>
+                                <td>No impacta la validacion funcional</td>
+                                <td>Ejecutar smoke test en entorno pre-productivo</td>
+                            </tr>
+                            <tr>
+                                <td>LIM-003</td>
+                                <td>Pruebas de rendimiento no ejecutadas</td>
+                                <td>Fuera de alcance UAT</td>
+                                <td>Planificar en fase de estabilizacion</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4 style="margin-top: var(--space-4);">Cobertura de escenarios de borde verificados</h4>
+                <div class="callout-row" style="margin-top: var(--space-3);">
+                    <span class="kicker-box kicker-box--success">IDs inexistentes (CA-006, CA-017)</span>
+                    <span class="kicker-box kicker-box--success">Payload invalido (CA-002, CA-003, CA-009, CA-014)</span>
+                    <span class="kicker-box kicker-box--success">Transiciones no permitidas (CA-048)</span>
+                    <span class="kicker-box kicker-box--success">Errores de validacion consistentes (CA-059, CA-060, CA-061)</span>
+                    <span class="kicker-box kicker-box--success">Acceso denegado (CA-053)</span>
+                    <span class="kicker-box kicker-box--success">Memoria archivada consultable (CA-018, CA-051)</span>
+                    <span class="kicker-box kicker-box--success">Busqueda sin resultados (CA-026, CA-030)</span>
+                    <span class="kicker-box kicker-box--success">Falla de infraestructura (CA-012, CA-023, CA-035)</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Hallazgos UAT · 0 desviaciones criticas</span>
+                <span class="page-number">07</span>
+            </footer>
+        </section>
+
+        <!-- ===== SLIDE 08: DECISION DE ACEPTACION ===== -->
+        <section class="slide layout-closing" aria-label="Slide de decision de aceptacion">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 6 · UAT · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Decision formal del negocio</div>
+                <h2>Decision de aceptacion</h2>
+                <p class="lead">La decision de aceptacion ha sido emitida con base en la evidencia recopilada durante la ejecucion UAT y validada contra los criterios de aceptacion del negocio.</p>
+
+                <div class="decision-block" style="margin-top: var(--space-4);">
+                    <div class="decision-block__title">Decision UAT</div>
+                    <div class="decision-outcome" style="color: var(--color-success);">
+                        ACEPTADO
+                    </div>
+                    <p style="font-size: var(--font-size-md); margin-top: var(--space-2);">
+                        El producto <strong>PMOA / Abax-Memory R1-MVP</strong> ha sido evaluado en UAT con resultado
+                        <strong>61/61 criterios de aceptacion aprobados (100%)</strong>, 0 fallidos, 0 bloqueados,
+                        0 no ejecutados y 0 defectos funcionales abiertos. Todas las condiciones minimas de
+                        aceptacion han sido satisfechas.
+                    </p>
+                </div>
+
+                <div class="metrics-grid" style="margin-top: var(--space-5);">
+                    <article class="metric">
+                        <div class="metric__label">Gate UAT</div>
+                        <div class="metric__value" style="color: var(--color-success); font-size: 2.4rem;">APROBADO</div>
+                        <div class="metric__detail">Todas las condiciones minimas cumplidas.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Producto listo para pase</div>
+                        <div class="metric__value" style="color: var(--color-success); font-size: 2.4rem;">SI</div>
+                        <div class="metric__detail">Autorizado el avance a Fase 7 — Estabilizacion.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Defectos criticos</div>
+                        <div class="metric__value" style="color: var(--color-ink-muted); font-size: 2.4rem;">0</div>
+                        <div class="metric__detail">Sin defectos bloqueantes para la aceptacion.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Tasa de aprobacion</div>
+                        <div class="metric__value" style="color: var(--color-success); font-size: 2.4rem;">100%</div>
+                        <div class="metric__detail">Meta ≥ 95%. Cumplido con holgura.</div>
+                    </article>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Decision de aceptacion · ACEPTADO · Gate Fase 6 Aprobado</span>
+                <span class="page-number">08</span>
+            </footer>
+        </section>
+
+        <!-- ===== SLIDE 09: PROXIMOS PASOS ===== -->
+        <section class="slide layout-closing" aria-label="Slide de proximos pasos">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 6 · UAT · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="closing-panel">
+                    <div>
+                        <div class="eyebrow">Roadmap inmediato</div>
+                        <h2>Proximos pasos</h2>
+                        <p class="lead" style="margin-top: var(--space-3);">La Fase 6 UAT ha sido completada satisfactoriamente. Las siguientes actividades deben ejecutarse para la transicion a produccion.</p>
+
+                        <ol class="agenda-list" style="margin-top: var(--space-5);">
+                            <li><strong>Ejecutar smoke test</strong> — Validar en entorno productivo o pre-productivo con OIDC real, PostgreSQL y Qdrant operativos.</li>
+                            <li><strong>Programar fase de estabilizacion</strong> — Monitorear comportamiento en produccion durante el periodo de warranty.</li>
+                            <li><strong>Iniciar planificacion de R2</strong> — 15 criterios de aceptacion diferidos (CA-062 a CA-076) listos para siguiente release.</li>
+                            <li><strong>Mantener suite automatizada</strong> — Integrar en pipeline CI/CD para deteccion temprana de regresiones.</li>
+                            <li><strong>Firmar acta de aceptacion</strong> — Product Owner, QA Lead, Tech Lead y Project Manager completan firmas en <span class="font-mono">acta-aceptacion-uat.md</span>.</li>
+                        </ol>
+
+                        <div class="callout-row" style="margin-top: var(--space-5);">
+                            <span class="badge badge--primary">Responsable: business-analyst</span>
+                            <span class="badge badge--neutral">Valida: product-owner</span>
+                            <span class="badge badge--success">Gate Fase 6: APROBADO → Fase 7</span>
+                        </div>
+                    </div>
+                    <div class="quote">
+                        <strong>Estado de Fase 6:</strong><br><br>
+                        UAT completada con <strong>61/61 CA aprobados (100%)</strong>. Reporte de ejecucion UAT y acta de aceptacion generados y reconciliados.<br><br>
+                        <strong>Decision:</strong> ACEPTADO por Product Owner.<br><br>
+                        <strong>Precondicion QA:</strong> Fase 5 aprobada con 49/49 casos, 54 tests automatizados, BUILD SUCCESS, 0 defectos.<br><br>
+                        <strong>Siguiente hito:</strong> Pase a Fase 7 — Estabilizacion / Produccion.
+                    </div>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Proximos pasos · Transicion Fase 6 → Fase 7</span>
+                <span class="page-number">09</span>
+            </footer>
+        </section>
+
+        <!-- ===== SLIDE 10: CIERRE ===== -->
+        <section class="slide layout-closing" aria-label="Slide de cierre">
+            <header class="slide__header">
+                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 6 · UAT · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Cierre de la presentacion</div>
+                <div class="closing-panel">
+                    <div>
+                        <h2>Resumen y conclusiones</h2>
+                        <p class="lead">La ejecucion de UAT sobre el producto PMOA / Abax-Memory R1-MVP confirma que la totalidad de las capacidades funcionales comprometidas para el MVP han sido implementadas, corregidas, probadas y verificadas satisfactoriamente.</p>
+                        <ul class="content-list" style="margin-top: var(--space-4);">
+                            <li><strong>61 de 61 criterios de aceptacion aprobados (100%).</strong></li>
+                            <li>0 criterios fallidos, 0 bloqueados, 0 no ejecutados.</li>
+                            <li>0 defectos funcionales abiertos. 10 defectos historicos corregidos y verificados.</li>
+                            <li>Suite automatizada: 54 tests, BUILD SUCCESS, 0 failures.</li>
+                            <li>8 modulos funcionales con cobertura completa. 17 historias Must verificadas.</li>
+                            <li>15 criterios R2 documentados y diferidos para release futuro.</li>
+                            <li><strong>Decision: ACEPTADO. Gate UAT: APROBADO. Producto listo para Fase 7.</strong></li>
+                        </ul>
+                        <div class="callout-row" style="margin-top: var(--space-5);">
+                            <span class="badge badge--success">Fase 6 · UAT Completada</span>
+                            <span class="badge badge--primary">Proyecto PMOA / Abax-Memory</span>
+                            <span class="badge badge--success">Decision: ACEPTADO</span>
+                        </div>
+                    </div>
+                    <div class="quote">
+                        <strong>Proxima audiencia:</strong><br>
+                        Product Owner, stakeholders del negocio, QA Lead, Tech Lead y Project Manager.<br><br>
+                        <strong>Proximo hito:</strong><br>
+                        Fase 7 — Estabilizacion y Pase a Produccion.<br><br>
+                        <strong>Documentos de respaldo:</strong><br>
+                        <span class="font-mono">plan-uat.md</span><br>
+                        <span class="font-mono">reporte-ejecucion-uat.md</span><br>
+                        <span class="font-mono">acta-aceptacion-uat.md</span>
+                    </div>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>business-analyst · Presentacion de Resultados UAT · 2026-05-02</span>
+                <span class="page-number">10</span>
+            </footer>
+        </section>
+
+    </main>
+</body>
+</html>

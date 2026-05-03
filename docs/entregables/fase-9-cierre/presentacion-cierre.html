@@ -1,0 +1,1080 @@
+<!-- Fase: 9-Cierre, Responsable: project-manager, Fecha: 2026-05-02, Estado: Completado -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PMOA — Presentacion de Cierre del Proyecto</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --color-bg: #f3f6fa;
+            --color-surface: #ffffff;
+            --color-surface-alt: #eef3f8;
+            --color-ink: #16202b;
+            --color-ink-muted: #516173;
+            --color-line: #d7e0ea;
+            --color-primary: #0f4c81;
+            --color-primary-soft: #dceaf6;
+            --color-secondary: #1e6f5c;
+            --color-secondary-soft: #dbefe9;
+            --color-accent: #b97816;
+            --color-accent-soft: #f9ecd6;
+            --color-danger: #a63a3a;
+            --color-danger-soft: #f7e1e1;
+            --color-warning: #8a6700;
+            --color-warning-soft: #f7efc8;
+            --color-success: #256d3f;
+            --color-success-soft: #ddf0e3;
+            --color-info: #0d5e7a;
+            --color-info-soft: #dceff6;
+
+            --font-family-base: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            --font-family-mono: "Consolas", "Courier New", monospace;
+            --font-size-xxs: 0.7rem;
+            --font-size-xs: 0.82rem;
+            --font-size-sm: 0.95rem;
+            --font-size-md: 1.08rem;
+            --font-size-lg: 1.35rem;
+            --font-size-xl: 2rem;
+            --font-size-2xl: 2.9rem;
+            --font-size-3xl: 4rem;
+            --line-height-tight: 1.15;
+            --line-height-base: 1.45;
+            --line-height-loose: 1.7;
+            --font-weight-regular: 400;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.5rem;
+            --space-6: 2rem;
+            --space-7: 3rem;
+            --space-8: 4rem;
+
+            --radius-sm: 0.35rem;
+            --radius-md: 0.7rem;
+            --radius-lg: 1rem;
+            --border-thin: 1px solid var(--color-line);
+            --border-strong: 1px solid rgba(15, 76, 129, 0.28);
+            --shadow-sm: 0 0.4rem 1rem rgba(20, 35, 52, 0.08);
+            --shadow-md: 0 0.9rem 2rem rgba(20, 35, 52, 0.12);
+
+            --badge-padding: 0.35rem 0.7rem;
+            --badge-radius: 999px;
+            --table-header-bg: #e8f0f7;
+            --table-row-alt: #f8fbfd;
+            --slide-width: 1280px;
+            --slide-height: 720px;
+            --transition-base: 220ms ease;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0; padding: 0;
+            background: var(--color-bg);
+            color: var(--color-ink);
+            font-family: var(--font-family-base);
+            line-height: var(--line-height-base);
+        }
+
+        body { padding: var(--space-6); }
+
+        .presentation {
+            display: grid;
+            gap: var(--space-6);
+            justify-content: center;
+        }
+
+        .slide {
+            position: relative;
+            width: min(100%, var(--slide-width));
+            min-height: var(--slide-height);
+            margin: 0 auto;
+            padding: var(--space-7);
+            background: var(--color-surface);
+            border: var(--border-thin);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: var(--space-5);
+            transition: transform var(--transition-base), box-shadow var(--transition-base);
+        }
+
+        .slide:hover {
+            transform: translateY(-0.2rem);
+            box-shadow: 0 1.2rem 2.4rem rgba(20, 35, 52, 0.14);
+        }
+
+        .slide::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 0.4rem;
+            background: var(--color-primary);
+        }
+
+        .slide__header, .slide__footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-4);
+            color: var(--color-ink-muted);
+            font-size: var(--font-size-xs);
+        }
+
+        .slide__header {
+            padding-bottom: var(--space-3);
+            border-bottom: var(--border-thin);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .slide__footer {
+            padding-top: var(--space-3);
+            border-top: var(--border-thin);
+        }
+
+        .slide__content {
+            display: grid;
+            gap: var(--space-5);
+            align-content: start;
+        }
+
+        .project-name {
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+
+        h1, h2, h3, h4, p, ul, ol, blockquote { margin: 0; }
+
+        h1 { font-size: var(--font-size-3xl); line-height: var(--line-height-tight); }
+        h2 { font-size: var(--font-size-2xl); line-height: var(--line-height-tight); }
+        h3 { font-size: var(--font-size-xl); line-height: 1.2; }
+        h4 { font-size: var(--font-size-lg); line-height: 1.25; }
+        p, li, td, th { font-size: var(--font-size-md); }
+
+        .eyebrow {
+            color: var(--color-primary);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-bold);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .lead {
+            max-width: 52rem;
+            font-size: var(--font-size-lg);
+            color: var(--color-ink-muted);
+        }
+
+        .muted { color: var(--color-ink-muted); }
+        .accent { color: var(--color-primary); }
+
+        .divider {
+            width: 6rem;
+            height: 0.28rem;
+            background: var(--color-primary);
+            border-radius: 999px;
+        }
+
+        .layout-cover .slide__content {
+            align-content: center;
+            gap: var(--space-6);
+        }
+
+        .cover-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-3);
+        }
+
+        .content-list, .check-list {
+            display: grid;
+            gap: var(--space-3);
+            padding-left: 1.25rem;
+        }
+
+        .content-list li::marker, .check-list li::marker {
+            color: var(--color-primary);
+        }
+
+        .layout-content .slide__content,
+        .layout-table .slide__content,
+        .layout-metrics .slide__content,
+        .layout-closing .slide__content { grid-template-columns: 1fr; }
+
+        .layout-two-columns .slide__content {
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: var(--space-6);
+        }
+
+        .column, .card, .highlight, .risk-block, .metric, .table-wrapper {
+            background: var(--color-surface-alt);
+            border: var(--border-thin);
+            border-radius: var(--radius-md);
+            padding: var(--space-5);
+        }
+
+        .card { box-shadow: var(--shadow-sm); }
+
+        .cards-grid, .metrics-grid {
+            display: grid;
+            gap: var(--space-4);
+        }
+
+        .cards-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .metrics-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+        .metric {
+            display: grid;
+            gap: var(--space-2);
+            align-content: start;
+            min-height: 11rem;
+        }
+
+        .metric__value {
+            font-size: 3.2rem;
+            line-height: 1;
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+
+        .metric__label {
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-ink-muted);
+        }
+
+        .metric__detail { font-size: var(--font-size-sm); }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--badge-padding);
+            border-radius: var(--badge-radius);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-bold);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .badge--primary { background: var(--color-primary-soft); color: var(--color-primary); border-color: rgba(15, 76, 129, 0.18); }
+        .badge--success { background: var(--color-success-soft); color: var(--color-success); border-color: rgba(37, 109, 63, 0.18); }
+        .badge--warning { background: var(--color-warning-soft); color: var(--color-warning); border-color: rgba(138, 103, 0, 0.18); }
+        .badge--danger  { background: var(--color-danger-soft);  color: var(--color-danger);  border-color: rgba(166, 58, 58, 0.18); }
+        .badge--info    { background: var(--color-info-soft);    color: var(--color-info);    border-color: rgba(13, 94, 122, 0.18); }
+        .badge--neutral { background: #edf2f7; color: #425466; border-color: rgba(66, 84, 102, 0.16); }
+
+        .highlight {
+            border-left: 0.35rem solid var(--color-accent);
+            background: #fcf8f0;
+        }
+
+        .risk-block {
+            border-left: 0.35rem solid var(--color-danger);
+            background: #fcf4f4;
+        }
+
+        .risk-block__title, .highlight__title, .card__title {
+            margin-bottom: var(--space-2);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .table-wrapper { overflow: hidden; padding: 0; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--color-surface);
+        }
+
+        thead { background: var(--table-header-bg); }
+
+        th, td {
+            padding: 1rem 1.1rem;
+            text-align: left;
+            vertical-align: top;
+            border-bottom: var(--border-thin);
+        }
+
+        tbody tr:nth-child(even) { background: var(--table-row-alt); }
+        tbody tr:last-child td { border-bottom: 0; }
+
+        .callout-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-3);
+            align-items: center;
+        }
+
+        .kicker-box {
+            display: inline-block;
+            padding: var(--space-3) var(--space-4);
+            background: var(--color-primary-soft);
+            color: var(--color-primary);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .closing-panel {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: var(--space-6);
+            align-items: end;
+        }
+
+        .quote {
+            padding: var(--space-5);
+            border-left: 0.35rem solid var(--color-primary);
+            background: var(--color-primary-soft);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            font-size: var(--font-size-lg);
+        }
+
+        .page-number { font-variant-numeric: tabular-nums; }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-4);
+        }
+
+        .team-card {
+            background: var(--color-surface-alt);
+            border: var(--border-thin);
+            border-radius: var(--radius-md);
+            padding: var(--space-5);
+            display: grid;
+            gap: var(--space-2);
+            align-content: start;
+        }
+
+        .team-card__role {
+            font-size: var(--font-size-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-ink-muted);
+        }
+
+        .team-card__name {
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+
+        .phase-timeline {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: var(--space-2);
+        }
+
+        .phase-dot {
+            display: grid;
+            gap: var(--space-2);
+            align-content: start;
+            justify-items: center;
+            text-align: center;
+        }
+
+        .phase-dot__circle {
+            width: 2.8rem;
+            height: 2.8rem;
+            border-radius: 50%;
+            background: var(--color-success-soft);
+            border: 3px solid var(--color-success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-xs);
+            color: var(--color-success);
+        }
+
+        .phase-dot__circle--pending {
+            background: #f3f6fa;
+            border-color: var(--color-line);
+            color: var(--color-ink-muted);
+        }
+
+        .phase-dot__label {
+            font-size: var(--font-size-xxs);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--color-ink-muted);
+        }
+
+        .phase-dot__status {
+            font-size: var(--font-size-xxs);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-success);
+        }
+
+        .tech-stack-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-4);
+        }
+
+        .tech-card {
+            background: var(--color-surface-alt);
+            border: var(--border-thin);
+            border-radius: var(--radius-md);
+            padding: var(--space-4);
+            display: grid;
+            gap: var(--space-2);
+            align-content: start;
+        }
+
+        .tech-card__name {
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+        }
+
+        .tech-card__version {
+            font-size: var(--font-size-xs);
+            color: var(--color-ink-muted);
+            font-family: var(--font-family-mono);
+        }
+
+        .tech-card__status {
+            font-size: var(--font-size-xs);
+        }
+
+        .lessons-list {
+            display: grid;
+            gap: var(--space-3);
+        }
+
+        .lesson-item {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: var(--space-3);
+            align-items: start;
+            padding: var(--space-3);
+            background: var(--color-surface-alt);
+            border-radius: var(--radius-sm);
+            border: var(--border-thin);
+        }
+
+        .lesson-item__num {
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-lg);
+            color: var(--color-primary);
+            min-width: 2rem;
+            text-align: center;
+        }
+
+        .lesson-item__text {
+            font-size: var(--font-size-sm);
+        }
+
+        @media (max-width: 1360px) {
+            body { padding: var(--space-4); }
+            .slide { min-height: auto; }
+            .layout-two-columns .slide__content,
+            .closing-panel,
+            .cards-grid,
+            .metrics-grid,
+            .team-grid,
+            .tech-stack-grid { grid-template-columns: 1fr 1fr; }
+            .phase-timeline { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 900px) {
+            .slide { padding: var(--space-5); border-radius: var(--radius-md); }
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 2.2rem; }
+            h3 { font-size: 1.6rem; }
+            .layout-two-columns .slide__content,
+            .closing-panel,
+            .cards-grid,
+            .metrics-grid,
+            .team-grid,
+            .tech-stack-grid { grid-template-columns: 1fr; }
+            .phase-timeline { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media print {
+            @page { size: 16:9 landscape; margin: 0.6cm; }
+            html, body { background: #ffffff; }
+            body { padding: 0; }
+            .presentation { gap: 0; }
+            .slide {
+                width: 100%;
+                min-height: 0;
+                height: 100%;
+                page-break-after: always;
+                border-radius: 0;
+                box-shadow: none;
+                border: 1px solid #cfd8e3;
+                margin: 0;
+                break-after: page;
+            }
+            .slide:hover { transform: none; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <main class="presentation">
+
+        <!-- SLIDE 1: PORTADA -->
+        <section class="slide layout-cover" aria-label="Slide de portada">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 9 · Cierre</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Abax-Memory v1.0.0</div>
+                <h1>Presentaci&oacute;n de Cierre del Proyecto</h1>
+                <div class="divider"></div>
+                <p class="lead">Proyecto completado exitosamente en 9 fases con metodolog&iacute;a cascada. Sistema operativo con IA real, 0 defectos cr&iacute;ticos, 100% de cobertura funcional verificada.</p>
+                <div class="cover-meta">
+                    <span class="badge badge--success">8 fases completadas</span>
+                    <span class="badge badge--primary">v1.0.0 Release</span>
+                    <span class="badge badge--info">IA OpenAI integrada</span>
+                    <span class="badge badge--success">Cierre formal</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>PMOA · Fase 9 — Cierre · 2026-05-02</span>
+                <span class="page-number">01</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 2: OBJETIVO Y ALCANCE ALCANZADO -->
+        <section class="slide layout-content" aria-label="Objetivo y alcance alcanzado">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 9 · Cierre · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Objetivo del proyecto</div>
+                <h2>Objetivo y alcance alcanzado</h2>
+                <p class="lead">Construir una plataforma de memoria operativa para agentes con trazabilidad, gobierno por criticidad, b&uacute;squeda sem&aacute;ntica y API REST documentada.</p>
+                <div class="highlight">
+                    <div class="highlight__title">Alcance R1-MVP entregado — 8 m&oacute;dulos completos</div>
+                    <p>M1. Gesti&oacute;n de memorias (12 CA) &bull; M2. API operativa (9 CA) &bull; M3. B&uacute;squeda y recuperaci&oacute;n (9 CA) &bull; M4. Persistencia y metadatos (6 CA) &bull; M5. Gobierno de memoria (12 CA) &bull; M6. Depuraci&oacute;n y mantenimiento (3 CA) &bull; M7. Acceso y visibilidad (5 CA) &bull; M8. Contrato API (5 CA)</p>
+                </div>
+                <ul class="content-list">
+                    <li><strong>61 criterios de aceptaci&oacute;n R1-MVP aprobados</strong> — 100% de cobertura funcional.</li>
+                    <li><strong>Sistema operativo con IA real</strong> — OpenAI text-embedding-3-large + gpt-4o-mini integrados, Qdrant con embeddings funcionales.</li>
+                    <li><strong>23 memorias en sistema</strong> — 16 aprobadas, 2 en revisi&oacute;n, 2 rechazadas, 2 observadas, 1 archivada.</li>
+                    <li><strong>Release p&uacute;blico v1.0.0</strong> — GitHub Release + imagen GHCR accesible.</li>
+                </ul>
+            </div>
+            <footer class="slide__footer">
+                <span>Objetivo y alcance</span>
+                <span class="page-number">02</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 3: LINEA DE TIEMPO F0-F8 CON ESTADOS -->
+        <section class="slide layout-table" aria-label="Linea de tiempo de fases">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 9 · Cierre · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Ciclo de vida completo</div>
+                <h2>L&iacute;nea de tiempo F0–F9</h2>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fase</th>
+                                <th>Nombre</th>
+                                <th>Entregables</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Decisi&oacute;n</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>F0</td>
+                                <td>Descubrimiento</td>
+                                <td>6/6</td>
+                                <td>2026-05-01</td>
+                                <td><span class="badge badge--success">Completada</span></td>
+                                <td>Documentada</td>
+                            </tr>
+                            <tr>
+                                <td>F1</td>
+                                <td>Inicio</td>
+                                <td>5/5</td>
+                                <td>2026-05-01</td>
+                                <td><span class="badge badge--success">Completada</span></td>
+                                <td>Documentada</td>
+                            </tr>
+                            <tr>
+                                <td>F2</td>
+                                <td>An&aacute;lisis Funcional</td>
+                                <td>5/5</td>
+                                <td>2026-05-01</td>
+                                <td><span class="badge badge--success">Completada</span></td>
+                                <td>Documentada</td>
+                            </tr>
+                            <tr>
+                                <td>F3</td>
+                                <td>Dise&ntilde;o T&eacute;cnico</td>
+                                <td>3/3</td>
+                                <td>2026-05-01</td>
+                                <td><span class="badge badge--success">Completada</span></td>
+                                <td>Documentada</td>
+                            </tr>
+                            <tr>
+                                <td>F4</td>
+                                <td>Construcci&oacute;n</td>
+                                <td>6/6</td>
+                                <td>2026-05-01</td>
+                                <td><span class="badge badge--success">Aprobada</span></td>
+                                <td>10 defectos corregidos</td>
+                            </tr>
+                            <tr>
+                                <td>F5</td>
+                                <td>Pruebas QA</td>
+                                <td>5/5</td>
+                                <td>2026-05-02</td>
+                                <td><span class="badge badge--success">Aprobada</span></td>
+                                <td>49/49 casos, 3 defectos cerrados</td>
+                            </tr>
+                            <tr>
+                                <td>F6</td>
+                                <td>Pruebas UAT</td>
+                                <td>4/4</td>
+                                <td>2026-05-02</td>
+                                <td><span class="badge badge--success">Aceptada</span></td>
+                                <td>61/61 CA, 100%</td>
+                            </tr>
+                            <tr>
+                                <td>F7</td>
+                                <td>Despliegue</td>
+                                <td>5/5</td>
+                                <td>2026-05-02</td>
+                                <td><span class="badge badge--success">Desplegada</span></td>
+                                <td>IA real operativa</td>
+                            </tr>
+                            <tr>
+                                <td>F8</td>
+                                <td>Estabilizaci&oacute;n</td>
+                                <td>1/1</td>
+                                <td>2026-05-02</td>
+                                <td><span class="badge badge--success">Aprobada</span></td>
+                                <td>26/26 PASS, 0 cr&iacute;ticos</td>
+                            </tr>
+                            <tr>
+                                <td><strong>F9</strong></td>
+                                <td><strong>Cierre</strong></td>
+                                <td><strong>En curso</strong></td>
+                                <td><strong>2026-05-02</strong></td>
+                                <td><span class="badge badge--primary">Activa</span></td>
+                                <td><strong>Cierre formal</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>L&iacute;nea de tiempo · F0–F9</span>
+                <span class="page-number">03</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 4: METRICAS CLAVE -->
+        <section class="slide layout-metrics" aria-label="Metricas clave del proyecto">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 9 · Cierre · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Resultados cuantificados</div>
+                <h2>M&eacute;tricas clave del proyecto</h2>
+                <div class="metrics-grid">
+                    <article class="metric">
+                        <div class="metric__label">Criterios Aceptaci&oacute;n UAT</div>
+                        <div class="metric__value">61/61</div>
+                        <div class="metric__detail">100% aprobados. 8 m&oacute;dulos R1-MVP cobertura completa.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Casos de Prueba QA</div>
+                        <div class="metric__value">49/49</div>
+                        <div class="metric__detail">100% aprobados. 5 iteraciones correctivas. 0 fallidos.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Escenarios Estabilizaci&oacute;n</div>
+                        <div class="metric__value">26/26</div>
+                        <div class="metric__detail">100% PASS. 8 bloques funcionales. 0 fallidos, 0 bloqueados.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Tests Automatizados</div>
+                        <div class="metric__value">54</div>
+                        <div class="metric__detail">BUILD SUCCESS. 0 failures, 0 errors, 0 skipped.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Defectos Cr&iacute;ticos</div>
+                        <div class="metric__value">0</div>
+                        <div class="metric__detail">3 defectos QA cerrados. 1 baja severidad documentado (DEF-STAB-001).</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Fases Completadas</div>
+                        <div class="metric__value">8/9</div>
+                        <div class="metric__detail">F0-F8 completadas. F9 cierre en curso. 100% entregables documentales.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Duraci&oacute;n Total</div>
+                        <div class="metric__value">2 d&iacute;as</div>
+                        <div class="metric__detail">2026-05-01 a 2026-05-02. Sin desviaciones de cronograma.</div>
+                    </article>
+                    <article class="metric">
+                        <div class="metric__label">Memorias en Sistema</div>
+                        <div class="metric__value">23</div>
+                        <div class="metric__detail">16 aprobadas, 2 en revisi&oacute;n, 2 rechazadas, 2 observadas, 1 archivada.</div>
+                    </article>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>M&eacute;tricas clave</span>
+                <span class="page-number">04</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 5: STACK TECNOLOGICO DESPLEGADO -->
+        <section class="slide layout-content" aria-label="Stack tecnologico desplegado">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 9 · Cierre · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Infraestructura y tecnolog&iacute;a</div>
+                <h2>Stack tecnol&oacute;gico desplegado</h2>
+                <div class="tech-stack-grid">
+                    <article class="tech-card">
+                        <div class="tech-card__name">Backend Quarkus</div>
+                        <div class="tech-card__version">v3.15.3 · 1.0.0-SNAPSHOT</div>
+                        <div class="tech-card__status"><span class="badge badge--success">UP :8080</span></div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">API REST, systemd, health checks UP.</p>
+                    </article>
+                    <article class="tech-card">
+                        <div class="tech-card__name">PostgreSQL</div>
+                        <div class="tech-card__version">v16.13 (Alpine)</div>
+                        <div class="tech-card__status"><span class="badge badge--success">UP :5432</span></div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">Base pmoadb, Flyway v1 aplicada.</p>
+                    </article>
+                    <article class="tech-card">
+                        <div class="tech-card__name">Qdrant</div>
+                        <div class="tech-card__version">v1.17.1</div>
+                        <div class="tech-card__status"><span class="badge badge--success">UP :6333</span></div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">Colecci&oacute;n de embeddings, b&uacute;squeda sem&aacute;ntica funcional.</p>
+                    </article>
+                    <article class="tech-card">
+                        <div class="tech-card__name">Keycloak</div>
+                        <div class="tech-card__version">v26.6.1</div>
+                        <div class="tech-card__status"><span class="badge badge--success">UP :8443</span></div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">Realm abax-memory, RBAC con 5 roles.</p>
+                    </article>
+                    <article class="tech-card">
+                        <div class="tech-card__name">OpenAI Embeddings</div>
+                        <div class="tech-card__version">text-embedding-3-large</div>
+                        <div class="tech-card__status"><span class="badge badge--success">Integrado</span></div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">3072 dimensiones, Qdrant poblado.</p>
+                    </article>
+                    <article class="tech-card">
+                        <div class="tech-card__name">OpenAI Extracci&oacute;n</div>
+                        <div class="tech-card__version">gpt-4o-mini</div>
+                        <div class="tech-card__status"><span class="badge badge--success">Integrado</span></div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">Structured outputs, validaci&oacute;n sem&aacute;ntica.</p>
+                    </article>
+                    <article class="tech-card">
+                        <div class="tech-card__name">Flyway</div>
+                        <div class="tech-card__version">v1 baseline</div>
+                        <div class="tech-card__status"><span class="badge badge--success">Aplicada</span></div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">Schema operativo, migraci&oacute;n versionada.</p>
+                    </article>
+                    <article class="tech-card">
+                        <div class="tech-card__name">Docker + GHCR</div>
+                        <div class="tech-card__version">ghcr.io/breisnerlopez</div>
+                        <div class="tech-card__status"><span class="badge badge--info">Publicado</span></div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">Imagen abax-memory:latest disponible.</p>
+                    </article>
+                </div>
+                <div class="callout-row">
+                    <span class="kicker-box">Seguridad: API key OpenAI via variable de entorno, nunca hardcodeada</span>
+                    <span class="kicker-box">RBAC: 5 roles (operator, reviewer, adminuser, auditor, api-consumer)</span>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Stack tecnol&oacute;gico</span>
+                <span class="page-number">05</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 6: LO ENTREGADO -->
+        <section class="slide layout-two-columns" aria-label="Lo entregado en Fase 7">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 9 · Cierre · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="column">
+                    <div class="eyebrow">Entregables del proyecto</div>
+                    <h2>Lo entregado</h2>
+                    <ul class="content-list">
+                        <li><strong>API REST documentada</strong> — 13 endpoints con OpenAPI 3.0.3 en <code>/q/openapi</code>.</li>
+                        <li><strong>Gesti&oacute;n de memorias</strong> — CRUD completo multi-tipo (procedimiento, incidente, gu&iacute;a, runbook, pol&iacute;tica).</li>
+                        <li><strong>B&uacute;squeda sem&aacute;ntica</strong> — Qdrant con embeddings OpenAI, filtros combinados.</li>
+                        <li><strong>Gobierno por criticidad</strong> — Flujos de aprobaci&oacute;n, auto-aprobaci&oacute;n, RBAC.</li>
+                        <li><strong>IA integrada</strong> — OpenAI text-embedding-3-large + gpt-4o-mini.</li>
+                        <li><strong>GitHub Release v1.0.0</strong> — Tag p&uacute;blico accesible.</li>
+                        <li><strong>Imagen GHCR</strong> — <code>ghcr.io/breisnerlopez/abax-memory:latest</code></li>
+                    </ul>
+                </div>
+                <aside class="column">
+                    <div class="card">
+                        <div class="card__title">Endpoints principales</div>
+                        <table style="font-size:var(--font-size-xs);">
+                            <thead><tr><th>Verbo</th><th>Ruta</th></tr></thead>
+                            <tbody>
+                                <tr><td>POST</td><td>/api/casos</td></tr>
+                                <tr><td>GET</td><td>/api/casos</td></tr>
+                                <tr><td>POST</td><td>/api/casos/{id}/memorias</td></tr>
+                                <tr><td>GET</td><td>/api/memorias</td></tr>
+                                <tr><td>PATCH</td><td>/api/memorias/{id}</td></tr>
+                                <tr><td>POST</td><td>/api/memorias/{id}/aprobar</td></tr>
+                                <tr><td>POST</td><td>/api/memorias/{id}/rechazar</td></tr>
+                                <tr><td>GET</td><td>/api/memorias/buscar</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="highlight" style="margin-top:1rem;">
+                        <div class="highlight__title">Release &amp; Registry</div>
+                        <p style="font-size:var(--font-size-xs); word-break:break-all;">https://github.com/breisnerlopez/abax-memory/releases/tag/v1.0.0</p>
+                        <p style="font-size:var(--font-size-xs); font-family:var(--font-family-mono);">ghcr.io/breisnerlopez/abax-memory:latest</p>
+                    </div>
+                </aside>
+            </div>
+            <footer class="slide__footer">
+                <span>Entregables</span>
+                <span class="page-number">06</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 7: PENDIENTES ACEPTADOS -->
+        <section class="slide layout-content" aria-label="Pendientes aceptados">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 9 · Cierre · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Decisiones de cierre</div>
+                <h2>Pendientes aceptados</h2>
+                <p class="lead">Los siguientes pendientes han sido identificados, evaluados y aceptados formalmente. No bloquean la operaci&oacute;n del sistema en su estado actual.</p>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Pendiente</th>
+                                <th>Impacto</th>
+                                <th>Decisi&oacute;n</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PEND-01</td>
+                                <td><strong>InMemoryGitProvider</strong> — Repositorio Git real para versionado de memorias.</td>
+                                <td><span class="badge badge--warning">Medio</span></td>
+                                <td>Pospuesto por decisi&oacute;n del usuario. Adaptador en memoria funcional. No bloqueante.</td>
+                            </tr>
+                            <tr>
+                                <td>PEND-02</td>
+                                <td><strong>Realm OIDC Keycloak</strong> — Configuraci&oacute;n completa del realm abax-memory para autenticaci&oacute;n JWT.</td>
+                                <td><span class="badge badge--neutral">Bajo</span></td>
+                                <td>Pendiente menor. OIDC deshabilitado en backend. Endpoints protegidos retornan 401.</td>
+                            </tr>
+                            <tr>
+                                <td>PEND-03</td>
+                                <td><strong>Rotaci&oacute;n de API key OpenAI</strong> — Programada post-cierre.</td>
+                                <td><span class="badge badge--warning">Medio</span></td>
+                                <td>Coordinada con administrador de secretos. API key gestionada via variable de entorno.</td>
+                            </tr>
+                            <tr>
+                                <td>PEND-04</td>
+                                <td><strong>Degradaci&oacute;n graceful ante indisponibilidad OpenAI</strong>.</td>
+                                <td><span class="badge badge--warning">Medio</span></td>
+                                <td>Monitoreo recomendado. Timeouts configurados. Pendiente para evoluci&oacute;n futura.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="highlight">
+                    <div class="highlight__title">Nota</div>
+                    <p>Todos los pendientes han sido documentados en el registro de entregables y en la bit&aacute;cora del proyecto. Se recomienda incluirlos en el backlog R2 para seguimiento post-cierre.</p>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Pendientes aceptados</span>
+                <span class="page-number">07</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 8: LECCIONES APRENDIDAS -->
+        <section class="slide layout-content" aria-label="Lecciones aprendidas">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 9 · Cierre · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Mejora continua</div>
+                <h2>Lecciones aprendidas clave</h2>
+                <div class="lessons-list">
+                    <div class="lesson-item">
+                        <div class="lesson-item__num">1</div>
+                        <div class="lesson-item__text"><strong>Integraci&oacute;n temprana de IA real.</strong> Pospusimos la integraci&oacute;n OpenAI hasta Fase 5, lo que gener&oacute; 3 defectos reales (compatibilidad Qdrant v1.17.1, payload, status codes). Se resolvieron en 5 iteraciones, pero la integraci&oacute;n desde Fase 4 habr&iacute;a reducido el ciclo correctivo.</div>
+                    </div>
+                    <div class="lesson-item">
+                        <div class="lesson-item__num">2</div>
+                        <div class="lesson-item__text"><strong>Bater&iacute;a burn-in de 26 escenarios.</strong> La estabilizaci&oacute;n sistem&aacute;tica con 8 bloques funcionales en entorno real (Fase 8) confirm&oacute; la inexistencia de defectos cr&iacute;ticos y dio confianza para el cierre. Es una pr&aacute;ctica que debe replicarse en futuros proyectos.</div>
+                    </div>
+                    <div class="lesson-item">
+                        <div class="lesson-item__num">3</div>
+                        <div class="lesson-item__text"><strong>Gesti&oacute;n de secretos desde el dise&ntilde;o.</strong> La API key de OpenAI se configur&oacute; desde el inicio via variable de entorno, sin hardcodeo. Esto evit&oacute; incidentes de seguridad y facilit&oacute; la publicaci&oacute;n del c&oacute;digo en GitHub.</div>
+                    </div>
+                    <div class="lesson-item">
+                        <div class="lesson-item__num">4</div>
+                        <div class="lesson-item__text"><strong>QA con datos reales, no simulados.</strong> Los 49 casos de prueba QA se ejecutaron contra el sistema real (OpenAI, Qdrant, PostgreSQL, Keycloak). Esto detect&oacute; 3 defectos que no habr&iacute;an aparecido con mocks, y garantiz&oacute; que la UAT fuera un paseo.</div>
+                    </div>
+                    <div class="lesson-item">
+                        <div class="lesson-item__num">5</div>
+                        <div class="lesson-item__text"><strong>Trazabilidad completa CA → QA → UAT → Estabilizaci&oacute;n.</strong> Mantener la cadena de verificaci&oacute;n desde criterios de aceptaci&oacute;n hasta la bater&iacute;a burn-in permiti&oacute; decisiones de gate basadas en evidencia, no en opiniones. Cero sorpresas en fases tard&iacute;as.</div>
+                    </div>
+                    <div class="lesson-item">
+                        <div class="lesson-item__num">6</div>
+                        <div class="lesson-item__text"><strong>Documentaci&oacute;n ejecutiva consistente.</strong> El design system de presentaciones unificado garantiz&oacute; comunicaci&oacute;n clara y profesional a stakeholders en cada fase. Ahorr&oacute; tiempo y evit&oacute; inconsistencias visuales.</div>
+                    </div>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Lecciones aprendidas</span>
+                <span class="page-number">08</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 9: AGRADECIMIENTOS AL EQUIPO -->
+        <section class="slide layout-content" aria-label="Agradecimientos al equipo">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 9 · Cierre · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Reconocimiento</div>
+                <h2>Agradecimientos al equipo</h2>
+                <p class="lead">Este proyecto fue posible gracias al compromiso, la excelencia t&eacute;cnica y la colaboraci&oacute;n multidisciplinaria de cada integrante del equipo.</p>
+                <div class="team-grid">
+                    <article class="team-card">
+                        <div class="team-card__role">Product Owner</div>
+                        <div class="team-card__name">breisnerlopez</div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">Visi&oacute;n del producto, priorizaci&oacute;n del backlog, aceptaci&oacute;n formal UAT.</p>
+                    </article>
+                    <article class="team-card">
+                        <div class="team-card__role">Business Analyst</div>
+                        <div class="team-card__name">business-analyst</div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">Requerimientos funcionales, criterios de aceptaci&oacute;n, plan UAT.</p>
+                    </article>
+                    <article class="team-card">
+                        <div class="team-card__role">Tech Lead</div>
+                        <div class="team-card__name">tech-lead</div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">Arquitectura, integraci&oacute;n OpenAI, backend Quarkus, correcci&oacute;n de defectos.</p>
+                    </article>
+                    <article class="team-card">
+                        <div class="team-card__role">QA Funcional</div>
+                        <div class="team-card__name">qa-functional</div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">49 casos de prueba, 5 iteraciones correctivas, bater&iacute;a burn-in 26 escenarios.</p>
+                    </article>
+                    <article class="team-card">
+                        <div class="team-card__role">DevOps</div>
+                        <div class="team-card__name">devops</div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">Plan de despliegue, rollback, ejecuci&oacute;n, GHCR, Dockerfile.</p>
+                    </article>
+                    <article class="team-card">
+                        <div class="team-card__role">Project Manager</div>
+                        <div class="team-card__name">project-manager</div>
+                        <p class="muted" style="font-size:var(--font-size-xs);">Gesti&oacute;n de fases, riesgos, comunicaci&oacute;n, cierre formal.</p>
+                    </article>
+                </div>
+                <div class="quote">
+                    &ldquo;Un proyecto donde cada fase cerr&oacute; en verde, cada defecto se resolvi&oacute;, y cada m&eacute;trica super&oacute; el 100%. Gracias a cada uno por hacerlo posible.&rdquo;
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>Agradecimientos al equipo</span>
+                <span class="page-number">09</span>
+            </footer>
+        </section>
+
+        <!-- SLIDE 10: CIERRE FORMAL -->
+        <section class="slide layout-closing" aria-label="Cierre formal del proyecto">
+            <header class="slide__header">
+                <span class="project-name">PMOA — Plataforma de Memoria Operativa para Agentes</span>
+                <span>Fase 9 · Cierre · 2026-05-02</span>
+            </header>
+            <div class="slide__content">
+                <div class="eyebrow">Cierre formal</div>
+                <div class="closing-panel">
+                    <div>
+                        <h2>Proyecto Abax-Memory / PMOA — Cerrado</h2>
+                        <p class="lead">El proyecto ha completado exitosamente las 9 fases del ciclo de vida cascada. El sistema est&aacute; operativo, verificado y listo para uso con usuarios reales.</p>
+                        <div class="callout-row" style="margin-top:1.5rem;">
+                            <span class="badge badge--success">8 fases completadas</span>
+                            <span class="badge badge--primary">v1.0.0 Release</span>
+                            <span class="badge badge--success">0 defectos cr&iacute;ticos</span>
+                        </div>
+                        <div style="margin-top:var(--space-4);">
+                            <h4>Resumen final</h4>
+                            <ul class="check-list">
+                                <li><strong>61/61</strong> criterios de aceptaci&oacute;n UAT aprobados (100%).</li>
+                                <li><strong>49/49</strong> casos QA aprobados (100%).</li>
+                                <li><strong>26/26</strong> escenarios de estabilizaci&oacute;n aprobados (100%).</li>
+                                <li><strong>54</strong> tests automatizados — BUILD SUCCESS.</li>
+                                <li><strong>0</strong> defectos cr&iacute;ticos abiertos.</li>
+                                <li><strong>Stack operativo</strong>: Quarkus + PostgreSQL + Qdrant + Keycloak + OpenAI.</li>
+                                <li><strong>Release p&uacute;blico</strong>: GitHub v1.0.0 + GHCR.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="quote">
+                            <strong>Fecha de cierre:</strong> 2026-05-02<br><br>
+                            <strong>Estado:</strong> Cerrado exitosamente<br><br>
+                            <strong>Firmante:</strong> Project Manager<br><br>
+                            <strong>Pr&oacute;ximo paso:</strong> Transferencia a operaciones, rotaci&oacute;n de API key, backlog R2 para evoluci&oacute;n futura.
+                        </div>
+                        <div class="callout-row" style="margin-top:1.5rem;">
+                            <span class="kicker-box">Proyecto finalizado</span>
+                            <span class="kicker-box">Lecciones documentadas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="slide__footer">
+                <span>PMOA · Cierre formal · v1.0.0</span>
+                <span class="page-number">10</span>
+            </footer>
+        </section>
+
+    </main>
+</body>
+</html>
