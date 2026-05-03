@@ -13,19 +13,21 @@ LABEL org.opencontainers.image.source="https://github.com/breisnerlopez/abax-mem
 
 WORKDIR /app
 
-# Copy the Quarkus runner JAR
-COPY backend-quarkus/target/abax-memory-backend-1.0.0-SNAPSHOT-runner.jar app.jar
+# Copy the Quarkus application (fast-jar layout)
+COPY backend-quarkus/target/quarkus-app/lib/ /app/lib/
+COPY backend-quarkus/target/quarkus-app/*.jar /app/
+COPY backend-quarkus/target/quarkus-app/app/ /app/app/
+COPY backend-quarkus/target/quarkus-app/quarkus/ /app/quarkus/
 
 # Expose backend port
 EXPOSE 8080
 
 # Healthcheck via Quarkus liveness probe
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 --start-period=15s \
-  CMD java -cp app.jar -Dquarkus.http.port=8080 -Dquarkus.launch.rebuild=false >/dev/null 2>&1 || \
-  wget --no-verbose --tries=1 --spider http://localhost:8080/q/health/live 2>/dev/null || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/q/health/live 2>/dev/null || exit 1
 
 # OpenAI API Key — MUST be provided at runtime, NEVER hardcoded
 ENV OPENAI_API_KEY=""
 
 # Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "quarkus-run.jar"]
