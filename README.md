@@ -5,13 +5,57 @@
 [![Java](https://img.shields.io/badge/java-21-orange)](https://adoptium.net/)
 [![Quarkus](https://img.shields.io/badge/quarkus-3.15.3-purple)](https://quarkus.io/)
 [![License](https://img.shields.io/badge/license-Proprietary-red)](#licencia)
-[![Tests](https://img.shields.io/badge/tests-54%20passed%20%7C%200%20failures-brightgreen)](#calidad)
-[![UAT](https://img.shields.io/badge/UAT-61%2F61%20CA%20approved-brightgreen)](#calidad)
-[![QA](https://img.shields.io/badge/QA-49%2F49%20passed-brightgreen)](#calidad)
+[![Tests](https://img.shields.io/badge/tests-54%20passed%20%7C%200%20failures-brightgreen)](#metricas-del-proyecto)
+[![UAT](https://img.shields.io/badge/UAT-61%2F61%20CA%20approved-brightgreen)](#metricas-del-proyecto)
+[![QA](https://img.shields.io/badge/QA-49%2F49%20passed-brightgreen)](#metricas-del-proyecto)
 
-**Plataforma backend API-first de memoria operativa para agentes con IA**, construida bajo metodologia corporativa en cascada con verificacion formal de calidad. Proporciona gestion de casos, memorias operativas enriquecidas con embeddings semanticos, flujos de aprobacion con reglas de negocio, busqueda vectorial y gobierno de acceso basado en roles (RBAC).
+**Plataforma backend API-first de memoria operativa para agentes con IA**, construida bajo metodologia corporativa en cascada con verificacion formal de calidad. Gestion de casos, memorias operativas enriquecidas con embeddings semanticos, flujos de aprobacion con reglas de negocio, busqueda vectorial y gobierno de acceso basado en roles (RBAC).
 
 > **PMOA** — Plataforma de Memoria Operativa con Agentes · v1.0.0 MVP
+
+---
+
+## ¿Que es PMOA / Abax-Memory?
+
+Abax-Memory es el motor de persistencia inteligente de la plataforma PMOA. Proporciona a los agentes de IA una **memoria operativa estructurada y consultable semanticamente** — es decir, los agentes no solo guardan informacion, sino que pueden recuperarla por significado, no por palabras clave.
+
+**Tres capacidades principales**: gestion de casos operativos (CRUD completo con validacion semantica), busqueda vectorial sobre memorias (Qdrant + OpenAI embeddings de 3072 dimensiones), y gobierno de acceso con RBAC via Keycloak OIDC. Todo expuesto como API REST documentada con OpenAPI 3.0.3.
+
+> **Documentacion completa del proyecto** en GitHub Pages: **[https://breisnerlopez.github.io/abax-memory/](https://breisnerlopez.github.io/abax-memory/)**
+
+---
+
+## Quick Start
+
+Con Docker instalado, en **3 pasos**:
+
+```bash
+# 1. Clonar
+git clone https://github.com/breisnerlopez/abax-memory.git && cd abax-memory
+
+# 2. Configurar tu API key de OpenAI (NUNCA hardcodear)
+export OPENAI_API_KEY="sk-..."
+
+# 3. Levantar el stack completo
+docker compose up -d
+```
+
+Verificar que todo esta funcionando:
+
+```bash
+curl http://localhost:8080/q/health          # Backend Quarkus
+curl http://localhost:6333/healthz            # Qdrant
+curl http://localhost:8443/realms/abax-memory # Keycloak
+```
+
+> **Swagger UI**: [http://localhost:8080/q/swagger-ui](http://localhost:8080/q/swagger-ui) · **OpenAPI spec**: [http://localhost:8080/q/openapi](http://localhost:8080/q/openapi)
+
+Para detener:
+
+```bash
+docker compose down           # preserva datos
+docker compose down -v        # elimina todo (⚠️)
+```
 
 ---
 
@@ -47,6 +91,44 @@ Flujo principal: **Cliente autenticado** → Keycloak (JWT) → API REST Quarkus
 
 ---
 
+## Documentacion del Proyecto
+
+El proyecto fue ejecutado bajo metodologia en cascada con 10 fases, cada una con entregables formales, aprobaciones y gates de calidad. La documentacion completa esta disponible en el repositorio y en GitHub Pages.
+
+| Fase | Estado | Gate | Entregables |
+|---|---|---|---|
+| F0 — Descubrimiento | 🟢 Completada | Documentada | Hallazgos, stakeholders, vision preliminar |
+| F1 — Inicio | 🟢 Completada | Documentada | Charter, kickoff, cronograma, alcance |
+| F2 — Analisis Funcional | 🟢 Completada | Documentada | Requerimientos, reglas de negocio, CAs |
+| F3 — Diseno Tecnico | 🟢 Completada | Documentada | Arquitectura, ADRs, modelo de datos |
+| F4 — Construccion | 🟢 Completada | Aprobada | Backend, API REST, integraciones |
+| F5 — Pruebas QA | 🟢 Completada | Aprobada (0 defectos) | 49/49 casos de prueba aprobados |
+| F6 — UAT | 🟢 Completada | Aceptada (61/61 CA) | Pruebas de aceptacion de usuario |
+| F7 — Despliegue | 🟢 Completada | Desplegada con IA real | Go-live, GHCR, verificacion |
+| F8 — Estabilizacion | 🟢 Completada | Aprobada (26/26 PASS) | Burn-in, monitoreo, soporte |
+| F9 — Cierre | 🟢 Completada | **Proyecto CERRADO** | Lecciones aprendidas, consistencia final |
+
+---
+
+## Presentaciones
+
+Las presentaciones ejecutivas y tecnicas del proyecto estan disponibles como documentos HTML autonomos — abren en cualquier navegador y se pueden imprimir como PDF.
+
+> **🔗 Indice completo en GitHub Pages:** [https://breisnerlopez.github.io/abax-memory/](https://breisnerlopez.github.io/abax-memory/)
+
+| # | Fase | Presentacion | Enlace |
+|---|---|---|---|
+| 1 | F0 · Descubrimiento | Hallazgos iniciales y vision preliminar | [Ver](docs/entregables/fase-0-descubrimiento/presentacion-descubrimiento.html) |
+| 2 | F1 · Inicio | Kickoff, equipo, cronograma y alcance | [Ver](docs/entregables/fase-1-inicio/presentacion-kickoff.html) |
+| 3 | F2 · Analisis | Propuesta funcional y criterios de aceptacion | [Ver](docs/entregables/fase-2-analisis/presentacion-propuesta-funcional.html) |
+| 4 | F3 · Diseno Tecnico | Arquitectura, ADRs y modelo de datos | [Ver](docs/entregables/fase-3-diseno-tecnico/presentacion-arquitectura.html) |
+| 5 | F4 · Construccion | Avance de implementacion y metricas de build | [Ver](docs/entregables/fase-4-construccion/presentacion-avance.html) |
+| 6 | F6 · UAT | Resultados de User Acceptance Testing | [Ver](docs/entregables/fase-6-uat/presentacion-resultados-uat.html) |
+| 7 | F7 · Despliegue | Plan de Go-Live y verificacion post-deploy | [Ver](docs/entregables/fase-7-despliegue/presentacion-go-live.html) |
+| 8 | F9 · Cierre | Resumen ejecutivo, logros y lecciones aprendidas | [Ver](docs/entregables/fase-9-cierre/presentacion-cierre.html) |
+
+---
+
 ## Stack Tecnologico
 
 | Componente | Tecnologia | Version | Proposito |
@@ -54,7 +136,7 @@ Flujo principal: **Cliente autenticado** → Keycloak (JWT) → API REST Quarkus
 | **Backend** | Quarkus (Java) | 3.15.3 | Framework REST reactivo, CDI, Hibernate ORM |
 | **Lenguaje** | Java | 21 (LTS) | JDK base |
 | **Base de Datos** | PostgreSQL (Alpine) | 16 | Persistencia operativa de casos y memorias |
-| **Migraciones** | Flyway | — | Baseline V1\_\_baseline\_operational\_store |
+| **Migraciones** | Flyway | — | Baseline `V1__baseline_operational_store` |
 | **Vector DB** | Qdrant | 1.17.1 | Busqueda semantica sobre embeddings (3072 dims) |
 | **IA** | OpenAI API | text-embedding-3-large, gpt-4o-mini, gpt-4o | Embeddings, extraccion de entidades, validacion semantica |
 | **Integracion IA** | LangChain4j | 1.0.0-beta1 | Cliente OpenAI declarativo para Quarkus |
@@ -65,7 +147,9 @@ Flujo principal: **Cliente autenticado** → Keycloak (JWT) → API REST Quarkus
 
 ---
 
-## Requisitos Previos
+## Instalacion y Despliegue
+
+### Requisitos Previos
 
 | Herramienta | Version minima | Nota |
 |---|---|---|
@@ -76,9 +160,7 @@ Flujo principal: **Cliente autenticado** → Keycloak (JWT) → API REST Quarkus
 | Maven (solo desarrollo) | 3.9+ | Wrapper incluido (`./mvnw`) |
 | Puertos disponibles | 8080, 5432, 6333, 6334, 8443 | Verificar que no esten en uso |
 
----
-
-## Instalacion y Despliegue (Docker Compose)
+### Despliegue con Docker Compose
 
 ```bash
 # 1. Clonar repositorio
@@ -106,55 +188,9 @@ curl http://localhost:8443/realms/abax-memory  # Keycloak
 | Qdrant | `http://qdrant:6333` | `6333` | `abax-qdrant` |
 | Keycloak | `http://keycloak:8080` | `8443` | `abax-keycloak` |
 
-### Detener y limpiar
-
-```bash
-# Detener servicios preservando volumenes (datos persistentes)
-docker compose down
-
-# Detener y eliminar volumenes (⚠️ borra datos)
-docker compose down -v
-```
-
 ---
 
-## Configuracion
-
-Toda la configuracion se realiza mediante **variables de entorno**. La unica variable obligatoria es `OPENAI_API_KEY`.
-
-### Variables de Entorno
-
-| Variable | Obligatoria | Valor por defecto | Descripcion |
-|---|---|---|---|
-| `OPENAI_API_KEY` | **SI** | *(vacia)* | API key de OpenAI. NUNCA hardcodear en codigo ni config. |
-| `QUARKUS_DATASOURCE_JDBC_URL` | No | `jdbc:postgresql://localhost:5432/pmoadb` | JDBC URL de PostgreSQL |
-| `QUARKUS_DATASOURCE_USERNAME` | No | `pmoa` | Usuario de base de datos |
-| `QUARKUS_DATASOURCE_PASSWORD` | No | `pmoa` | Password de base de datos |
-| `ABAX_QDRANT_HOST` | No | `localhost` | Host de Qdrant |
-| `ABAX_QDRANT_PORT` | No | `6333` | Puerto REST de Qdrant |
-| `ABAX_QDRANT_COLLECTION` | No | `abax-memories` | Nombre de la coleccion de embeddings |
-| `ABAX_QDRANT_USE_TLS` | No | `false` | Usar TLS para Qdrant |
-| `QUARKUS_OIDC_AUTH_SERVER_URL` | No | `http://localhost:8443/realms/abax-memory` | URL del servidor OIDC (Keycloak) |
-| `QUARKUS_OIDC_CLIENT_ID` | No | `abax-memory-api` | Client ID OIDC |
-| `QUARKUS_OIDC_CREDENTIALS_SECRET` | No | *(valor por defecto)* | Client secret OIDC |
-| `MP_JWT_VERIFY_ISSUER` | No | Derivado del auth server | Emisor JWT a verificar |
-| `MP_JWT_VERIFY_AUDIENCES` | No | `abax-memory-api` | Audiencias JWT aceptadas |
-| `ABAX_OPENAI_VALIDATION_MODEL` | No | `gpt-4o` | Modelo para validacion semantica critica |
-| `ABAX_PROCESSING_AUTO_RUN` | No | `true` | Ejecutar procesamiento automatico al iniciar |
-
-### Modelos OpenAI configurados
-
-| Config key | Modelo | Uso |
-|---|---|---|
-| `quarkus.langchain4j.openai.embedding-model.model-name` | `text-embedding-3-large` (3072 dims) | Generacion de embeddings para busqueda semantica |
-| `quarkus.langchain4j.openai.chat-model.model-name` | `gpt-4o-mini` | Extraccion de entidades (structured outputs) |
-| `abax.openai.validation-model` | `gpt-4o` | Validacion semantica de criticidad alta |
-
-> **Nota de seguridad**: La API key se gestiona exclusivamente via variable de entorno. No se almacena en codigo fuente, archivos de configuracion, ni imagenes Docker. Rotar la key despues del desarrollo y antes de produccion definitiva.
-
----
-
-## Endpoints API Principales
+## Endpoints API
 
 Swagger UI disponible en: `http://localhost:8080/q/swagger-ui`  
 OpenAPI spec: `http://localhost:8080/q/openapi`
@@ -237,6 +273,42 @@ El backend requiere autenticacion via **OIDC con Keycloak** para todos los endpo
 
 ---
 
+## Configuracion
+
+Toda la configuracion se realiza mediante **variables de entorno**. La unica variable obligatoria es `OPENAI_API_KEY`.
+
+### Variables de Entorno
+
+| Variable | Obligatoria | Valor por defecto | Descripcion |
+|---|---|---|---|
+| `OPENAI_API_KEY` | **SI** | *(vacia)* | API key de OpenAI. NUNCA hardcodear en codigo ni config. |
+| `QUARKUS_DATASOURCE_JDBC_URL` | No | `jdbc:postgresql://localhost:5432/pmoadb` | JDBC URL de PostgreSQL |
+| `QUARKUS_DATASOURCE_USERNAME` | No | `pmoa` | Usuario de base de datos |
+| `QUARKUS_DATASOURCE_PASSWORD` | No | `pmoa` | Password de base de datos |
+| `ABAX_QDRANT_HOST` | No | `localhost` | Host de Qdrant |
+| `ABAX_QDRANT_PORT` | No | `6333` | Puerto REST de Qdrant |
+| `ABAX_QDRANT_COLLECTION` | No | `abax-memories` | Nombre de la coleccion de embeddings |
+| `ABAX_QDRANT_USE_TLS` | No | `false` | Usar TLS para Qdrant |
+| `QUARKUS_OIDC_AUTH_SERVER_URL` | No | `http://localhost:8443/realms/abax-memory` | URL del servidor OIDC (Keycloak) |
+| `QUARKUS_OIDC_CLIENT_ID` | No | `abax-memory-api` | Client ID OIDC |
+| `QUARKUS_OIDC_CREDENTIALS_SECRET` | No | *(valor por defecto)* | Client secret OIDC |
+| `MP_JWT_VERIFY_ISSUER` | No | Derivado del auth server | Emisor JWT a verificar |
+| `MP_JWT_VERIFY_AUDIENCES` | No | `abax-memory-api` | Audiencias JWT aceptadas |
+| `ABAX_OPENAI_VALIDATION_MODEL` | No | `gpt-4o` | Modelo para validacion semantica critica |
+| `ABAX_PROCESSING_AUTO_RUN` | No | `true` | Ejecutar procesamiento automatico al iniciar |
+
+### Modelos OpenAI configurados
+
+| Config key | Modelo | Uso |
+|---|---|---|
+| `quarkus.langchain4j.openai.embedding-model.model-name` | `text-embedding-3-large` (3072 dims) | Generacion de embeddings para busqueda semantica |
+| `quarkus.langchain4j.openai.chat-model.model-name` | `gpt-4o-mini` | Extraccion de entidades (structured outputs) |
+| `abax.openai.validation-model` | `gpt-4o` | Validacion semantica de criticidad alta |
+
+> **Nota de seguridad**: La API key se gestiona exclusivamente via variable de entorno. No se almacena en codigo fuente, archivos de configuracion, ni imagenes Docker. Rotar la key despues del desarrollo y antes de produccion definitiva.
+
+---
+
 ## Estructura del Proyecto
 
 ```
@@ -266,6 +338,7 @@ abax-memory/
 ├── CHANGELOG.md                      # Historial de versiones
 ├── project-manifest.yaml             # Manifiesto del proyecto (metadatos)
 ├── docs/                             # Documentacion cascada por fase
+│   ├── index.html                    # GitHub Pages: indice de presentaciones
 │   ├── entregables/                  # 42+ entregables formales (F0-F9)
 │   │   ├── fase-0-descubrimiento/
 │   │   ├── fase-1-inicio/
@@ -340,21 +413,6 @@ docker run -p 8080:8080 -e OPENAI_API_KEY="sk-..." abax-memory:local
 | Defectos criticos abiertos | **0** |
 | Defectos totales detectados | 4 (3 QA cerrados + 1 baja severidad documentado) |
 
-### Fases del Proyecto
-
-| Fase | Estado | Gate |
-|---|---|---|
-| F0 — Descubrimiento | 🟢 Completada | Documentada |
-| F1 — Inicio | 🟢 Completada | Documentada |
-| F2 — Analisis Funcional | 🟢 Completada | Documentada |
-| F3 — Diseno Tecnico | 🟢 Completada | Documentada |
-| F4 — Construccion | 🟢 Completada | Aprobada |
-| F5 — Pruebas QA | 🟢 Completada | Aprobada (0 defectos) |
-| F6 — UAT | 🟢 Completada | Aceptada (61/61 CA) |
-| F7 — Despliegue | 🟢 Completada | Desplegada con IA real |
-| F8 — Estabilizacion | 🟢 Completada | Aprobada (26/26 PASS) |
-| F9 — Cierre | 🟢 Completada | **Proyecto CERRADO** |
-
 ### Cobertura Funcional (R1-MVP)
 
 | Modulo | CAs | Aprobados |
@@ -386,24 +444,3 @@ docker run -p 8080:8080 -e OPENAI_API_KEY="sk-..." abax-memory:local
 ## Licencia
 
 Software propietario. Todos los derechos reservados. Consulte los terminos de licencia corporativa aplicables.
-
----
-
-## Verificacion de Consistencia Final (Fase 9 — Cierre)
-
-Se verifico la consistencia entre todos los artefactos del proyecto:
-
-| Verificacion | Artefactos comparados | Resultado |
-|---|---|---|
-| JAR runner en Docker | `Dockerfile` ↔ `pom.xml` | ✅ Consistente (`1.0.0-SNAPSHOT`) |
-| Variables de entorno | `docker-compose.yml` ↔ `application.properties` | ✅ Consistente (todas las vars coinciden) |
-| Modelos OpenAI | `application.properties` ↔ `CHANGELOG.md` | ✅ Consistente (`text-embedding-3-large`/`gpt-4o-mini`/`gpt-4o`) |
-| Puertos y servicios | `Dockerfile` ↔ `docker-compose.yml` | ✅ Consistente (8080, healthchecks) |
-| Version Docker label | `Dockerfile` ↔ Release v1.0.0 | ✅ Consistente |
-| Container Registry | `docker-compose.yml` ↔ GHCR | ✅ Consistente (`ghcr.io/breisnerlopez/abax-memory`) |
-| API endpoints | Codigo fuente ↔ Docs ↔ CHANGELOG | ✅ Consistente (13 endpoints documentados) |
-| Suite de tests | `pom.xml` ↔ Resultados reportados | ✅ 54 tests, BUILD SUCCESS |
-| Version Keycloak (docs) | `registro-entregables.md` vs `docker-compose.yml` | ⚠️ Docs reportan 26.6.1; docker-compose usa 26.1 |
-| Modelo embedding (docs) | `registro-entregables.md` F7 vs `application.properties` | ⚠️ Docs mencionan `-small`; config real es `-large` |
-
-**Conclusion**: Los artefactos operativos (codigo, Docker, configuracion, release, endpoints) son **completamente consistentes**. Las 2 discrepancias encontradas son exclusivamente en documentacion narrativa (`registro-entregables.md`) y no afectan despliegue ni operacion. El proyecto se entrega con verificacion de consistencia satisfactoria.
