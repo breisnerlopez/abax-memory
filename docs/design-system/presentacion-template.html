@@ -1,719 +1,284 @@
-<!-- Fase: 0-Descubrimiento, Entregable: Design System de Presentaciones, Responsable: business-analyst, Fecha: 2026-05-01, Estado: Completado -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PMOA - Template Base de Presentaciones</title>
-    <style>
-        :root {
-            color-scheme: light;
-            --color-bg: #f3f6fa;
-            --color-surface: #ffffff;
-            --color-surface-alt: #eef3f8;
-            --color-ink: #16202b;
-            --color-ink-muted: #516173;
-            --color-line: #d7e0ea;
-            --color-primary: #0f4c81;
-            --color-primary-soft: #dceaf6;
-            --color-secondary: #1e6f5c;
-            --color-secondary-soft: #dbefe9;
-            --color-accent: #b97816;
-            --color-accent-soft: #f9ecd6;
-            --color-danger: #a63a3a;
-            --color-danger-soft: #f7e1e1;
-            --color-warning: #8a6700;
-            --color-warning-soft: #f7efc8;
-            --color-success: #256d3f;
-            --color-success-soft: #ddf0e3;
-            --color-info: #0d5e7a;
-            --color-info-soft: #dceff6;
-
-            --font-family-base: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-            --font-family-mono: "Consolas", "Courier New", monospace;
-            --font-size-xxs: 0.7rem;
-            --font-size-xs: 0.82rem;
-            --font-size-sm: 0.95rem;
-            --font-size-md: 1.08rem;
-            --font-size-lg: 1.35rem;
-            --font-size-xl: 2rem;
-            --font-size-2xl: 2.9rem;
-            --font-size-3xl: 4rem;
-            --line-height-tight: 1.15;
-            --line-height-base: 1.45;
-            --line-height-loose: 1.7;
-            --font-weight-regular: 400;
-            --font-weight-semibold: 600;
-            --font-weight-bold: 700;
-
-            --space-1: 0.25rem;
-            --space-2: 0.5rem;
-            --space-3: 0.75rem;
-            --space-4: 1rem;
-            --space-5: 1.5rem;
-            --space-6: 2rem;
-            --space-7: 3rem;
-            --space-8: 4rem;
-
-            --radius-sm: 0.35rem;
-            --radius-md: 0.7rem;
-            --radius-lg: 1rem;
-            --border-thin: 1px solid var(--color-line);
-            --border-strong: 1px solid rgba(15, 76, 129, 0.28);
-            --shadow-sm: 0 0.4rem 1rem rgba(20, 35, 52, 0.08);
-            --shadow-md: 0 0.9rem 2rem rgba(20, 35, 52, 0.12);
-
-            --badge-padding: 0.35rem 0.7rem;
-            --badge-radius: 999px;
-            --table-header-bg: #e8f0f7;
-            --table-row-alt: #f8fbfd;
-            --slide-width: 1280px;
-            --slide-height: 720px;
-            --transition-base: 220ms ease;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            background: var(--color-bg);
-            color: var(--color-ink);
-            font-family: var(--font-family-base);
-            line-height: var(--line-height-base);
-        }
-
-        body {
-            padding: var(--space-6);
-        }
-
-        .presentation {
-            display: grid;
-            gap: var(--space-6);
-            justify-content: center;
-        }
-
-        .slide {
-            position: relative;
-            width: min(100%, var(--slide-width));
-            min-height: var(--slide-height);
-            margin: 0 auto;
-            padding: var(--space-7);
-            background: var(--color-surface);
-            border: var(--border-thin);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-md);
-            overflow: hidden;
-            display: grid;
-            grid-template-rows: auto 1fr auto;
-            gap: var(--space-5);
-            transition: transform var(--transition-base), box-shadow var(--transition-base);
-        }
-
-        .slide:hover {
-            transform: translateY(-0.2rem);
-            box-shadow: 0 1.2rem 2.4rem rgba(20, 35, 52, 0.14);
-        }
-
-        .slide::before {
-            content: "";
-            position: absolute;
-            inset: 0 auto 0 0;
-            width: 0.4rem;
-            background: var(--color-primary);
-        }
-
-        .slide__header,
-        .slide__footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: var(--space-4);
-            color: var(--color-ink-muted);
-            font-size: var(--font-size-xs);
-        }
-
-        .slide__header {
-            padding-bottom: var(--space-3);
-            border-bottom: var(--border-thin);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        .slide__footer {
-            padding-top: var(--space-3);
-            border-top: var(--border-thin);
-        }
-
-        .slide__content {
-            display: grid;
-            gap: var(--space-5);
-            align-content: start;
-        }
-
-        .project-name {
-            font-weight: var(--font-weight-bold);
-            color: var(--color-primary);
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        p,
-        ul,
-        ol,
-        blockquote {
-            margin: 0;
-        }
-
-        h1 {
-            font-size: var(--font-size-3xl);
-            line-height: var(--line-height-tight);
-        }
-
-        h2 {
-            font-size: var(--font-size-2xl);
-            line-height: var(--line-height-tight);
-        }
-
-        h3 {
-            font-size: var(--font-size-xl);
-            line-height: 1.2;
-        }
-
-        h4 {
-            font-size: var(--font-size-lg);
-            line-height: 1.25;
-        }
-
-        p,
-        li,
-        td,
-        th {
-            font-size: var(--font-size-md);
-        }
-
-        .eyebrow {
-            color: var(--color-primary);
-            font-size: var(--font-size-sm);
-            font-weight: var(--font-weight-bold);
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-
-        .lead {
-            max-width: 52rem;
-            font-size: var(--font-size-lg);
-            color: var(--color-ink-muted);
-        }
-
-        .muted {
-            color: var(--color-ink-muted);
-        }
-
-        .accent {
-            color: var(--color-primary);
-        }
-
-        .divider {
-            width: 6rem;
-            height: 0.28rem;
-            background: var(--color-primary);
-            border-radius: 999px;
-        }
-
-        .layout-cover .slide__content {
-            align-content: center;
-            gap: var(--space-6);
-        }
-
-        .cover-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--space-3);
-        }
-
-        .layout-agenda .agenda-list,
-        .content-list,
-        .check-list {
-            display: grid;
-            gap: var(--space-3);
-            padding-left: 1.25rem;
-        }
-
-        .agenda-list li::marker,
-        .content-list li::marker,
-        .check-list li::marker {
-            color: var(--color-primary);
-        }
-
-        .layout-content .slide__content,
-        .layout-table .slide__content,
-        .layout-metrics .slide__content,
-        .layout-closing .slide__content {
-            grid-template-columns: 1fr;
-        }
-
-        .layout-two-columns .slide__content {
-            grid-template-columns: 1.15fr 0.85fr;
-            gap: var(--space-6);
-        }
-
-        .column,
-        .card,
-        .highlight,
-        .risk-block,
-        .metric,
-        .table-wrapper {
-            background: var(--color-surface-alt);
-            border: var(--border-thin);
-            border-radius: var(--radius-md);
-            padding: var(--space-5);
-        }
-
-        .card {
-            box-shadow: var(--shadow-sm);
-        }
-
-        .cards-grid,
-        .metrics-grid {
-            display: grid;
-            gap: var(--space-4);
-        }
-
-        .cards-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-
-        .metrics-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-        }
-
-        .metric {
-            display: grid;
-            gap: var(--space-2);
-            align-content: start;
-            min-height: 11rem;
-        }
-
-        .metric__value {
-            font-size: 3.2rem;
-            line-height: 1;
-            font-weight: var(--font-weight-bold);
-            color: var(--color-primary);
-        }
-
-        .metric__label {
-            font-size: var(--font-size-sm);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--color-ink-muted);
-        }
-
-        .metric__detail {
-            font-size: var(--font-size-sm);
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--space-2);
-            padding: var(--badge-padding);
-            border-radius: var(--badge-radius);
-            font-size: var(--font-size-xs);
-            font-weight: var(--font-weight-bold);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            border: 1px solid transparent;
-            white-space: nowrap;
-        }
-
-        .badge--primary { background: var(--color-primary-soft); color: var(--color-primary); border-color: rgba(15, 76, 129, 0.18); }
-        .badge--success { background: var(--color-success-soft); color: var(--color-success); border-color: rgba(37, 109, 63, 0.18); }
-        .badge--warning { background: var(--color-warning-soft); color: var(--color-warning); border-color: rgba(138, 103, 0, 0.18); }
-        .badge--danger { background: var(--color-danger-soft); color: var(--color-danger); border-color: rgba(166, 58, 58, 0.18); }
-        .badge--info { background: var(--color-info-soft); color: var(--color-info); border-color: rgba(13, 94, 122, 0.18); }
-        .badge--neutral { background: #edf2f7; color: #425466; border-color: rgba(66, 84, 102, 0.16); }
-
-        .highlight {
-            border-left: 0.35rem solid var(--color-accent);
-            background: #fcf8f0;
-        }
-
-        .risk-block {
-            border-left: 0.35rem solid var(--color-danger);
-            background: #fcf4f4;
-        }
-
-        .risk-block__title,
-        .highlight__title,
-        .card__title {
-            margin-bottom: var(--space-2);
-            font-size: var(--font-size-lg);
-            font-weight: var(--font-weight-bold);
-        }
-
-        .table-wrapper {
-            overflow: hidden;
-            padding: 0;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--color-surface);
-        }
-
-        thead {
-            background: var(--table-header-bg);
-        }
-
-        th,
-        td {
-            padding: 1rem 1.1rem;
-            text-align: left;
-            vertical-align: top;
-            border-bottom: var(--border-thin);
-        }
-
-        tbody tr:nth-child(even) {
-            background: var(--table-row-alt);
-        }
-
-        tbody tr:last-child td {
-            border-bottom: 0;
-        }
-
-        .callout-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--space-3);
-            align-items: center;
-        }
-
-        .kicker-box {
-            display: inline-block;
-            padding: var(--space-3) var(--space-4);
-            background: var(--color-primary-soft);
-            color: var(--color-primary);
-            border-radius: var(--radius-sm);
-            font-size: var(--font-size-sm);
-            font-weight: var(--font-weight-semibold);
-        }
-
-        .closing-panel {
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
-            gap: var(--space-6);
-            align-items: end;
-        }
-
-        .quote {
-            padding: var(--space-5);
-            border-left: 0.35rem solid var(--color-primary);
-            background: var(--color-primary-soft);
-            border-radius: 0 var(--radius-md) var(--radius-md) 0;
-            font-size: var(--font-size-lg);
-        }
-
-        .page-number {
-            font-variant-numeric: tabular-nums;
-        }
-
-        @media (max-width: 1360px) {
-            body {
-                padding: var(--space-4);
-            }
-
-            .slide {
-                min-height: auto;
-            }
-
-            .layout-two-columns .slide__content,
-            .closing-panel,
-            .cards-grid,
-            .metrics-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 900px) {
-            .slide {
-                padding: var(--space-5);
-                border-radius: var(--radius-md);
-            }
-
-            h1 { font-size: 2.8rem; }
-            h2 { font-size: 2.2rem; }
-            h3 { font-size: 1.6rem; }
-
-            .layout-two-columns .slide__content,
-            .closing-panel,
-            .cards-grid,
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media print {
-            @page {
-                size: 16:9 landscape;
-                margin: 0.6cm;
-            }
-
-            html,
-            body {
-                background: #ffffff;
-            }
-
-            body {
-                padding: 0;
-            }
-
-            .presentation {
-                gap: 0;
-            }
-
-            .slide {
-                width: 100%;
-                min-height: 0;
-                height: 100%;
-                page-break-after: always;
-                border-radius: 0;
-                box-shadow: none;
-                border: 1px solid #cfd8e3;
-                margin: 0;
-                break-after: page;
-            }
-
-            .slide:hover {
-                transform: none;
-                box-shadow: none;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design System de Presentaciones — Plantilla de referencia</title>
+<style>
+  /* ==========================================================
+     RESET + BASE
+     ========================================================== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: var(--font-body, "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    transition: background 200ms ease, color 200ms ease;
+  }
+  h1, h2, h3 { font-family: var(--font-heading, var(--font-body)); font-weight: 800; line-height: 1.1; }
+
+  /* ==========================================================
+     PRESET: CORPORATE MINIMAL  (default)
+     Inspirado en Swiss / International Typographic Style.
+     Contraste verificado WCAG AA.
+     ========================================================== */
+  body[data-style="corporate-minimal"], body:not([data-style]) {
+    --bg: #FFFFFF;
+    --bg-alt: #F5F5F7;
+    --text: #1a1a2e;
+    --text-muted: #4a4a5e;       /* tinted neutral, no pure gray */
+    --accent: #0066cc;
+    --accent-strong: #e94560;
+    --border: #d8d8e0;
+    --font-heading: "Inter", "Segoe UI", sans-serif;
+  }
+
+  /* ==========================================================
+     PRESET: TECH EDITORIAL
+     KPIs grandes, jump ratio 10:1, cards en gris claro tintado.
+     ========================================================== */
+  body[data-style="tech-editorial"] {
+    --bg: #FFFFFF;
+    --bg-alt: #f0f0f3;          /* tinted gray, not #ccc */
+    --text: #111118;
+    --text-muted: #44444c;
+    --accent: #FFCC00;          /* used as bg with dark text on top */
+    --accent-strong: #111118;
+    --border: #d0d0d8;
+    --font-heading: "Inter", "Segoe UI", sans-serif;
+  }
+
+  /* ==========================================================
+     PRESET: DARK PREMIUM
+     Apple/Stripe-style. High-contrast cyan accent on deep navy.
+     ========================================================== */
+  body[data-style="dark-premium"] {
+    --bg: #0d1117;
+    --bg-alt: #1a1a2e;
+    --text: #e6e6f0;
+    --text-muted: #a0a0b0;       /* tinted, no pure gray */
+    --accent: #00d4ff;
+    --accent-strong: #00ff88;
+    --border: #2a2a3e;
+    --font-heading: "Inter", "Segoe UI", sans-serif;
+  }
+
+  /* ==========================================================
+     LAYOUT: SLIDE
+     1 slide = 1 mensaje. ~30% espacio negativo. Asimétrico.
+     ========================================================== */
+  .slide {
+    min-height: 100vh;
+    padding: 8vh 10vw;
+    display: grid;
+    align-content: start;
+    gap: 1.5rem;
+    page-break-after: always;
+    border-bottom: 1px solid var(--border);
+  }
+  .slide:last-child { border-bottom: none; }
+
+  .slide-eyebrow {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .slide h1 { font-size: clamp(2.5rem, 5vw, 4rem); }   /* jump ratio 4:1+ vs body */
+  .slide h2 { font-size: clamp(2rem, 4vw, 3rem); }
+  .slide h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); color: var(--text-muted); font-weight: 600; }
+  .slide p, .slide li { font-size: clamp(1rem, 1.5vw, 1.125rem); max-width: 70ch; }
+
+  /* KPI block — protagonista visual del Tech Editorial preset */
+  .kpi {
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--accent-strong);
+    letter-spacing: -0.03em;
+  }
+  .kpi-label { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* List: max 5 items, generous line-height */
+  ul, ol { padding-left: 1.5rem; display: grid; gap: 0.75rem; }
+  ul li::marker, ol li::marker { color: var(--accent); }
+
+  /* Table: max 5 columns. Tinted neutrals for borders. */
+  table { border-collapse: collapse; width: 100%; max-width: 60rem; }
+  th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+  th { font-weight: 700; color: var(--accent-strong); }
+
+  /* Card — no nested cards, single level only */
+  .card {
+    background: var(--bg-alt);
+    padding: 2rem;
+    border-radius: 4px;          /* subtle, not excessive */
+    border: 1px solid var(--border);
+    max-width: 42rem;
+  }
+
+  /* CTA block — every deck must end with one */
+  .cta {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 3rem 4rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  body[data-style="tech-editorial"] .cta { color: #111118; }
+  .cta-question { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; }
+
+  /* ==========================================================
+     STYLE SWITCHER (header del template de referencia)
+     ========================================================== */
+  .switcher {
+    position: fixed; top: 1rem; right: 1rem;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    padding: 0.5rem;
+    display: flex; gap: 0.25rem;
+    border-radius: 4px;
+    z-index: 100;
+  }
+  .switcher button {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid transparent;
+    padding: 0.5rem 0.875rem;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 150ms ease, border-color 150ms ease;
+  }
+  .switcher button:hover { background: var(--bg); border-color: var(--border); }
+  .switcher button[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  body[data-style="tech-editorial"] .switcher button[aria-pressed="true"] { color: #111118; }
+
+  /* Print: layout estable, sin switcher */
+  @media print {
+    .switcher { display: none; }
+    .slide { min-height: auto; page-break-after: always; padding: 4vh 6vw; }
+  }
+</style>
 </head>
-<body>
-    <main class="presentation">
-        <section class="slide layout-cover" aria-label="Slide de portada">
-            <header class="slide__header">
-                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
-                <span>Fase 0 · Descubrimiento</span>
-            </header>
-            <div class="slide__content">
-                <div class="eyebrow">Template base obligatorio</div>
-                <h1>Design System de Presentaciones del Proyecto</h1>
-                <div class="divider"></div>
-                <p class="lead">Plantilla HTML single-file para presentaciones ejecutivas y técnicas del proyecto, con estilo sobrio, reutilizable, imprimible y consistente.</p>
-                <div class="cover-meta">
-                    <span class="badge badge--primary">Proyecto PMOA</span>
-                    <span class="badge badge--info">Formato HTML autónomo</span>
-                    <span class="badge badge--success">Estado aprobado</span>
-                </div>
-            </div>
-            <footer class="slide__footer">
-                <span>Design System · Presentaciones</span>
-                <span class="page-number">01</span>
-            </footer>
-        </section>
+<body data-style="corporate-minimal">
 
-        <section class="slide layout-agenda" aria-label="Slide de agenda">
-            <header class="slide__header">
-                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
-                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
-            </header>
-            <div class="slide__content">
-                <div class="eyebrow">Layout reutilizable</div>
-                <h2>Agenda</h2>
-                <ol class="agenda-list">
-                    <li>Contexto y objetivo de la presentación</li>
-                    <li>Estado actual, hallazgos o propuesta</li>
-                    <li>Riesgos, dependencias y decisiones requeridas</li>
-                    <li>Próximos pasos y responsables</li>
-                </ol>
-                <div class="callout-row">
-                    <span class="kicker-box">Regla: 1 slide = 1 mensaje</span>
-                    <span class="kicker-box">Máximo recomendado: 5 puntos por lista</span>
-                </div>
-            </div>
-            <footer class="slide__footer">
-                <span>Layout: agenda</span>
-                <span class="page-number">02</span>
-            </footer>
-        </section>
+<nav class="switcher" aria-label="Cambiar preset visual">
+  <button type="button" data-set="corporate-minimal" aria-pressed="true">Corporate Minimal</button>
+  <button type="button" data-set="tech-editorial" aria-pressed="false">Tech Editorial</button>
+  <button type="button" data-set="dark-premium" aria-pressed="false">Dark Premium</button>
+</nav>
 
-        <section class="slide layout-content" aria-label="Slide de contenido">
-            <header class="slide__header">
-                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
-                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
-            </header>
-            <div class="slide__content">
-                <div class="eyebrow">Layout reutilizable</div>
-                <h2>Contenido principal</h2>
-                <p class="lead">Usar este layout para explicar contexto, decisiones, análisis funcional, conclusiones o mensajes ejecutivos con apoyo visual mínimo y alta claridad.</p>
-                <ul class="content-list">
-                    <li>Jerarquía tipográfica clara y contraste apto para lectura ejecutiva.</li>
-                    <li>Bloques destacados para mensajes clave, riesgos o definiciones.</li>
-                    <li>Espaciado consistente basado en variables CSS reutilizables.</li>
-                </ul>
-                <div class="highlight">
-                    <div class="highlight__title">Destacado</div>
-                    <p>Este template debe reutilizarse sin incorporar librerías externas, frameworks visuales ni estilos ad hoc por presentación.</p>
-                </div>
-            </div>
-            <footer class="slide__footer">
-                <span>Layout: contenido</span>
-                <span class="page-number">03</span>
-            </footer>
-        </section>
+<!-- ============================================================
+     SLIDE 1 — COVER
+     Estructura mínima: eyebrow, título grande, metadata.
+     ============================================================ -->
+<section class="slide" aria-label="Portada">
+  <span class="slide-eyebrow">Plantilla de referencia</span>
+  <h1>Design System de presentaciones</h1>
+  <h3>Tres presets para todo el ciclo del proyecto: gobierno, demos técnicas, kickoff de producto.</h3>
+  <p style="margin-top: 2rem; color: var(--text-muted);">
+    Proyecto · Fecha · Autor · Audiencia
+  </p>
+</section>
 
-        <section class="slide layout-two-columns" aria-label="Slide de dos columnas">
-            <header class="slide__header">
-                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
-                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
-            </header>
-            <div class="slide__content">
-                <div class="column">
-                    <div class="eyebrow">Layout reutilizable</div>
-                    <h2>Dos columnas</h2>
-                    <p class="lead">Adecuado para comparar escenarios AS-IS / TO-BE, alcance / fuera de alcance, beneficios / riesgos o decisión / impacto.</p>
-                    <ul class="content-list">
-                        <li>Columna principal para narrativa o análisis.</li>
-                        <li>Columna secundaria para soporte, datos o alertas.</li>
-                        <li>Balance visual limpio y profesional.</li>
-                    </ul>
-                </div>
-                <aside class="column">
-                    <div class="card">
-                        <div class="card__title">Tarjeta de apoyo</div>
-                        <p class="muted">Ideal para supuestos validados, decisiones solicitadas o dependencias del entregable.</p>
-                    </div>
-                    <div class="risk-block" style="margin-top: 1rem;">
-                        <div class="risk-block__title">Bloque de riesgo</div>
-                        <p>Evitar slides saturados, colores estridentes o componentes inconsistentes entre fases.</p>
-                    </div>
-                </aside>
-            </div>
-            <footer class="slide__footer">
-                <span>Layout: dos columnas</span>
-                <span class="page-number">04</span>
-            </footer>
-        </section>
+<!-- ============================================================
+     SLIDE 2 — AGENDA
+     Máx 5 ítems. Marker tintado al accent.
+     ============================================================ -->
+<section class="slide" aria-label="Agenda">
+  <span class="slide-eyebrow">Agenda</span>
+  <h2>Qué vas a ver</h2>
+  <ul>
+    <li>El sistema: 3 presets compartiendo principios de UX</li>
+    <li>Anti-patrones a evitar (incluido el AI-slop)</li>
+    <li>Cómo el agente <code>create-presentation</code> usa este template</li>
+    <li>Checklist de calidad antes de entregar</li>
+  </ul>
+</section>
 
-        <section class="slide layout-table" aria-label="Slide de tabla">
-            <header class="slide__header">
-                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
-                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
-            </header>
-            <div class="slide__content">
-                <div class="eyebrow">Layout reutilizable</div>
-                <h2>Tabla de seguimiento</h2>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Elemento</th>
-                                <th>Descripción</th>
-                                <th>Estado</th>
-                                <th>Observación</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Paleta visual</td>
-                                <td>Variables CSS definidas para uso común.</td>
-                                <td><span class="badge badge--success">Completo</span></td>
-                                <td>Incluye tonos primarios, de soporte y estados.</td>
-                            </tr>
-                            <tr>
-                                <td>Layouts</td>
-                                <td>Portada, agenda, contenido, columnas, tabla, métricas y cierre.</td>
-                                <td><span class="badge badge--success">Completo</span></td>
-                                <td>Base obligatoria para nuevas presentaciones.</td>
-                            </tr>
-                            <tr>
-                                <td>Impresión</td>
-                                <td>Reglas print para exportación limpia a PDF.</td>
-                                <td><span class="badge badge--warning">Validar</span></td>
-                                <td>Revisar compatibilidad final según navegador corporativo.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <footer class="slide__footer">
-                <span>Layout: tabla</span>
-                <span class="page-number">05</span>
-            </footer>
-        </section>
+<!-- ============================================================
+     SLIDE 3 — KPI BLOCK
+     1 mensaje = la métrica. Jump ratio extremo.
+     ============================================================ -->
+<section class="slide" aria-label="Métrica clave">
+  <span class="slide-eyebrow">Métrica clave</span>
+  <div class="kpi">98%</div>
+  <p class="kpi-label">Cobertura de criterios de aceptación validados con UAT</p>
+  <p style="margin-top: 2rem; max-width: 50ch;">
+    Las métricas merecen ser el protagonista visual del slide. Jump ratio 8:1 entre la cifra y el cuerpo.
+    Sin gráficos decorativos: el número solo, con contexto mínimo a su lado.
+  </p>
+</section>
 
-        <section class="slide layout-metrics" aria-label="Slide de métricas">
-            <header class="slide__header">
-                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
-                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
-            </header>
-            <div class="slide__content">
-                <div class="eyebrow">Layout reutilizable</div>
-                <h2>Métricas y KPIs</h2>
-                <div class="metrics-grid">
-                    <article class="metric">
-                        <div class="metric__label">Layouts base</div>
-                        <div class="metric__value">7</div>
-                        <div class="metric__detail">Portada, agenda, contenido, columnas, tabla, métricas y cierre.</div>
-                    </article>
-                    <article class="metric">
-                        <div class="metric__label">Dependencias externas</div>
-                        <div class="metric__value">0</div>
-                        <div class="metric__detail">Cumple el requisito single-file autónomo.</div>
-                    </article>
-                    <article class="metric">
-                        <div class="metric__label">Modos de uso</div>
-                        <div class="metric__value">2</div>
-                        <div class="metric__detail">Visualización en navegador e impresión/PDF.</div>
-                    </article>
-                    <article class="metric">
-                        <div class="metric__label">Objetivo visual</div>
-                        <div class="metric__value">AA</div>
-                        <div class="metric__detail">Contraste y legibilidad aptos para audiencia técnico-ejecutiva.</div>
-                    </article>
-                </div>
-            </div>
-            <footer class="slide__footer">
-                <span>Layout: métricas</span>
-                <span class="page-number">06</span>
-            </footer>
-        </section>
+<!-- ============================================================
+     SLIDE 4 — COMPARACIÓN
+     Tabla densa pero legible. Borders tintados, no #ccc.
+     ============================================================ -->
+<section class="slide" aria-label="Comparación de presets">
+  <span class="slide-eyebrow">Comparación</span>
+  <h2>Cuándo elegir cada preset</h2>
+  <table>
+    <thead>
+      <tr><th>Preset</th><th>Audiencia ideal</th><th>Tipo de contenido</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Corporate Minimal</td><td>Comité directivo, sponsors</td><td>Decisiones, gobierno, status</td></tr>
+      <tr><td>Tech Editorial</td><td>Equipo técnico, PM/QA</td><td>Demos, KPIs, reportes de calidad</td></tr>
+      <tr><td>Dark Premium</td><td>Audiencia mixta de alto impacto</td><td>Kickoff, go-live, demos de producto</td></tr>
+    </tbody>
+  </table>
+</section>
 
-        <section class="slide layout-closing" aria-label="Slide de cierre">
-            <header class="slide__header">
-                <span class="project-name">PMOA - Plataforma de Memoria Operativa para Agentes</span>
-                <span>Fase 0 · Descubrimiento · 2026-05-01</span>
-            </header>
-            <div class="slide__content">
-                <div class="eyebrow">Layout reutilizable</div>
-                <div class="closing-panel">
-                    <div>
-                        <h2>Cierre y siguiente uso esperado</h2>
-                        <p class="lead">Toda presentación del proyecto debe partir de este archivo, preservando identidad visual, estructura de slide y consistencia documental entre fases.</p>
-                        <div class="callout-row" style="margin-top: 1.5rem;">
-                            <span class="badge badge--primary">Uso obligatorio</span>
-                            <span class="badge badge--neutral">Editar contenido, no el sistema base</span>
-                        </div>
-                    </div>
-                    <div class="quote">
-                        Próximo paso: clonar este template y adaptar únicamente el contenido de cada slide según audiencia, fase y objetivo.
-                    </div>
-                </div>
-            </div>
-            <footer class="slide__footer">
-                <span>Layout: cierre</span>
-                <span class="page-number">07</span>
-            </footer>
-        </section>
-    </main>
+<!-- ============================================================
+     SLIDE 5 — ANTI-PATRONES
+     Card simple. Sin nesting. Sin gradientes.
+     ============================================================ -->
+<section class="slide" aria-label="Antipatrones a evitar">
+  <span class="slide-eyebrow">Lo que NO hacemos</span>
+  <h2>Anti-patrones a evitar</h2>
+  <div class="card">
+    <ul>
+      <li><strong>Gradientes púrpura/rosa</strong> — el default LLM, se ve AI-generated.</li>
+      <li><strong>Gris puro</strong> (#888, #ccc) — siempre tintar neutrales hacia el acento.</li>
+      <li><strong>Cards anidados</strong> — un nivel máximo. Más es ruido visual.</li>
+      <li><strong>Bounce/elastic easing</strong> — se percibe anticuado. Curvas suaves 200–300 ms.</li>
+      <li><strong>Más de 3 colores activos</strong> por slide.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 6 — CTA
+     Cierre obligatorio. Pregunta o decisión explícita.
+     ============================================================ -->
+<section class="slide" aria-label="Llamado a la acción">
+  <span class="slide-eyebrow">Decisión solicitada</span>
+  <h2>¿Aprueban este Design System como base para todas las presentaciones del proyecto?</h2>
+  <div class="cta">
+    <span class="cta-question">Sí, lo adoptamos · Necesitamos ajustes · Volver a discutir</span>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll('.switcher button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const style = btn.dataset.set;
+      document.body.dataset.style = style;
+      document.querySelectorAll('.switcher button').forEach((b) => {
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+    });
+  });
+</script>
+
 </body>
 </html>
