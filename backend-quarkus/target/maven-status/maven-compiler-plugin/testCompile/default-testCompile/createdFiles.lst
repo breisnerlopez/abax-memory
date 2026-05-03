@@ -10,7 +10,9 @@ com/btl/administrador/api/resource/MemoryResourceTest.class
 com/btl/administrador/api/service/ProcessingWorkerServiceTest.class
 com/btl/administrador/api/service/ProcessingWorkerServiceTest$FailingSearchIndexer.class
 com/btl/administrador/api/service/ServiceTestSupport$1.class
+com/btl/administrador/api/exception/ApiExceptionMapperTest$6.class
 com/btl/administrador/api/exception/ApiExceptionMapperTest$1.class
 com/btl/administrador/api/service/ProcessingJobServiceTest.class
 com/btl/administrador/api/exception/ApiExceptionMapperTest.class
+com/btl/administrador/api/exception/ApiExceptionMapperTest$5.class
 com/btl/administrador/api/exception/ApiExceptionMapperTest$4.class

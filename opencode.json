@@ -4,127 +4,137 @@
     "orchestrator": {
       "description": "Orquestador principal del proyecto. Coordina agentes siguiendo flujo cascada.",
       "mode": "primary",
+      "color": "#dc143c",
       "temperature": 0.3,
       "permission": {
-        "read": "allow",
-        "edit": "allow",
-        "glob": "allow",
-        "grep": "allow",
-        "bash": "allow",
+        "read": "deny",
+        "edit": "deny",
+        "glob": "deny",
+        "grep": "deny",
+        "bash": "deny",
         "task": "allow",
-        "skill": "allow",
-        "webfetch": "allow",
-        "todowrite": "allow"
+        "skill": "deny",
+        "webfetch": "deny",
+        "todowrite": "deny"
       }
     },
     "project-manager": {
       "description": "Project Manager responsable de planificacion, seguimiento, gestion de riesgos, dependencias y reporte de avance del proyecto bajo metodologia cascada.",
       "mode": "subagent",
+      "color": "#00ced1",
       "temperature": 0.3,
       "permission": {
         "read": "allow",
         "edit": "allow",
-        "glob": "allow",
-        "grep": "allow",
-        "bash": "allow",
+        "glob": "deny",
+        "grep": "deny",
+        "bash": "deny",
         "skill": "allow"
       }
     },
     "business-analyst": {
       "description": "Analista funcional experto en levantamiento de requerimientos, documentacion de reglas de negocio, definicion de alcance y criterios de aceptacion para proyectos de software en cascada.",
       "mode": "subagent",
+      "color": "#5f9ea0",
       "temperature": 0.3,
       "permission": {
         "read": "allow",
         "edit": "allow",
         "glob": "allow",
         "grep": "allow",
-        "bash": "allow",
-        "webfetch": "allow",
+        "bash": "deny",
+        "webfetch": "ask",
         "skill": "allow"
       }
     },
     "tech-lead": {
       "description": "Lider tecnico responsable de traducir arquitectura en tareas ejecutables, establecer estandares de codigo, realizar code review y coordinar al equipo de desarrollo.",
       "mode": "subagent",
+      "color": "#00ced1",
       "temperature": 0.2,
       "permission": {
         "read": "allow",
         "edit": "allow",
         "glob": "allow",
         "grep": "allow",
-        "bash": "allow",
-        "webfetch": "allow",
+        "bash": "ask",
+        "webfetch": "ask",
         "skill": "allow"
       }
     },
     "developer-backend": {
       "description": "Desarrollador backend especializado en implementar servicios, APIs, logica de negocio y componentes del lado servidor siguiendo estandares y diseno tecnico aprobado.",
       "mode": "subagent",
+      "color": "#7b68ee",
       "temperature": 0.2,
       "permission": {
         "read": "allow",
         "edit": "allow",
         "glob": "allow",
         "grep": "allow",
-        "bash": "allow",
-        "webfetch": "allow",
+        "bash": "ask",
+        "webfetch": "deny",
         "skill": "allow"
       }
     },
     "qa-functional": {
       "description": "Tester funcional responsable de disenar casos de prueba, ejecutar pruebas, reportar defectos y validar que la solucion cumple con los criterios de aceptacion definidos.",
       "mode": "subagent",
+      "color": "#9370db",
       "temperature": 0.2,
       "permission": {
         "read": "allow",
         "edit": "allow",
         "glob": "allow",
         "grep": "allow",
-        "bash": "allow",
+        "bash": "ask",
         "skill": "allow"
       }
     },
     "solution-architect": {
       "description": "Arquitecto de solucion responsable de transformar requerimientos funcionales en disenos tecnicos implementables, seguros, integrables y operables.",
       "mode": "subagent",
+      "color": "#9932cc",
       "temperature": 0.2,
       "permission": {
         "read": "allow",
         "edit": "allow",
         "glob": "allow",
         "grep": "allow",
-        "bash": "allow",
-        "webfetch": "allow",
+        "bash": "deny",
+        "webfetch": "ask",
         "skill": "allow"
       }
     },
     "devops": {
       "description": "Ingeniero DevOps responsable de pipelines CI/CD, ambientes, contenedorizacion, infraestructura como codigo y procesos de despliegue controlado con rollback.",
       "mode": "subagent",
+      "color": "#20b2aa",
       "temperature": 0.1,
       "permission": {
         "read": "allow",
         "edit": "allow",
         "glob": "allow",
         "grep": "allow",
-        "bash": "allow",
+        "bash": "ask",
         "skill": "allow"
       }
     },
     "developer-frontend": {
       "description": "Desarrollador frontend especializado en implementar interfaces de usuario, componentes, navegacion y consumo de APIs siguiendo estandares de UX y diseno tecnico aprobado.",
       "mode": "subagent",
+      "color": "#00fa9a",
       "temperature": 0.2,
       "permission": {
         "read": "allow",
         "edit": "allow",
         "glob": "allow",
         "grep": "allow",
-        "bash": "allow",
-        "webfetch": "allow",
+        "bash": "ask",
+        "webfetch": "deny",
         "skill": "allow"
       }
     }
-  }
+  },
+  "permission": "allow"
 }

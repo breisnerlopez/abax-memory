@@ -2,11 +2,13 @@ project:
   name: Abax-Memory
   description: Proyecto Abax-Memory
   size: small
-  stack: angular-quarkus
+  stack: legacy-other
   target: opencode
   team_scope: full
   provider: openai
   model_strategy: inherit
+  permission_mode: full
+  isolation_mode: devcontainer
   governance_model: lightweight
   governance_name: Equipo Ligero
 team:
@@ -49,6 +51,8 @@ skills:
     name: Criterios de Aceptacion
   - id: accessibility-check
     name: Verificacion de Accesibilidad
+  - id: anti-mock-review
+    name: Code Review Anti-Mock
   - id: api-consumption
     name: Consumo e Integracion de APIs
   - id: api-design
@@ -63,6 +67,8 @@ skills:
     name: Control de Cambios
   - id: ci-cd-pipeline
     name: Pipeline CI/CD
+  - id: code-naming-convention
+    name: Convencion de Nombres en Codigo (ingles obligatorio)
   - id: code-review
     name: Revision de Codigo
   - id: coding-standards
@@ -77,20 +83,32 @@ skills:
     name: Reporte y Gestion de Defectos
   - id: deliverable-registry
     name: Registro y Control de Entregables
+  - id: dependency-management
+    name: Gestion de Dependencias y Entorno Local
   - id: deployment-plan
     name: Plan de Despliegue
+  - id: deployment-planning
+    name: Planificacion de Despliegue a Produccion
+  - id: documentation-quality-bar
+    name: Barra de Calidad de Documentacion
   - id: environment-management
     name: Gestion de Ambientes
   - id: error-handling
     name: Manejo de Errores y Excepciones
+  - id: existing-docs-update-protocol
+    name: Protocolo de actualizacion de documentacion existente (anti-overwrite)
   - id: frontend-implementation
     name: Implementacion de Interfaces Frontend
   - id: functional-analysis
     name: Analisis Funcional
+  - id: git-collaboration
+    name: Colaboracion con Git por Fase
   - id: impact-assessment
     name: Evaluacion de Impacto de Cambios
   - id: integration-design
     name: Diseno de Integraciones entre Sistemas
+  - id: iteration-strategy
+    name: Estrategia de Iteracion (v2/v3 sobre proyecto cerrado)
   - id: multi-stage-review
     name: Revision en Multiples Etapas
   - id: presentation-design
@@ -99,16 +117,24 @@ skills:
     name: Priorizacion de Requerimientos y Backlog
   - id: process-mapping
     name: Mapeo de Procesos AS-IS/TO-BE
+  - id: project-documentation-structure
+    name: Estructura de Documentacion del Proyecto
   - id: project-planning
     name: Planificacion de Proyectos
+  - id: project-readme
+    name: README de Proyecto (mejores practicas)
   - id: project-tracking
     name: Seguimiento y Control de Proyecto
   - id: regression-testing
     name: Pruebas de Regresion Manuales
   - id: requirement-traceability
     name: Trazabilidad de Requerimientos
+  - id: reverse-engineering
+    name: Lectura y Reconstruccion de Sistemas Existentes
   - id: risk-matrix
     name: Matriz de Riesgos
+  - id: role-boundaries
+    name: Limites de Rol y Reglas de Rechazo
   - id: stakeholder-management
     name: Gestion de Stakeholders
   - id: status-reporting
@@ -137,7 +163,7 @@ tools:
   - id: create-document
     name: Creador de Documentos
   - id: create-presentation
-    name: Generador de Presentaciones
+    name: Generador de Presentaciones HTML
   - id: db-migrate
     name: Migracion de Base de Datos
   - id: generate-diagram
@@ -153,10 +179,5 @@ warnings:
   - developer-backend funciona mejor con dba (no incluido)
   - qa-functional funciona mejor con qa-lead (no incluido)
   - developer-frontend funciona mejor con ux-designer (no incluido)
-  - project-manager funciona mejor con product-owner (no incluido)
-  - business-analyst funciona mejor con product-owner (no incluido)
-  - developer-backend funciona mejor con dba (no incluido)
-  - qa-functional funciona mejor con qa-lead (no incluido)
-  - developer-frontend funciona mejor con ux-designer (no incluido)
-generated_at: 2026-05-02T02:29:34.396Z
+generated_at: 2026-05-03T17:42:05.134Z
 generated_by: abax-swarm v0.1.0
