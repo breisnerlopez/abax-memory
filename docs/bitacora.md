@@ -133,7 +133,7 @@
 | Version | **v1.0.0** |
 | Release URL | https://github.com/breisnerlopez/abax-memory/releases/tag/v1.0.0 |
 | Imagen GHCR | `ghcr.io/breisnerlopez/abax-memory:latest` |
-| Stack operativo | Backend Quarkus 3.15.3 + PostgreSQL 16.13 + Qdrant 1.17.1 + Keycloak 26.6.1 |
+| Stack operativo | Backend Quarkus 3.15.3 + PostgreSQL 16.13 + Qdrant 1.17.1 + Keycloak 26.1.0 |
 | IA integrada | OpenAI `text-embedding-3-large` (3072 dims) + `gpt-4o-mini` (structured outputs) |
 | Total memorias en sistema | 23 (16 APROBADA, 2 EN_REVISION, 2 RECHAZADA, 2 OBSERVADA, 1 ARCHIVADA) |
 | Defectos abiertos | **0 criticos**. 1 baja severidad (DEF-STAB-001, documentado, workaround disponible) |
@@ -295,7 +295,7 @@ Con base en el reporte de estabilizacion y la trazabilidad completa de las 9 fas
 | Backend Quarkus | 1.0.0-SNAPSHOT / Quarkus 3.15.3 | `http://localhost:8080` — systemd |
 | PostgreSQL | 16.13 (Alpine) | `localhost:5432` — base `pmoadb` |
 | Qdrant | 1.17.1 | `http://localhost:6333` — coleccion `abax-memories`, 1 punto indexado |
-| Keycloak | 26.6.1 | `http://localhost:8443` — realm `abax-memory` |
+| Keycloak | 26.1.0 | `http://localhost:8443` — realm `abax-memory` |
 | OpenAI Embeddings | `text-embedding-3-large` | 3072 dimensiones |
 | OpenAI Extraccion | `gpt-4o-mini` | Structured outputs |
 | Flyway | v1 — baseline operational store | Aplicada |
@@ -327,7 +327,7 @@ Con base en el reporte de estabilizacion y la trazabilidad completa de las 9 fas
 
 | Capacidad | Modelo | Estado |
 |---|---|---|
-| Generacion de embeddings | `text-embedding-3-small` / equivalente | ✅ Integrado — Qdrant poblado con embeddings reales |
+| Generacion de embeddings | `text-embedding-3-large` / equivalente | ✅ Integrado — Qdrant poblado con embeddings reales |
 | Extraccion de entidades | Modelo OpenAI | ✅ Integrado — Pipeline de extraccion funcional |
 | Validacion semantica | Modelo OpenAI | ✅ Integrado — Validacion de contenido operativa |
 
@@ -341,7 +341,7 @@ Con base en el reporte de estabilizacion y la trazabilidad completa de las 9 fas
 |---|---|---|---|
 | Backend Quarkus | 1.0.0-SNAPSHOT (Quarkus 3.15.3) | `http://localhost:8080` | UP — IA real integrada |
 | Qdrant | 1.17.1 | `http://localhost:6333` (REST), `http://localhost:6334` (gRPC) | UP — Coleccion de embeddings creada |
-| Keycloak | 26.6.1 | `http://localhost:8443` | UP |
+| Keycloak | 26.1.0 | `http://localhost:8443` | UP |
 | PostgreSQL | 16.13 (Alpine) | `localhost:5432` | UP |
 | Flyway | v1 — baseline operational store | N/A | Aplicada |
 | OpenAI API | Via variable de entorno `OPENAI_API_KEY` | N/A | Configurada — Embeddings + Extraccion + Validacion |
@@ -364,7 +364,7 @@ Con base en el reporte de estabilizacion y la trazabilidad completa de las 9 fas
 |---|---|---|---|
 | Backend Quarkus | 1.0.0-SNAPSHOT (Quarkus 3.15.3) | `http://localhost:8080` | UP |
 | Qdrant | 1.17.1 | `http://localhost:6333` (REST), `http://localhost:6334` (gRPC) | UP — Coleccion de embeddings creada |
-| Keycloak | 26.6.1 | `http://localhost:8443` | UP |
+| Keycloak | 26.1.0 | `http://localhost:8443` | UP |
 | PostgreSQL | 16.13 (Alpine) | `localhost:5432` | UP |
 | Flyway | v1 — baseline operational store | N/A | Aplicada |
 | OpenAI API | Via `OPENAI_API_KEY` (env) | N/A | Configurada — Embeddings, extraccion y validacion |
@@ -420,7 +420,7 @@ Con base en el reporte de estabilizacion y la trazabilidad completa de las 9 fas
 | Backend Quarkus | ✅ UP en `http://localhost:8080` — Health check UP. IA real integrada (OpenAI). |
 | PostgreSQL | ✅ UP en `localhost:5432` — Base `pmoadb`, Flyway v1 aplicada |
 | Qdrant | ✅ UP en `http://localhost:6333` — v1.17.1, readyz ok. Coleccion de embeddings creada. |
-| Keycloak | ✅ UP en `http://localhost:8443` — v26.6.1 |
+| Keycloak | ✅ UP en `http://localhost:8443` — v26.1.0 |
 | OpenAI | ✅ Integrado — Embeddings, extraccion y validacion con modelos reales. API key via variable de entorno. |
 | OIDC configurado | ⚠️ Pendiente menor — Realm `abax-memory` no creado. OIDC deshabilitado en backend. |
 | Semaforo Fase 7 | 🟢 Verde — DESPLEGADA CON IA REAL. Listo para Fase 8 — Estabilizacion. |
@@ -506,7 +506,7 @@ gantt
     section Despliegue Ejecutado
     PostgreSQL + Flyway                    :done, e1, 2026-05-02, 1d
     Qdrant 1.17.1                          :done, e2, 2026-05-02, 1d
-    Keycloak 26.6.1                        :done, e3, 2026-05-02, 1d
+    Keycloak 26.1.0                        :done, e3, 2026-05-02, 1d
     Backend Quarkus (build + run)          :done, e4, 2026-05-02, 1d
     Health checks verificados              :done, e5, 2026-05-02, 1d
 
@@ -547,7 +547,7 @@ gantt
   - Fase 6 UAT fue aprobada con 61/61 CA R1-MVP (100%), 0 defectos abiertos, suite automatizada BUILD SUCCESS.
   - Fase 7 — Despliegue recibe 4 entregables completados: Plan de Despliegue (devops), Plan de Rollback (devops), Presentacion Go-Live (project-manager), Ejecucion de Despliegue (devops).
   - El despliegue fue ejecutado exitosamente el **2026-05-02** (adelantado respecto a la ventana planificada del 2026-05-04).
-  - **Stack completo operativo con IA real**: Backend Quarkus 3.15.3 en `http://localhost:8080` (Health UP, OpenAI integrado), PostgreSQL 16.13 en `localhost:5432` (Flyway v1 aplicada), Qdrant 1.17.1 en `http://localhost:6333` (readyz ok, coleccion de embeddings creada), Keycloak 26.6.1 en `http://localhost:8443` (operativo).
+  - **Stack completo operativo con IA real**: Backend Quarkus 3.15.3 en `http://localhost:8080` (Health UP, OpenAI integrado), PostgreSQL 16.13 en `localhost:5432` (Flyway v1 aplicada), Qdrant 1.17.1 en `http://localhost:6333` (readyz ok, coleccion de embeddings creada), Keycloak 26.1.0 en `http://localhost:8443` (operativo).
   - **Integracion OpenAI completada**: Modelos reales para embeddings, extraccion de entidades y validacion semantica. API key configurada de forma segura via variable de entorno (nunca hardcodeada). Qdrant poblado con embeddings reales.
   - **Nota de seguridad**: Se recomienda rotar la API key de OpenAI una vez finalizado el desarrollo y antes del paso a produccion definitiva.
   - **Pendiente menor**: Configurar realm `abax-memory` en Keycloak para OIDC. Actualmente OIDC deshabilitado en el backend. No bloquea la operacion del stack ni el avance a Fase 8.
@@ -573,7 +573,7 @@ Con base en la revision de los 3 entregables documentales de Fase 7 — Desplieg
 - **F7-DEL-003 Presentacion Go-Live Readiness**: Presentacion ejecutiva de 25 slides con resumen de fases, calidad, riesgos, checklist, go/no-go, cronograma, equipo y firmas.
 - **F7-DEL-004 Ejecucion de Despliegue**: Documento de 8 secciones con registro completo de comandos, resultados, verificaciones y estado final del sistema (`docs/entregables/fase-7-despliegue/ejecucion-despliegue.md`).
 
-**Fase 7 — Despliegue queda COMPLETADA DOCUMENTALMENTE (100%) Y DESPLEGADA EXITOSAMENTE CON IA REAL. Stack completo operativo: Backend Quarkus (8080, OpenAI integrado) + PostgreSQL 16.13 (5432) + Qdrant 1.17.1 (6333, coleccion de embeddings creada) + Keycloak 26.6.1 (8443). Health check UP. Flyway migration aplicada. Integracion OpenAI completada: embeddings, extraccion de entidades y validacion semantica con modelos reales. API key configurada de forma segura via variable de entorno. Nota de seguridad: rotar API key post-desarrollo. Pendiente menor: configurar realm Keycloak para OIDC (no bloqueante). Proyecto listo para Fase 8 — Estabilizacion.**
+**Fase 7 — Despliegue queda COMPLETADA DOCUMENTALMENTE (100%) Y DESPLEGADA EXITOSAMENTE CON IA REAL. Stack completo operativo: Backend Quarkus (8080, OpenAI integrado) + PostgreSQL 16.13 (5432) + Qdrant 1.17.1 (6333, coleccion de embeddings creada) + Keycloak 26.1.0 (8443). Health check UP. Flyway migration aplicada. Integracion OpenAI completada: embeddings, extraccion de entidades y validacion semantica con modelos reales. API key configurada de forma segura via variable de entorno. Nota de seguridad: rotar API key post-desarrollo. Pendiente menor: configurar realm Keycloak para OIDC (no bloqueante). Proyecto listo para Fase 8 — Estabilizacion.**
 
 ---
 

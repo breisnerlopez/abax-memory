@@ -56,7 +56,7 @@ Construir un **MVP backend de memoria operativa con inteligencia artificial real
 | Integracion IA real (OpenAI) | Si | ✅ `text-embedding-3-large` + `gpt-4o-mini` | 100% |
 | Base de datos PostgreSQL con Flyway | Si | ✅ PostgreSQL 16.13, Flyway v1 aplicada | 100% |
 | Motor de busqueda semantica (Qdrant) | Si | ✅ Qdrant 1.17.1, coleccion de embeddings creada | 100% |
-| Autenticacion y autorizacion (Keycloak) | Si | ✅ Keycloak 26.6.1, realm `abax-memory`, RBAC funcional | 100% |
+| Autenticacion y autorizacion (Keycloak) | Si | ✅ Keycloak 26.1.0, realm `abax-memory`, RBAC funcional | 100% |
 | Suit de pruebas automatizadas | Si | ✅ 54 tests, BUILD SUCCESS, 0 failures | 100% |
 | Criterios de aceptacion UAT (R1-MVP) | 61 CA | ✅ 61/61 aprobados (100%) | 100% |
 | Despliegue en produccion | Si | ✅ Desplegado en servidor cloud privado | 100% |
@@ -249,7 +249,7 @@ Construir un **MVP backend de memoria operativa con inteligencia artificial real
 | Backend Quarkus | 1.0.0-SNAPSHOT / Quarkus 3.15.3 | `http://localhost:8080` | UP — systemd |
 | PostgreSQL | 16.13 (Alpine) | `localhost:5432` — base `pmoadb` | UP |
 | Qdrant | 1.17.1 | `http://localhost:6333` — coleccion `abax-memories` | UP |
-| Keycloak | 26.6.1 | `http://localhost:8443` — realm `abax-memory` | UP |
+| Keycloak | 26.1.0 | `http://localhost:8443` — realm `abax-memory` | UP |
 | OpenAI Embeddings | `text-embedding-3-large` | 3072 dimensiones | Integrado |
 | OpenAI Extraccion | `gpt-4o-mini` | Structured outputs | Integrado |
 | Flyway | v1 — baseline operational store | N/A | Aplicada |
@@ -354,7 +354,7 @@ Por medio del presente documento, se declara formalmente el **cierre del proyect
 │                                                     │
 │  ┌──────────────┐    ┌──────────────────────────┐  │
 │  │   Keycloak   │    │   Backend Quarkus 3.15.3  │  │
-│  │   26.6.1     │◄───│   :8080 (systemd)         │  │
+│  │   26.1.0     │◄───│   :8080 (systemd)         │  │
 │  │   :8443      │    │   - OpenAI text-embedding │  │
 │  │   RBAC OIDC  │    │   - OpenAI gpt-4o-mini    │  │
 │  └──────────────┘    │   - JAX-RS endpoints      │  │
@@ -559,7 +559,7 @@ El producto entregado es un **MVP backend de memoria operativa con inteligencia 
 - **OpenAI** `gpt-4o-mini` para extraccion de entidades y validacion semantica
 - **Qdrant 1.17.1** como motor de busqueda vectorial
 - **PostgreSQL 16.13** como almacen operacional con Flyway v1
-- **Keycloak 26.6.1** para autenticacion OIDC y RBAC con 5 roles
+- **Keycloak 26.1.0** para autenticacion OIDC y RBAC con 5 roles
 
 La calidad del producto ha sido verificada en multiples capas: **54 tests automatizados BUILD SUCCESS**, **49 casos QA (100%)**, **61 criterios de aceptacion UAT (100%)**, **26 escenarios de estabilizacion (100%)**, con **0 defectos criticos abiertos**.
 

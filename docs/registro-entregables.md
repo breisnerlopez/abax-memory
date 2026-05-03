@@ -146,7 +146,7 @@
 | Backend Quarkus | 1.0.0-SNAPSHOT / Quarkus 3.15.3 | `http://localhost:8080` | UP — IA real integrada (OpenAI) |
 | PostgreSQL | 16.13 (Alpine) | `localhost:5432` — base `pmoadb` | UP |
 | Qdrant | 1.17.1 | `http://localhost:6333` | UP — Coleccion de embeddings creada |
-| Keycloak | 26.6.1 | `http://localhost:8443` | UP |
+| Keycloak | 26.1.0 | `http://localhost:8443` | UP |
 | Flyway | v1 — baseline operational store | N/A | Aplicada |
 | OpenAI API | Via `OPENAI_API_KEY` (env) | N/A | Configurada — Embeddings, extraccion y validacion |
 
@@ -154,7 +154,7 @@
 
 | Capacidad | Modelo | Estado |
 |---|---|---|
-| Generacion de embeddings | `text-embedding-3-small` / equivalente | ✅ Integrado — Qdrant poblado con embeddings reales |
+| Generacion de embeddings | `text-embedding-3-large` / equivalente | ✅ Integrado — Qdrant poblado con embeddings reales |
 | Extraccion de entidades | Modelo OpenAI | ✅ Integrado — Pipeline de extraccion funcional |
 | Validacion semantica | Modelo OpenAI | ✅ Integrado — Validacion de contenido operativa |
 
@@ -185,7 +185,7 @@
 | Backend Quarkus | 1.0.0-SNAPSHOT / Quarkus 3.15.3 | `http://localhost:8080` | UP |
 | PostgreSQL | 16.13 (Alpine) | `localhost:5432` — base `pmoadb` | UP |
 | Qdrant | 1.17.1 | `http://localhost:6333` | UP — Coleccion de embeddings creada |
-| Keycloak | 26.6.1 | `http://localhost:8443` | UP |
+| Keycloak | 26.1.0 | `http://localhost:8443` | UP |
 | Flyway | v1 — baseline operational store | N/A | Aplicada |
 | OpenAI API | Via `OPENAI_API_KEY` (env) | N/A | Configurada |
 
@@ -286,7 +286,7 @@
 - La Ejecucion de Despliegue (F7-DEL-004) documenta el despliegue real con comandos, resultados, verificaciones y estado final. Stack completo operativo.
 - La Integracion OpenAI Real (F7-DEL-005) confirma que el backend opera con modelos reales de OpenAI para embeddings, extraccion de entidades y validacion semantica. Qdrant tiene su coleccion de embeddings creada y operativa. La API key esta gestionada de forma segura via variable de entorno.
 - El despliegue fue ejecutado exitosamente el **2026-05-02** con todos los health checks UP.
-- **Stack operativo con IA real**: Backend Quarkus (`:8080`, OpenAI integrado) + PostgreSQL 16.13 (`:5432`, Flyway v1) + Qdrant 1.17.1 (`:6333`, coleccion de embeddings creada) + Keycloak 26.6.1 (`:8443`).
+- **Stack operativo con IA real**: Backend Quarkus (`:8080`, OpenAI integrado) + PostgreSQL 16.13 (`:5432`, Flyway v1) + Qdrant 1.17.1 (`:6333`, coleccion de embeddings creada) + Keycloak 26.1.0 (`:8443`).
 - **Pendiente menor**: Configurar realm `abax-memory` en Keycloak para OIDC (F7-C06). No bloqueante. A abordar en Fase 8.
 - **Nota de seguridad**: Rotar API key de OpenAI despues del desarrollo. Coordinar con administrador de secretos.
 - Los 10 riesgos de despliegue estan mayormente cerrados (8/10). 2 riesgos reducidos en vigilancia para Fase 8.
@@ -425,7 +425,7 @@ gantt
     section Despliegue Ejecutado
     PostgreSQL + Flyway                   :done, f7b1, 2026-05-02, 1d
     Qdrant 1.17.1                         :done, f7b2, 2026-05-02, 1d
-    Keycloak 26.6.1                       :done, f7b3, 2026-05-02, 1d
+    Keycloak 26.1.0                       :done, f7b3, 2026-05-02, 1d
     Backend Quarkus (build + run)         :done, f7b4, 2026-05-02, 1d
     Health checks verificados             :done, f7b5, 2026-05-02, 1d
 
@@ -465,7 +465,7 @@ gantt
 - **Fase 9 — Cierre: CERRADA** con 1 entregable completado (Informe de Cierre del Proyecto, 12 secciones).
 - **Fase 8 — Estabilizacion: APROBADA** con 26/26 escenarios PASS (100%), 0 defectos criticos.
 - El **Acta de Cierre del Proyecto** se registra en `docs/entregables/fase-9-cierre/informe-cierre-proyecto.md` con fecha 2026-05-02.
-- **Stack completo operativo con IA real**: Backend Quarkus 3.15.3 en `http://localhost:8080` + PostgreSQL 16.13 + Qdrant 1.17.1 + Keycloak 26.6.1.
+- **Stack completo operativo con IA real**: Backend Quarkus 3.15.3 en `http://localhost:8080` + PostgreSQL 16.13 + Qdrant 1.17.1 + Keycloak 26.1.0.
 - **Sistema listo para operacion con usuarios reales**: 23 memorias en sistema, 5 roles RBAC verificados, 8 bloques funcionales validados.
 - **Release publico**: v1.0.0 en https://github.com/breisnerlopez/abax-memory/releases/tag/v1.0.0
 - **Imagen GHCR**: `ghcr.io/breisnerlopez/abax-memory:latest`
