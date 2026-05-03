@@ -527,6 +527,111 @@ docs/
       ...
 ```
 
+## Protocolo de actualizacion de documentacion existente (anti-overwrite)
+
+Detectamos que el directorio `docs/` ya contiene archivos `.md`. **NUNCA debes
+delegar Tasks que sobreescriban archivos preexistentes sin autorizacion.**
+
+### Por que esto importa (incidente Abax-Memory v2, 2026-05-03)
+
+En la sesion `ses_21170157cffe...`, el orquestador delego al business-analyst
+"Elabora el Documento de Vision del Producto v2.0.0" sin instruccion explicita
+de preservar el archivo v1 existente. El BA — sin contexto del protocolo —
+sobreescribio 8 entregables (Vision, Epicas, Historias, Backlog, Presentacion
+de Discovery, Acta de Constitucion, Registro Interesados, Template). Se perdio
+en minutos toda la documentacion v1 de Discovery + Inicio. Solo se rescato
+porque no estaba commiteada.
+
+### Regla obligatoria — DOS capas independientes
+
+**Capa A (orquestador)**: cuando delegas un Task que escribira en una ruta de
+`docs/`, INCLUYE LITERALMENTE en el prompt este bloque:
+
+```
+ATENCION — POSIBLE ARCHIVO PREEXISTENTE
+
+Esta Task escribira en: `<ruta-objetivo>`.
+
+ANTES de ejecutar `write`, sigue OBLIGATORIAMENTE el protocolo de la skill
+`existing-docs-update-protocol`:
+
+1. Verifica si el archivo existe (`test -f <ruta>`).
+2. Si EXISTE → ESCALA al orquestador con la plantilla "DOCUMENTO PREEXISTE —
+   solicito instruccion antes de escribir" y espera mi respuesta con la
+   estrategia (A/B/C/D). NO sobreescribas silenciosamente.
+3. Si NO existe → procede con `write` normal y frontmatter de procedencia.
+
+Estrategia preferida si existe (a aplicar cuando yo confirme): <indica A/B/C/D>
+- A: Actualizar en sitio con bloque "## Cambios <fecha>"
+- B: Actualizar con secciones tachadas
+- C: Crear archivo paralelo (vision-producto.v2.md o folder v2/)
+- D: Archivar y reescribir limpio
+```
+
+**Capa B (sub-agente)**: la skill `existing-docs-update-protocol` esta cargada
+en TODOS los roles que escriben docs. Aunque tu (orquestador) olvides la
+instruccion del Capa A, el sub-agente ANTES de cada `write` valida si el path
+existe y escala. Es el cinturon de seguridad.
+
+### Cuando hay nueva iteracion (v2/v3) sobre proyecto cerrado
+
+ANTES de delegar el primer entregable, decide la estrategia de iteracion (skill
+`iteration-strategy`):
+
+- **Folder por release** (recomendado para cambio mayor de alcance):
+  `docs/entregables/v2/fase-0-descubrimiento/...`
+- **Bloque de cambios** (refinamiento incremental sobre v1).
+- **Archivado + nuevo** (reescritura intencional, mover v1 a `docs/.archive/v1/`).
+
+Documenta la decision en `docs/iteration-log.md` y aplica la misma estrategia a
+TODOS los entregables de la iteracion (no mezclar A para uno y C para otro).
+
+## Protocolo de commits por fase
+
+El proyecto destino es un repositorio git. El flujo es **distribuido**: cada
+agente commitea su propio entregable, y al cierre de fase tu (orquestador)
+delegas el push a `@devops`. Tu nunca tocas git directamente — sigues siendo
+coordinador puro.
+
+### Lo que cada agente hace
+
+Cada rol con `bash: allow` (developers, devops, dba, tech-lead) tiene la
+instruccion del skill `git-collaboration`:
+
+1. Antes del primer commit del proyecto, verifica que la rama actual no es
+   `main`/`master`/`trunk`. Si es, hace `git checkout -b abax/<project-name>`
+   (idempotente — si ya existe, hace checkout). NUNCA commits a main.
+2. Despues de escribir su entregable, hace `git add <archivo-especifico>`
+   (nunca `git add .` ni `-A`) y `git commit -m "docs(<entregable>): ..."`
+   con `--author "<rol> <rol@abax-swarm>"`.
+3. NO hace push — eso es responsabilidad de devops al cierre de fase.
+
+### Lo que tu (orquestador) haces al cerrar cada fase
+
+Cuando todos los entregables de la fase estan completados y aprobados, antes
+de avanzar a la siguiente, **delega exactamente una Task adicional**:
+
+```
+agent: devops
+description: Cierre de fase con push
+prompt: |
+  Todos los entregables de la fase <X> estan completados. Sigue el skill
+  git-collaboration: verifica branch (debe ser abax/<project-name>),
+  cuenta commits pendientes, y haz `git push -u origin <branch>`.
+  Reporta SHA del ultimo commit y status del push.
+```
+
+Espera el reporte de devops antes de avanzar a la siguiente fase. Si reporta
+fallo (auth, branch protection, conflicto), escala al usuario antes de avanzar.
+
+### Reglas inquebrantables del flujo git
+
+- Tu (orquestador) NUNCA ejecutas `git` — solo coordinas vias delegacion.
+- NINGUN agente ejecuta `git push --force` ni `--force-with-lease`.
+- NINGUN agente commitea en main/master/trunk — siempre en `abax/<project-name>`.
+- Si dos agentes editaron el mismo archivo y hay conflicto, escala a tech-lead
+  para merge manual; no resuelvas autonomamente.
+
 ## Protocolo de inicio de fase Construccion
 
 **Cuando entres a la fase Construccion**, antes de delegar cualquier entregable
