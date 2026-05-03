@@ -43,7 +43,7 @@
         "glob": "allow",
         "grep": "allow",
         "bash": "deny",
-        "webfetch": "ask",
+        "webfetch": "allow",
         "skill": "allow"
       }
     },
@@ -57,8 +57,8 @@
         "edit": "allow",
         "glob": "allow",
         "grep": "allow",
-        "bash": "ask",
-        "webfetch": "ask",
+        "bash": "allow",
+        "webfetch": "allow",
         "skill": "allow"
       }
     },
@@ -72,7 +72,7 @@
         "edit": "allow",
         "glob": "allow",
         "grep": "allow",
-        "bash": "ask",
+        "bash": "allow",
         "webfetch": "deny",
         "skill": "allow"
       }
@@ -87,7 +87,7 @@
         "edit": "allow",
         "glob": "allow",
         "grep": "allow",
-        "bash": "ask",
+        "bash": "allow",
         "skill": "allow"
       }
     },
@@ -102,7 +102,7 @@
         "glob": "allow",
         "grep": "allow",
         "bash": "deny",
-        "webfetch": "ask",
+        "webfetch": "allow",
         "skill": "allow"
       }
     },
@@ -116,7 +116,7 @@
         "edit": "allow",
         "glob": "allow",
         "grep": "allow",
-        "bash": "ask",
+        "bash": "allow",
         "skill": "allow"
       }
     },
@@ -130,7 +130,7 @@
         "edit": "allow",
         "glob": "allow",
         "grep": "allow",
-        "bash": "ask",
+        "bash": "allow",
         "webfetch": "deny",
         "skill": "allow"
       }
