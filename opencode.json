@@ -140,9 +140,6 @@
     "*": "allow",
     "bash": {
       "*": "allow",
-      "git push --force *": "ask",
-      "git push -f *": "ask",
-      "git reset --hard *": "ask",
       "rm -rf *": "ask",
       "sudo *": "ask"
     },
