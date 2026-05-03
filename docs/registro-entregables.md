@@ -473,3 +473,37 @@ gantt
 - **0 defectos criticos abiertos**. 1 defecto baja severidad documentado (DEF-STAB-001).
 - **Seguridad**: API key de OpenAI configurada via variable de entorno. Rotacion programada post-cierre.
 - **Propiedad transferida**: Product Owner recibe formalmente la propiedad del producto para operacion y evolucion futura (R2).
+
+---
+
+## v2.0.0 — Registro de Entregables
+
+### Fase 0 — Descubrimiento v2 (COMPLETADA)
+
+| ID | Entregable | Path | Responsable | Estado |
+|---|---|---|---|---|
+| F0v2-DEL-001 | Vision del Producto | `docs/entregables/v2/fase-0-descubrimiento/vision-producto.md` | business-analyst | ✅ Completado |
+| F0v2-DEL-002 | Epicas y Features | `docs/entregables/v2/fase-0-descubrimiento/epicas-features.md` | business-analyst | ✅ Completado |
+| F0v2-DEL-003 | Historias de Usuario | `docs/entregables/v2/fase-0-descubrimiento/historias-usuario.md` | business-analyst | ✅ Completado |
+| F0v2-DEL-004 | Design System (reutilizado v1) | `docs/design-system/presentacion-template.html` | business-analyst | ✅ Reutilizado |
+| F0v2-DEL-005 | Backlog Priorizado | `docs/entregables/v2/fase-0-descubrimiento/backlog-priorizado.md` | business-analyst | ✅ Completado |
+| F0v2-DEL-006 | Presentacion de Descubrimiento | `docs/entregables/v2/fase-0-descubrimiento/presentacion-descubrimiento.html` | business-analyst | ✅ Completado |
+| F0v2-DEL-007 | URLs Publicas | `docs/entregables/v2/fase-0-descubrimiento/urls-publicas.md` | project-manager | ✅ Completado |
+
+### Gate de Fase 0 — Descubrimiento v2
+
+| Indicador | Valor |
+|---|---|
+| Fecha de decision | 2026-05-03 |
+| Aprobador | Usuario sponsor |
+| Entregables obligatorios | 7/7 |
+| Completitud documental | 100% |
+| Decision del gate | **APROBADO** |
+| Efecto sobre Fase 1 | **Habilitada** — Inicio v2.0.0 |
+
+### Dashboard de fases — v2.0.0
+
+| Fase | Semaforo | Estado |
+|---|---|---|
+| F0 — Descubrimiento v2 | 🟢 Verde | Completada |
+| F1 — Inicio v2 | ⚪ Pendiente | No iniciada |

@@ -794,3 +794,28 @@ Con base en el reporte de ejecucion UAT (F6-DEL-002) y el acta de aceptacion UAT
 - **Acta de aceptacion: ACEPTADO**, con firmas requeridas registradas.
 
 **Fase 6 — Pruebas de Aceptacion (UAT) queda APROBADA. El producto PMOA / Abax-Memory R1-MVP esta listo para avanzar a Fase 7 — Despliegue.**
+
+---
+
+## v2.0.0 — Inicio de iteracion
+- **Fecha**: 2026-05-03
+- **Estrategia**: A — Folder por release (`docs/entregables/v2/`)
+- **Decision**: Usuario aprobo alcance de Discovery v2
+
+### Fase 0 — Descubrimiento (COMPLETADA)
+
+| Entregable | Path |
+|---|---|
+| Vision del Producto | `docs/entregables/v2/fase-0-descubrimiento/vision-producto.md` |
+| Epicas y Features (10 epicas, 85+ features) | `docs/entregables/v2/fase-0-descubrimiento/epicas-features.md` |
+| Historias de Usuario (69 historias) | `docs/entregables/v2/fase-0-descubrimiento/historias-usuario.md` |
+| Design System (reutilizado de v1) | `docs/design-system/presentacion-template.html` |
+| Backlog Priorizado (R1+R2 MVP) | `docs/entregables/v2/fase-0-descubrimiento/backlog-priorizado.md` |
+| Presentacion de Descubrimiento | `docs/entregables/v2/fase-0-descubrimiento/presentacion-descubrimiento.html` |
+| URLs Publicas | `docs/entregables/v2/fase-0-descubrimiento/urls-publicas.md` |
+
+**Gate**: ✅ Aprobado por el usuario — 2026-05-03
+
+### Proximo paso
+
+Fase 1 — Inicio (v2.0.0) habilitada. Pendiente delegacion del orquestador.
