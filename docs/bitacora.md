@@ -794,3 +794,60 @@ Con base en el reporte de ejecucion UAT (F6-DEL-002) y el acta de aceptacion UAT
 - **Acta de aceptacion: ACEPTADO**, con firmas requeridas registradas.
 
 **Fase 6 — Pruebas de Aceptacion (UAT) queda APROBADA. El producto PMOA / Abax-Memory R1-MVP esta listo para avanzar a Fase 7 — Despliegue.**
+
+---
+
+## v2.0.0 — Inicio de iteracion
+- **Fecha**: 2026-05-03
+- **Estrategia**: A — Folder por release (`docs/entregables/v2/`)
+- **Decision**: Usuario aprobo alcance de Discovery v2
+
+### Fase 0 — Descubrimiento (COMPLETADA)
+
+| Entregable | Path |
+|---|---|
+| Vision del Producto | `docs/entregables/v2/fase-0-descubrimiento/vision-producto.md` |
+| Epicas y Features (10 epicas, 85+ features) | `docs/entregables/v2/fase-0-descubrimiento/epicas-features.md` |
+| Historias de Usuario (69 historias) | `docs/entregables/v2/fase-0-descubrimiento/historias-usuario.md` |
+| Design System (reutilizado de v1) | `docs/design-system/presentacion-template.html` |
+| Backlog Priorizado (R1+R2 MVP) | `docs/entregables/v2/fase-0-descubrimiento/backlog-priorizado.md` |
+| Presentacion de Descubrimiento | `docs/entregables/v2/fase-0-descubrimiento/presentacion-descubrimiento.html` |
+| URLs Publicas | `docs/entregables/v2/fase-0-descubrimiento/urls-publicas.md` |
+
+**Gate**: ✅ Aprobado por el usuario — 2026-05-03
+
+### Fase 1 — Inicio (COMPLETADA) — 2026-05-03
+- Acta de Constitución → docs/entregables/v2/fase-1-inicio/acta-de-constitucion.md
+- Registro de Interesados → docs/entregables/v2/fase-1-inicio/registro-de-interesados.md
+- Matriz de Riesgos (17 riesgos) → docs/entregables/v2/fase-1-inicio/matriz-de-riesgos-inicial.md
+- Cronograma Preliminar → docs/entregables/v2/fase-1-inicio/cronograma-preliminar.md
+- Presentación de Kickoff → docs/entregables/v2/fase-1-inicio/presentacion-kickoff.html
+**Gate**: ✅ Aprobado por el usuario — 2026-05-03
+
+### Fase 2 — Analisis Funcional (COMPLETADA) — 2026-05-03
+
+| Entregable | Path |
+|---|---|
+| Especificacion Funcional | `docs/entregables/v2/fase-2-analisis/especificacion-funcional.md` |
+| Reglas de Negocio | `docs/entregables/v2/fase-2-analisis/reglas-de-negocio.md` |
+| Criterios de Aceptacion | `docs/entregables/v2/fase-2-analisis/criterios-de-aceptacion.md` |
+| Diagramas de Proceso | `docs/entregables/v2/fase-2-analisis/diagramas-de-proceso.md` |
+| Presentacion de Propuesta Funcional | `docs/entregables/v2/fase-2-analisis/presentacion-propuesta-funcional.html` |
+| URLs Publicas | `docs/entregables/v2/fase-2-analisis/urls-publicas.md` |
+
+**Gate**: ✅ Aprobado por el usuario — 2026-05-03
+
+### Fase 3 — Diseno Tecnico v2 (COMPLETADA) — 2026-05-03
+
+| Entregable | Path |
+|---|---|
+| Descomposicion Tecnica | `docs/entregables/v2/fase-3-diseno-tecnico/descomposicion-tecnica.md` |
+| Documento de Arquitectura | `docs/entregables/v2/fase-3-diseno-tecnico/documento-de-arquitectura.md` |
+| Presentacion de Arquitectura | `docs/entregables/v2/fase-3-diseno-tecnico/presentacion-arquitectura.html` |
+| URLs Publicas | `docs/entregables/v2/fase-3-diseno-tecnico/urls-publicas.md` |
+
+**Gate**: ⚠️ Pendiente de aprobacion por el usuario sponsor — 2026-05-03
+
+### Proximo paso
+
+Fase 4 — Construccion (v2.0.0) habilitada condicionada a aprobacion del gate F3. Pendiente delegacion del orquestador.

@@ -473,3 +473,101 @@ gantt
 - **0 defectos criticos abiertos**. 1 defecto baja severidad documentado (DEF-STAB-001).
 - **Seguridad**: API key de OpenAI configurada via variable de entorno. Rotacion programada post-cierre.
 - **Propiedad transferida**: Product Owner recibe formalmente la propiedad del producto para operacion y evolucion futura (R2).
+
+---
+
+## v2.0.0 — Registro de Entregables
+
+### Fase 0 — Descubrimiento v2 (COMPLETADA)
+
+| ID | Entregable | Path | Responsable | Estado |
+|---|---|---|---|---|
+| F0v2-DEL-001 | Vision del Producto | `docs/entregables/v2/fase-0-descubrimiento/vision-producto.md` | business-analyst | ✅ Completado |
+| F0v2-DEL-002 | Epicas y Features | `docs/entregables/v2/fase-0-descubrimiento/epicas-features.md` | business-analyst | ✅ Completado |
+| F0v2-DEL-003 | Historias de Usuario | `docs/entregables/v2/fase-0-descubrimiento/historias-usuario.md` | business-analyst | ✅ Completado |
+| F0v2-DEL-004 | Design System (reutilizado v1) | `docs/design-system/presentacion-template.html` | business-analyst | ✅ Reutilizado |
+| F0v2-DEL-005 | Backlog Priorizado | `docs/entregables/v2/fase-0-descubrimiento/backlog-priorizado.md` | business-analyst | ✅ Completado |
+| F0v2-DEL-006 | Presentacion de Descubrimiento | `docs/entregables/v2/fase-0-descubrimiento/presentacion-descubrimiento.html` | business-analyst | ✅ Completado |
+| F0v2-DEL-007 | URLs Publicas | `docs/entregables/v2/fase-0-descubrimiento/urls-publicas.md` | project-manager | ✅ Completado |
+
+### Gate de Fase 0 — Descubrimiento v2
+
+| Indicador | Valor |
+|---|---|
+| Fecha de decision | 2026-05-03 |
+| Aprobador | Usuario sponsor |
+| Entregables obligatorios | 7/7 |
+| Completitud documental | 100% |
+| Decision del gate | **APROBADO** |
+| Efecto sobre Fase 1 | **Habilitada** — Inicio v2.0.0 |
+
+### Fase 1 — Inicio v2 (COMPLETADA)
+
+| ID | Entregable | Path | Responsable | Estado |
+|---|---|---|---|---|
+| F1v2-DEL-001 | Acta de Constitución | `docs/entregables/v2/fase-1-inicio/acta-de-constitucion.md` | project-manager | ✅ Completado |
+| F1v2-DEL-002 | Registro de Interesados | `docs/entregables/v2/fase-1-inicio/registro-de-interesados.md` | project-manager | ✅ Completado |
+| F1v2-DEL-003 | Matriz de Riesgos (17 riesgos) | `docs/entregables/v2/fase-1-inicio/matriz-de-riesgos-inicial.md` | project-manager | ✅ Completado |
+| F1v2-DEL-004 | Cronograma Preliminar | `docs/entregables/v2/fase-1-inicio/cronograma-preliminar.md` | project-manager | ✅ Completado |
+| F1v2-DEL-005 | Presentación de Kickoff | `docs/entregables/v2/fase-1-inicio/presentacion-kickoff.html` | project-manager | ✅ Completado |
+
+### Gate de Fase 1 — Inicio v2
+
+| Indicador | Valor |
+|---|---|
+| Fecha de decision | 2026-05-03 |
+| Aprobador | Usuario sponsor |
+| Entregables obligatorios | 5/5 |
+| Completitud documental | 100% |
+| Decision del gate | **APROBADO** |
+| Efecto sobre Fase 2 | **Habilitada** — Analisis Funcional v2.0.0 |
+
+### Fase 2 — Analisis Funcional v2 (COMPLETADA)
+
+| ID | Entregable | Path | Responsable | Estado |
+|---|---|---|---|---|
+| F2v2-DEL-001 | Especificacion Funcional | `docs/entregables/v2/fase-2-analisis/especificacion-funcional.md` | business-analyst | ✅ Completado |
+| F2v2-DEL-002 | Reglas de Negocio | `docs/entregables/v2/fase-2-analisis/reglas-de-negocio.md` | business-analyst | ✅ Completado |
+| F2v2-DEL-003 | Criterios de Aceptacion | `docs/entregables/v2/fase-2-analisis/criterios-de-aceptacion.md` | business-analyst | ✅ Completado |
+| F2v2-DEL-004 | Diagramas de Proceso | `docs/entregables/v2/fase-2-analisis/diagramas-de-proceso.md` | business-analyst | ✅ Completado |
+| F2v2-DEL-005 | Presentacion de Propuesta Funcional | `docs/entregables/v2/fase-2-analisis/presentacion-propuesta-funcional.html` | business-analyst | ✅ Completado |
+
+### Gate de Fase 2 — Analisis Funcional v2
+
+| Indicador | Valor |
+|---|---|
+| Fecha de decision | 2026-05-03 |
+| Aprobador | Usuario sponsor |
+| Entregables obligatorios | 5/5 |
+| Completitud documental | 100% |
+| Decision del gate | **APROBADO** |
+| Efecto sobre Fase 3 | **Habilitada** — Diseno Tecnico v2.0.0 |
+
+### Fase 3 — Diseno Tecnico v2 (COMPLETADA — Gate pendiente)
+
+| ID | Entregable | Path | Responsable | Estado |
+|---|---|---|---|---|
+| F3v2-DEL-001 | Descomposicion Tecnica | `docs/entregables/v2/fase-3-diseno-tecnico/descomposicion-tecnica.md` | tech-lead | ✅ Completado |
+| F3v2-DEL-002 | Documento de Arquitectura | `docs/entregables/v2/fase-3-diseno-tecnico/documento-de-arquitectura.md` | tech-lead | ✅ Completado |
+| F3v2-DEL-003 | Presentacion de Arquitectura | `docs/entregables/v2/fase-3-diseno-tecnico/presentacion-arquitectura.html` | tech-lead | ✅ Completado |
+| F3v2-DEL-004 | URLs Publicas | `docs/entregables/v2/fase-3-diseno-tecnico/urls-publicas.md` | project-manager | ✅ Completado |
+
+### Gate de Fase 3 — Diseno Tecnico v2
+
+| Indicador | Valor |
+|---|---|
+| Fecha de decision | 2026-05-03 |
+| Aprobador | Usuario sponsor |
+| Entregables obligatorios | 3/3 |
+| Completitud documental | 100% |
+| Decision del gate | **PENDIENTE DE APROBACION** |
+| Efecto sobre Fase 4 | **Condicionada** — Construccion v2.0.0 habilitada al aprobar |
+
+### Dashboard de fases — v2.0.0
+
+| Fase | Semaforo | Estado |
+|---|---|---|
+| F0 — Descubrimiento v2 | 🟢 Verde | Completada |
+| F1 — Inicio v2 | 🟢 Verde | Completada |
+| F2 — Analisis Funcional v2 | 🟢 Verde | Completada |
+| F3 — Diseno Tecnico v2 | 🟡 Amarillo | Completada — Gate pendiente |
