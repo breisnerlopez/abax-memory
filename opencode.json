@@ -136,5 +136,22 @@
       }
     }
   },
-  "permission": "allow"
+  "permission": {
+    "bash": {
+      "*": "allow",
+      "git *": "allow",
+      "git push *": "allow",
+      "git push --force *": "ask",
+      "git push -f *": "ask",
+      "git reset --hard *": "ask",
+      "rm -rf *": "ask",
+      "sudo *": "ask"
+    },
+    "edit": "allow",
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "webfetch": "allow",
+    "external_directory": "allow"
+  }
 }
