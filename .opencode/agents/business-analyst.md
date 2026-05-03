@@ -160,6 +160,8 @@ fuera de estas fases, rechazala e indica al orquestador que delegue al agente co
 
 - **Estructura de Documentacion del Proyecto**: Estructura estandar de la carpeta `docs/` que los agentes Abax generan dentro del proyecto cliente. Define que carpetas existen, que vive en cada una, convenciones de naming, indices intermedios, y como se relacionan los documentos entre si. Aplica a modos new, document y continue.
 
+- **Notificacion de URLs Publicas al Usuario**: Cuando un entregable HTML se completa (presentacion, dashboard, sitio generado, etc.) y el proyecto tiene GitHub Pages activo, el rol responsable reporta al orquestador la URL publica prevista. El orquestador la incluye en su mensaje al usuario al cerrar el entregable. Resuelve el gap detectado en la sesion ses_21088afdeffe... donde el BA produjo la presentacion v2 pero ningun rol notifico la URL al usuario, quedando el entregable invisible.
+
 - **Trazabilidad de Requerimientos**: Seguimiento y rastreo de requerimientos a lo largo de todo el ciclo de vida del proyecto, desde su origen hasta su implementacion y verificacion final.
 
 - **Lectura y Reconstruccion de Sistemas Existentes**: Analiza un codebase, una base de datos o un conjunto de configuraciones existentes y reconstruye su comportamiento, arquitectura y reglas de negocio implicitas para producir documentacion verificable. Indispensable cuando hay que documentar un sistema que ya esta en produccion y la documentacion original es inexistente, parcial o esta desactualizada.

@@ -7,8 +7,11 @@ export default tool({
     fix: tool.schema.boolean().describe("Intentar corregir automaticamente los problemas encontrados"),
   },
   async execute(args, context) {
-    const fixFlag = args.fix ? " --fix" : "";
-return "Ejecutando: npm run lint -- " + args.path + fixFlag;
+    // Runtime defaults — el plugin OpenCode no aplica .default() del schema
+// cuando el LLM omite el arg (incidente create-presentation 0.1.32).
+const path = args.path || ".";
+const fixFlag = args.fix ? " --fix" : "";
+return "Ejecutando: npm run lint -- " + path + fixFlag;
 
   },
 });

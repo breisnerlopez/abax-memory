@@ -7,8 +7,12 @@ export default tool({
     path: tool.schema.string().describe("Ruta especifica a ejecutar (opcional, vacio para todos)"),
   },
   async execute(args, context) {
-    const cmd = args.path ? "npm test -- " + args.path : "npm test";
-return "Ejecutando: " + cmd + " (tipo: " + args.test_type + ")";
+    // Runtime defaults — el plugin OpenCode no aplica .default() del schema
+// cuando el LLM omite el arg (incidente create-presentation 0.1.32).
+const testType = args.test_type || "unit";
+const path = args.path || "";
+const cmd = path ? "npm test -- " + path : "npm test";
+return "Ejecutando: " + cmd + " (tipo: " + testType + ")";
 
   },
 });

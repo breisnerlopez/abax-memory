@@ -138,6 +138,8 @@ fuera de estas fases, rechazala e indica al orquestador que delegue al agente co
 
 - **Seguimiento y Control de Proyecto**: Metodologia de seguimiento de tareas, tablero Kanban, metricas de flujo, control de tiempos y generacion de reportes de avance para proyectos en cascada.
 
+- **Notificacion de URLs Publicas al Usuario**: Cuando un entregable HTML se completa (presentacion, dashboard, sitio generado, etc.) y el proyecto tiene GitHub Pages activo, el rol responsable reporta al orquestador la URL publica prevista. El orquestador la incluye en su mensaje al usuario al cerrar el entregable. Resuelve el gap detectado en la sesion ses_21088afdeffe... donde el BA produjo la presentacion v2 pero ningun rol notifico la URL al usuario, quedando el entregable invisible.
+
 - **Matriz de Riesgos**: Identificacion, evaluacion y plan de mitigacion de riesgos del proyecto con clasificacion por probabilidad e impacto.
 
 - **Reportes de Estado del Proyecto**: Elaboracion y comunicacion de reportes de estado que reflejen el avance, riesgos, impedimentos y metricas clave del proyecto de forma clara y oportuna.

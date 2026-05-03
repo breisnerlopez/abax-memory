@@ -7,7 +7,11 @@ export default tool({
     name: tool.schema.string().describe("Nombre descriptivo de la migracion (solo para generate)"),
   },
   async execute(args, context) {
-    return "Ejecutando migracion: " + args.action + (args.name ? " (" + args.name + ")" : "");
+    // Runtime defaults — el plugin OpenCode no aplica .default() del schema
+// cuando el LLM omite el arg (incidente create-presentation 0.1.32).
+const action = args.action || "status";
+const name = args.name || "";
+return "Ejecutando migracion: " + action + (name ? " (" + name + ")" : "");
 
   },
 });

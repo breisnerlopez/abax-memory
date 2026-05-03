@@ -7,9 +7,12 @@ export default tool({
     diagram_type: tool.schema.string().default("flowchart").describe("Tipo de diagrama: flowchart, sequence, classDiagram, erDiagram, gantt, stateDiagram"),
   },
   async execute(args, context) {
-    const validTypes = ["flowchart", "sequence", "classDiagram", "erDiagram", "gantt", "stateDiagram"];
+    // Runtime defaults — el plugin OpenCode no aplica .default() del schema
+// cuando el LLM omite el arg (incidente create-presentation 0.1.32).
+const validTypes = ["flowchart", "sequence", "classDiagram", "erDiagram", "gantt", "stateDiagram"];
 const type = validTypes.includes(args.diagram_type) ? args.diagram_type : "flowchart";
-return "```mermaid\n" + type + "\n" + args.description + "\n```";
+const description = args.description || "(sin descripcion)";
+return "```mermaid\n" + type + "\n" + description + "\n```";
 
   },
 });
