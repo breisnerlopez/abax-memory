@@ -11,6 +11,7 @@ import com.btl.administrador.api.domain.MemoryVersionRecord;
 import com.btl.administrador.api.domain.ProcessingJobType;
 import com.btl.administrador.api.domain.ProcessingStatus;
 import com.btl.administrador.api.domain.ReviewDecision;
+import com.btl.administrador.api.domain.RelationType;
 import com.btl.administrador.api.dto.ApproveMemoryRequest;
 import com.btl.administrador.api.dto.ArchiveMemoryRequest;
 import com.btl.administrador.api.dto.AuditEventResponse;
@@ -28,6 +29,8 @@ import com.btl.administrador.api.integration.git.GitProvider;
 import com.btl.administrador.api.persistence.MemoryRelationRepository;
 import com.btl.administrador.api.persistence.MemoryRepository;
 import com.btl.administrador.api.persistence.MemoryVersionRepository;
+import com.btl.administrador.api.security.MemoryRoles;
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -42,6 +45,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 @ApplicationScoped
 public class MemoryService {
@@ -78,6 +82,9 @@ public class MemoryService {
 
     @Inject
     ValidationService validationService;
+
+    @Inject
+    SecurityIdentity securityIdentity;
 
     @Transactional
     public MemoryResponse createManual(CreateMemoryRequest request) {
@@ -143,6 +150,10 @@ public class MemoryService {
         memoryVersionRepository.save(versionRecord);
         memory.currentVersionId = versionRecord.id;
         memoryRepository.save(memory);
+
+        // ISSUE #10: Materialize extracted relations AFTER memory is persisted to avoid FK violations
+        materializeExtractedRelations(memory);
+
         processingJobService.createIfAbsent(memory.id, versionRecord.id, ProcessingJobType.INDEX_MEMORY);
         auditService.record(memory.id, ENTITY_TYPE, "MEMORY_UPDATED", "Memoria actualizada", memory.commitSha, memory.pullRequestRef);
         return toResponse(memory);
@@ -208,8 +219,16 @@ public class MemoryService {
         return toRelationResponse(relationRef);
     }
 
+    /**
+     * ISSUE #9: api-consumer cannot see memories that are not yet APROBADA.
+     * For api-consumer-only users, non-APROBADA memories return 403.
+     */
     public MemoryResponse getById(String memoryId) {
-        return toResponse(requireMemory(memoryId));
+        MemoryRecord memory = requireMemory(memoryId);
+        if (isApiConsumerOnly() && memory.state != MemoryState.APROBADA) {
+            throw new ApiException(Response.Status.FORBIDDEN.getStatusCode(), "ACCESS_DENIED", "Access denied for this memory state");
+        }
+        return toResponse(memory);
     }
 
     public MemoryTraceabilityResponse traceability(String memoryId) {
@@ -237,8 +256,12 @@ public class MemoryService {
                 events);
     }
 
+    /**
+     * ISSUE #9: api-consumer only sees APROBADA memories in list results.
+     */
     public List<MemoryResponse> list(String type, String state, String origin, String domain, boolean includeArchived) {
         validateListFilters(type, state, origin);
+        Predicate<MemoryRecord> roleFilter = buildRoleFilter();
         return memoryRepository.findAll().stream()
                 .filter(memory -> includeArchived || (memory.state != MemoryState.ARCHIVADA
                         && memory.state != MemoryState.DUPLICADA
@@ -247,6 +270,7 @@ public class MemoryService {
                 .filter(memory -> state == null || memory.state.name().equalsIgnoreCase(state))
                 .filter(memory -> origin == null || memory.origin.name().equalsIgnoreCase(origin))
                 .filter(memory -> domain == null || memory.domains.stream().anyMatch(value -> value.equalsIgnoreCase(domain)))
+                .filter(roleFilter)
                 .sorted(Comparator.comparing(memory -> memory.createdAt))
                 .map(this::toResponse)
                 .toList();
@@ -328,6 +352,9 @@ public class MemoryService {
         memoryVersionRepository.save(versionRecord);
         memoryRecord.currentVersionId = versionRecord.id;
         memoryRepository.save(memoryRecord);
+
+        // ISSUE #10: Materialize extracted relations AFTER memory is persisted to avoid FK violations
+        materializeExtractedRelations(memoryRecord);
 
         // Run AI validation for critical memories before sending to human review
         if (memoryRecord.criticality.requiresHumanApproval()) {
@@ -478,6 +505,33 @@ public class MemoryService {
         return markdown.substring(secondSeparator + 5).trim();
     }
 
+    /**
+     * ISSUE #9: If the current user only has the api-consumer role (and no operator/reviewer/admin/auditor),
+     * return true to restrict access to APROBADA memories only.
+     */
+    private boolean isApiConsumerOnly() {
+        if (securityIdentity == null || securityIdentity.isAnonymous()) {
+            return true;
+        }
+        return securityIdentity.hasRole(MemoryRoles.API_CONSUMER)
+                && !securityIdentity.hasRole(MemoryRoles.MEMORY_OPERATOR)
+                && !securityIdentity.hasRole(MemoryRoles.MEMORY_REVIEWER)
+                && !securityIdentity.hasRole(MemoryRoles.MEMORY_ADMIN)
+                && !securityIdentity.hasRole(MemoryRoles.MEMORY_AUDITOR);
+    }
+
+    /**
+     * ISSUE #9: Build a predicate that filters memories based on the caller's role.
+     * api-consumer-only users can only see APROBADA memories.
+     * Users with elevated roles see all non-excluded states.
+     */
+    private Predicate<MemoryRecord> buildRoleFilter() {
+        if (isApiConsumerOnly()) {
+            return memory -> memory.state == MemoryState.APROBADA;
+        }
+        return memory -> true;
+    }
+
     private List<String> sanitizeList(List<String> input) {
         if (input == null) {
             return List.of();
@@ -489,6 +543,58 @@ public class MemoryService {
             }
         }
         return sanitized;
+    }
+
+    /**
+     * ISSUE #10: Parse extractedRelaciones from metadata and create MemoryRelationRef entries.
+     * Extracted relations are stored as "EntityA - EntityB | EntityC - EntityD".
+     * For each entity mentioned, attempt to find an existing memory by title match
+     * and create a RELACIONADO relation from the current memory to the matched memory.
+     */
+    private void materializeExtractedRelations(MemoryRecord memoryRecord) {
+        String extractedRelaciones = memoryRecord.metadata.get("extractedRelaciones");
+        if (extractedRelaciones == null || extractedRelaciones.isBlank()) {
+            return;
+        }
+
+        String[] relationStrings = extractedRelaciones.split("\\s*\\|\\s*");
+        for (String relationString : relationStrings) {
+            String trimmed = relationString.trim();
+            if (trimmed.isEmpty()) {
+                continue;
+            }
+
+            String[] parts = trimmed.split("\\s*-\\s*");
+            for (String entityName : parts) {
+                String normalizedEntity = entityName.trim().toLowerCase(Locale.ROOT);
+                if (normalizedEntity.isEmpty()) {
+                    continue;
+                }
+
+                // Look for an existing memory whose title contains this entity name
+                memoryRepository.findAll().stream()
+                        .filter(target -> !target.id.equals(memoryRecord.id))
+                        .filter(target -> target.title.toLowerCase(Locale.ROOT).contains(normalizedEntity))
+                        .findFirst()
+                        .ifPresent(targetMemory -> {
+                            // Avoid creating duplicate relations for the same source-target pair
+                            boolean alreadyExists = memoryRelationRepository.findByMemoryId(memoryRecord.id).stream()
+                                    .anyMatch(existing -> existing.targetMemoryId.equals(targetMemory.id)
+                                            && existing.relationType == RelationType.RELACIONADO);
+                            if (!alreadyExists) {
+                                MemoryRelationRef relationRef = new MemoryRelationRef();
+                                relationRef.id = UUID.randomUUID().toString();
+                                relationRef.sourceMemoryId = memoryRecord.id;
+                                relationRef.targetMemoryId = targetMemory.id;
+                                relationRef.relationType = RelationType.RELACIONADO;
+                                relationRef.createdAt = OffsetDateTime.now();
+                                memoryRelationRepository.save(relationRef);
+                                LOG.infov("Materialized extracted relation: {0} -> {1} (RELACIONADO)",
+                                        memoryRecord.id, targetMemory.id);
+                            }
+                        });
+            }
+        }
     }
 
     private MemoryResponse toResponse(MemoryRecord memoryRecord) {

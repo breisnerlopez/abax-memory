@@ -70,9 +70,11 @@ class ServiceTestSupport {
         memoryService.auditService = auditService;
         memoryService.structuredExtractionService = structuredExtractionService;
         memoryService.validationService = validationService;
+        memoryService.securityIdentity = identity("service-test-user", Set.of("memory-operator"));
 
         searchService.searchIndexer = searchIndexer;
         searchService.memoryRepository = memoryRepository;
+        searchService.securityIdentity = identity("service-test-user", Set.of("memory-operator"));
 
         processingWorkerService.processingJobService = processingJobService;
         processingWorkerService.memoryRepository = memoryRepository;
@@ -110,7 +112,9 @@ class ServiceTestSupport {
     }
 
     void useActor(String username, Set<String> roles) {
-        auditService.securityIdentity = identity(username, roles);
+        SecurityIdentity identity = identity(username, roles);
+        auditService.securityIdentity = identity;
+        memoryService.securityIdentity = identity;
     }
 
     private SecurityIdentity identity(String username, Set<String> roles) {

@@ -564,6 +564,53 @@ class MemoryResourceTest {
                 .body("code", equalTo("MEMORY_NOT_FOUND"));
     }
 
+    // ISSUE #9: api-consumer role filtering
+
+    @Test
+    @TestSecurity(user = "operator-user", roles = {"memory-operator"})
+    void list_operatorRole_seesAllNonExcludedMemories() {
+        given().contentType("application/json")
+                .body(memoryPayload("Runbook aprobado", "runbook", "BAJA", List.of("ops"), List.of("a"), "# A", Map.of("fuente", "manual")))
+                .when().post("/api/memorias").then().statusCode(201);
+        given().contentType("application/json")
+                .body(memoryPayload("Incidente en revision", "incidente", "CRITICA", List.of("seguridad"), List.of("b"), "# B", Map.of("fuente", "manual")))
+                .when().post("/api/memorias").then().statusCode(202);
+
+        given()
+                .when()
+                .get("/api/memorias")
+                .then()
+                .statusCode(200)
+                .body("", hasSize(2))
+                .body("state", contains("APROBADA", "EN_REVISION"));
+    }
+
+    @Test
+    @TestSecurity(user = "consumer-user", roles = {"api-consumer"})
+    void list_apiConsumerOnly_afterResetReturnsEmpty() {
+        // After reset there are no APROBADA memories; api-consumer sees empty list.
+        // The role filter prevents leaking non-APROBADA memories.
+        given()
+                .when()
+                .get("/api/memorias")
+                .then()
+                .statusCode(200)
+                .body("", hasSize(0));
+    }
+
+    @Test
+    @TestSecurity(user = "consumer-user", roles = {"api-consumer"})
+    void getById_apiConsumerOnly_missingMemory_returnsNotFound() {
+        // api-consumer trying to access a non-existent memory should get 404,
+        // not leak that a memory exists but is inaccessible.
+        given()
+                .when()
+                .get("/api/memorias/MEM-404")
+                .then()
+                .statusCode(404)
+                .body("code", equalTo("MEMORY_NOT_FOUND"));
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> memoryPayload(String title, String type, String criticality, List<String> domains, List<String> tags,
                                               String markdown, Map<String, String> metadata) {

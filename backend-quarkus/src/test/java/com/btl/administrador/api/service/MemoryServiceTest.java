@@ -311,6 +311,109 @@ class MemoryServiceTest {
                 });
     }
 
+    // ISSUE #9: api-consumer role filtering tests
+
+    @Test
+    void list_apiConsumerOnly_filtersOutNonApprovedMemories() {
+        ServiceTestSupport support = new ServiceTestSupport();
+
+        // Create an APROBADA (low criticality goes directly to APROBADA)
+        MemoryResponse approved = support.memoryService.createManual(new CreateMemoryRequest(
+                "Runbook aprobado", "RUNBOOK", Criticality.BAJA, List.of("OPS"), List.of("guia"),
+                "# Contenido aprobado", Map.of("fuente", "manual"),
+                frontmatter("Runbook aprobado", "runbook", "manual", "baja", List.of("OPS"), "manual")));
+
+        // Create an EN_REVISION (high criticality goes to EN_REVISION)
+        MemoryResponse review = support.memoryService.createManual(new CreateMemoryRequest(
+                "Incidente en revision", "INCIDENTE", Criticality.CRITICA, List.of("SEGURIDAD"), List.of("critico"),
+                "# Contenido en revision", Map.of("fuente", "manual"),
+                frontmatter("Incidente en revision", "incidente", "manual", "critica", List.of("SEGURIDAD"), "manual")));
+
+        // Switch to api-consumer-only
+        support.useActor("consumer-user", Set.of("api-consumer"));
+
+        var results = support.memoryService.list(null, null, null, null, false);
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).id()).isEqualTo(approved.id());
+        assertThat(results.get(0).state()).isEqualTo(MemoryState.APROBADA);
+    }
+
+    @Test
+    void list_elevatedRole_seesAllNonExcludedMemories() {
+        ServiceTestSupport support = new ServiceTestSupport();
+
+        support.memoryService.createManual(new CreateMemoryRequest(
+                "Runbook aprobado", "RUNBOOK", Criticality.BAJA, List.of("OPS"), List.of("guia"),
+                "# Contenido", Map.of("fuente", "manual"),
+                frontmatter("Runbook aprobado", "runbook", "manual", "baja", List.of("OPS"), "manual")));
+
+        support.memoryService.createManual(new CreateMemoryRequest(
+                "Incidente en revision", "INCIDENTE", Criticality.CRITICA, List.of("SEGURIDAD"), List.of("critico"),
+                "# Contenido", Map.of("fuente", "manual"),
+                frontmatter("Incidente en revision", "incidente", "manual", "critica", List.of("SEGURIDAD"), "manual")));
+
+        // Remains as memory-operator (elevated role)
+        var results = support.memoryService.list(null, null, null, null, false);
+        assertThat(results).hasSize(2);
+        assertThat(results).extracting(r -> r.state())
+                .containsExactlyInAnyOrder(MemoryState.APROBADA, MemoryState.EN_REVISION);
+    }
+
+    @Test
+    void getById_apiConsumerOnly_approvedMemory_returnsSuccess() {
+        ServiceTestSupport support = new ServiceTestSupport();
+
+        MemoryResponse approved = support.memoryService.createManual(new CreateMemoryRequest(
+                "Runbook aprobado", "RUNBOOK", Criticality.BAJA, List.of("OPS"), List.of("guia"),
+                "# Contenido", Map.of("fuente", "manual"),
+                frontmatter("Runbook aprobado", "runbook", "manual", "baja", List.of("OPS"), "manual")));
+
+        // Switch to api-consumer-only
+        support.useActor("consumer-user", Set.of("api-consumer"));
+
+        MemoryResponse result = support.memoryService.getById(approved.id());
+        assertThat(result.id()).isEqualTo(approved.id());
+        assertThat(result.state()).isEqualTo(MemoryState.APROBADA);
+    }
+
+    @Test
+    void getById_apiConsumerOnly_nonApprovedMemory_throwsForbidden() {
+        ServiceTestSupport support = new ServiceTestSupport();
+
+        MemoryResponse review = support.memoryService.createManual(new CreateMemoryRequest(
+                "Incidente en revision", "INCIDENTE", Criticality.CRITICA, List.of("SEGURIDAD"), List.of("critico"),
+                "# Contenido", Map.of("fuente", "manual"),
+                frontmatter("Incidente en revision", "incidente", "manual", "critica", List.of("SEGURIDAD"), "manual")));
+
+        assertThat(review.state()).isEqualTo(MemoryState.EN_REVISION);
+
+        // Switch to api-consumer-only
+        support.useActor("consumer-user", Set.of("api-consumer"));
+
+        assertThatThrownBy(() -> support.memoryService.getById(review.id()))
+                .isInstanceOf(ApiException.class)
+                .satisfies(error -> {
+                    ApiException exception = (ApiException) error;
+                    assertThat(exception.getStatus()).isEqualTo(403);
+                    assertThat(exception.getCode()).isEqualTo("ACCESS_DENIED");
+                });
+    }
+
+    @Test
+    void getById_elevatedRole_nonApprovedMemory_returnsSuccess() {
+        ServiceTestSupport support = new ServiceTestSupport();
+
+        MemoryResponse review = support.memoryService.createManual(new CreateMemoryRequest(
+                "Incidente en revision", "INCIDENTE", Criticality.CRITICA, List.of("SEGURIDAD"), List.of("critico"),
+                "# Contenido", Map.of("fuente", "manual"),
+                frontmatter("Incidente en revision", "incidente", "manual", "critica", List.of("SEGURIDAD"), "manual")));
+
+        // Remains as memory-operator (elevated role)
+        MemoryResponse result = support.memoryService.getById(review.id());
+        assertThat(result.id()).isEqualTo(review.id());
+        assertThat(result.state()).isEqualTo(MemoryState.EN_REVISION);
+    }
+
     private Map<String, Object> frontmatter(String title, String type, String origin, String criticality, List<String> domains, String fuente) {
         return Map.of(
                 "title", title,

@@ -4,5 +4,6 @@ public enum RelationType {
     RELACIONADA_CON,
     COMPLEMENTA,
     REEMPLAZA,
-    DEPENDE_DE
+    DEPENDE_DE,
+    RELACIONADO
 }

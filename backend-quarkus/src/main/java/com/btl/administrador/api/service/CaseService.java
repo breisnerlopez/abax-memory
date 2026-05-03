@@ -14,7 +14,9 @@ import jakarta.ws.rs.core.Response;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.jboss.logging.Logger;
@@ -34,8 +36,17 @@ public class CaseService {
     @Inject
     StructuredExtractionService structuredExtractionService;
 
+    private static final Set<String> VALID_PRIORITIES = Set.of("BAJA", "MEDIA", "ALTA", "CRITICA");
+
     @Transactional
     public CaseResponse create(CreateCaseRequest request) {
+        // ISSUE #5: Programmatic validation as defense-in-depth for Bean Validation
+        String normalizedPriority = request.priority().toUpperCase(Locale.ROOT);
+        if (!VALID_PRIORITIES.contains(normalizedPriority)) {
+            throw new ApiException(Response.Status.BAD_REQUEST.getStatusCode(), "INVALID_PRIORITY",
+                    "priority must be one of: BAJA, MEDIA, ALTA, CRITICA");
+        }
+
         CaseRecord caseRecord = new CaseRecord();
         caseRecord.id = "CASO-" + UUID.randomUUID().toString().substring(0, 8);
         caseRecord.origin = request.origin();

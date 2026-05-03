@@ -11,7 +11,9 @@ import com.btl.administrador.api.dto.SearchResultResponse;
 import com.btl.administrador.api.exception.ApiException;
 import com.btl.administrador.api.integration.qdrant.SearchIndexer;
 import com.btl.administrador.api.persistence.MemoryRepository;
+import com.btl.administrador.api.security.MemoryRoles;
 import com.btl.administrador.api.service.model.SearchHit;
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
@@ -32,6 +34,9 @@ public class SearchService {
     @Inject
     MemoryRepository memoryRepository;
 
+    @Inject
+    SecurityIdentity securityIdentity;
+
     public List<SearchResultResponse> search(SearchMemoryRequest request) {
         if (request.topK() <= 0 || request.topK() > 50) {
             throw new ApiException(Response.Status.BAD_REQUEST.getStatusCode(), "INVALID_TOPK", "topK must be between 1 and 50");
@@ -39,9 +44,13 @@ public class SearchService {
 
         validateFilters(request.filtros());
 
+        // ISSUE #9: api-consumer only sees APROBADA memories
+        Predicate<MemoryRecord> roleFilter = buildRoleFilter();
+
         Map<String, MemoryRecord> available = memoryRepository.findAll().stream()
                 .filter(memory -> memory.processingStatus == ProcessingStatus.AVAILABLE)
                 .filter(defaultVisibilityFilter(request.filtros()))
+                .filter(roleFilter)
                 .collect(Collectors.toMap(memory -> memory.id, memory -> memory));
 
         List<SearchHit> hits = searchIndexer.search(request.consulta(), request.topK(), request.filtros());
@@ -90,6 +99,30 @@ public class SearchService {
                 throw new ApiException(Response.Status.BAD_REQUEST.getStatusCode(), "INVALID_FILTER", "Unsupported " + filterName + " filter");
             }
         }
+    }
+
+    /**
+     * ISSUE #9: If the current user only has the api-consumer role (and no operator/reviewer/admin/auditor),
+     * restrict results to APROBADA memories only. Users with elevated roles see all non-excluded states.
+     */
+    private Predicate<MemoryRecord> buildRoleFilter() {
+        if (securityIdentity == null || securityIdentity.isAnonymous()) {
+            // No authenticated user: strictest filter (APROBADA only)
+            return memory -> memory.state == MemoryState.APROBADA;
+        }
+
+        boolean isApiConsumerOnly = securityIdentity.hasRole(MemoryRoles.API_CONSUMER)
+                && !securityIdentity.hasRole(MemoryRoles.MEMORY_OPERATOR)
+                && !securityIdentity.hasRole(MemoryRoles.MEMORY_REVIEWER)
+                && !securityIdentity.hasRole(MemoryRoles.MEMORY_ADMIN)
+                && !securityIdentity.hasRole(MemoryRoles.MEMORY_AUDITOR);
+
+        if (isApiConsumerOnly) {
+            return memory -> memory.state == MemoryState.APROBADA;
+        }
+
+        // Operator, reviewer, admin, auditor: see all states (filtered by defaultVisibilityFilter)
+        return memory -> true;
     }
 
     private Predicate<MemoryRecord> defaultVisibilityFilter(SearchFiltersRequest filters) {
