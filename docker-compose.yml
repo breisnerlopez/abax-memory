@@ -1,0 +1,166 @@
+# ============================================================
+# Abax-Memory — Docker Compose (Desarrollo Local)
+# Stack: Quarkus + PostgreSQL + Qdrant + Keycloak
+# ============================================================
+# Uso:
+#   export OPENAI_API_KEY="sk-..."
+#   docker compose up -d
+#
+# Verificacion:
+#   curl http://localhost:8080/q/health
+#   curl http://localhost:6333/healthz
+#   curl http://localhost:8443/realms/abax-memory
+# ============================================================
+
+version: "3.9"
+
+services:
+  # ==========================================
+  # PostgreSQL — Base de datos operativa
+  # ==========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: abax-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pmoadb
+      POSTGRES_USER: pmoa
+      POSTGRES_PASSWORD: pmoa
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pmoa -d pmoadb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - abax-net
+
+  # ==========================================
+  # Qdrant — Vector DB para embeddings semanticos
+  # ==========================================
+  qdrant:
+    image: qdrant/qdrant:v1.17.1
+    container_name: abax-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"   # REST API
+      - "6334:6334"   # gRPC
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - abax-net
+
+  # ==========================================
+  # Keycloak — Identity Provider (OIDC/JWT/RBAC)
+  # ==========================================
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    container_name: abax-keycloak
+    restart: unless-stopped
+    command:
+      - start-dev
+      - --http-port=8080
+      - --health-enabled=true
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/pmoadb
+      KC_DB_USERNAME: pmoa
+      KC_DB_PASSWORD: pmoa
+    ports:
+      - "8443:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - abax-net
+
+  # ==========================================
+  # Abax-Memory Backend — Quarkus API
+  # ==========================================
+  abax-memory:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/breisnerlopez/abax-memory:latest
+    container_name: abax-memory-backend
+    restart: unless-stopped
+    environment:
+      # === REQUERIDA: OpenAI API Key (nunca hardcodear) ===
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+
+      # === PostgreSQL ===
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgres:5432/pmoadb
+      QUARKUS_DATASOURCE_USERNAME: pmoa
+      QUARKUS_DATASOURCE_PASSWORD: pmoa
+
+      # === Qdrant ===
+      ABAX_QDRANT_HOST: qdrant
+      ABAX_QDRANT_PORT: "6333"
+      ABAX_QDRANT_COLLECTION: abax-memories
+      ABAX_QDRANT_USE_TLS: "false"
+      ABAX_QDRANT_VECTOR_SIZE: "3072"
+
+      # === Keycloak OIDC ===
+      QUARKUS_OIDC_AUTH_SERVER_URL: http://keycloak:8080/realms/abax-memory
+      QUARKUS_OIDC_CLIENT_ID: abax-memory-api
+      QUARKUS_OIDC_CREDENTIALS_SECRET: ZN8NB5raPHtfYozXLVrEGnbBdXI48BTI
+      MP_JWT_VERIFY_ISSUER: http://keycloak:8080/realms/abax-memory
+      MP_JWT_VERIFY_AUDIENCES: abax-memory-api
+
+      # === OpenAI Validation Model ===
+      ABAX_OPENAI_VALIDATION_MODEL: gpt-4o
+
+      # === Processing ===
+      ABAX_PROCESSING_AUTO_RUN: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/q/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - abax-net
+
+# ==========================================
+# Volumenes persistentes
+# ==========================================
+volumes:
+  pgdata:
+    name: abax-pgdata
+  qdrant_storage:
+    name: abax-qdrant-storage
+
+# ==========================================
+# Red interna
+# ==========================================
+networks:
+  abax-net:
+    name: abax-net
+    driver: bridge

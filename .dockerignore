@@ -1,0 +1,37 @@
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OpenCode
+.opencode/
+
+# Docs (not needed in image)
+docs/
+
+# Frontend (not part of backend image)
+frontend/
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Build artifacts (only the final JAR is needed)
+backend-quarkus/target/*.jar.original
+backend-quarkus/target/classes/
+backend-quarkus/target/generated-sources/
+backend-quarkus/target/maven-status/
+backend-quarkus/target/quarkus-artifact.properties
+
+# Node
+node_modules/
+package-lock.json
+
+# Env files (secrets)
+.env
+*.env
