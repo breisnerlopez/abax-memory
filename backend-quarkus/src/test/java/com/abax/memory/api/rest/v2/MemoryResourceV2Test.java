@@ -476,4 +476,80 @@ class MemoryResourceV2Test {
                 .then()
                 .statusCode(400);
     }
+
+    @Test
+    @Order(15)
+    @DisplayName("POST /api/v2/memories — invalid MemoryKind returns 400 not 500 (BUG-013)")
+    void createMemory_invalidKind_returns400() {
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "title", "Invalid Kind Test",
+                        "content", "Testing invalid kind handling.",
+                        "kind", "INVALID_KIND",
+                        "sensitivityLevel", "PUBLIC"
+                ))
+                .when()
+                .post(BASE_PATH)
+                .then()
+                .statusCode(400)
+                .body("errorCode", equalTo("INVALID_REQUEST"))
+                .body("message", containsString("MemoryKind"));
+    }
+
+    @Test
+    @Order(16)
+    @DisplayName("PUT /api/v2/memories/{id} — invalid LifecycleState returns 400 not 500 (BUG-014)")
+    void updateMemory_invalidLifecycleState_returns400() {
+        // Create a memory first
+        String id = given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "title", "Lifecycle State Test",
+                        "content", "Testing invalid lifecycle state handling."
+                ))
+                .when()
+                .post(BASE_PATH)
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        // Attempt update with an invalid lifecycle state value
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "title", "Updated Title",
+                        "lifecycleState", "INVALID_STATE"
+                ))
+                .when()
+                .put(BASE_PATH + "/" + id)
+                .then()
+                .statusCode(400)
+                .body("errorCode", equalTo("INVALID_REQUEST"))
+                .body("message", containsString("LifecycleState"));
+    }
+
+    @Test
+    @Order(17)
+    @DisplayName("POST /api/v2/memories — invalid SensitivityLevel returns 400 not 500")
+    void createMemory_invalidSensitivity_returns400() {
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "title", "Invalid Sensitivity Test",
+                        "content", "Testing invalid sensitivity handling.",
+                        "sensitivityLevel", "TOP_SECRET"
+                ))
+                .when()
+                .post(BASE_PATH)
+                .then()
+                .statusCode(400)
+                .body("errorCode", equalTo("INVALID_REQUEST"))
+                .body("message", containsString("SensitivityLevel"));
+    }
 }

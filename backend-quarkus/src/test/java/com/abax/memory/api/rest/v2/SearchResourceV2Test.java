@@ -381,6 +381,60 @@ class SearchResourceV2Test {
         }
     }
 
+    // ── BUG-004: Relation endpoint regression tests ──────────────────
+
+    @Test
+    @Order(18)
+    @DisplayName("POST /api/v2/relations — accepts 'type' alias for relationType (BUG-004)")
+    void createRelation_typeAlias_returns201() {
+        String sourceId = createMemory(TENANT_A, "Alias Source",
+                "Source for alias test.", "FACT", "INTERNAL");
+        String targetId = createMemory(TENANT_A, "Alias Target",
+                "Target for alias test.", "FACT", "INTERNAL");
+
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "sourceId", sourceId,
+                        "targetId", targetId,
+                        "type", "RELATED_TO"
+                ))
+                .when()
+                .post("/api/v2/relations")
+                .then()
+                .statusCode(201)
+                .body("id", notNullValue())
+                .body("sourceId", equalTo(sourceId))
+                .body("targetId", equalTo(targetId))
+                .body("relationType", equalTo("RELATED_TO"));
+    }
+
+    @Test
+    @Order(19)
+    @DisplayName("POST /api/v2/relations — invalid RelationType returns 400 not 500 (BUG-004)")
+    void createRelation_invalidType_returns400() {
+        String sourceId = createMemory(TENANT_A, "InvalidType Source",
+                "Source for invalid type test.", "FACT", "INTERNAL");
+        String targetId = createMemory(TENANT_A, "InvalidType Target",
+                "Target for invalid type test.", "FACT", "INTERNAL");
+
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "sourceId", sourceId,
+                        "targetId", targetId,
+                        "relationType", "NONEXISTENT_TYPE"
+                ))
+                .when()
+                .post("/api/v2/relations")
+                .then()
+                .statusCode(400)
+                .body("errorCode", equalTo("INVALID_REQUEST"))
+                .body("message", containsString("RelationType"));
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────
 
     private String createMemory(String tenantId, String title, String content, String kind, String sensitivity) {
