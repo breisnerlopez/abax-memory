@@ -2,6 +2,8 @@ package com.abax.memory.infrastructure.persistence;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -39,6 +41,7 @@ public class AuditRecordEntity extends PanacheEntityBase {
     @Column(name = "action", nullable = false, updatable = false, length = 30)
     private String action;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "diff", nullable = false, updatable = false, columnDefinition = "JSONB")
     private String diff = "{}";
 
