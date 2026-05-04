@@ -471,4 +471,50 @@ class SearchResourceV2Test {
                 .extract()
                 .path("id");
     }
+
+    // ── Admin Endpoint Tests ──────────────────────────────────────────
+
+    @Test
+    @Order(30)
+    @DisplayName("GET /api/v2/admin/profiles — returns 200 with valid response structure")
+    void listProfiles_withAdminRole_returns200() {
+        // Profiles may or may not be seeded depending on Flyway state.
+        // This test verifies endpoint accessibility and valid JSON contract.
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .header("X-Role", "admin")
+                .when()
+                .get("/api/v2/admin/profiles")
+                .then()
+                .statusCode(200)
+                .body("$", notNullValue());
+    }
+
+    @Test
+    @Order(31)
+    @DisplayName("GET /api/v2/admin/profiles — returns 403 without admin role")
+    void listProfiles_withoutAdminRole_returns403() {
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .header("X-Role", "viewer")
+                .when()
+                .get("/api/v2/admin/profiles")
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
+    @Order(32)
+    @DisplayName("GET /api/v2/admin/health — returns 200 with status and timestamp")
+    void health_returns200() {
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .when()
+                .get("/api/v2/admin/health")
+                .then()
+                .statusCode(200)
+                .body("status", equalTo("OK"))
+                .body("timestamp", notNullValue())
+                .time(org.hamcrest.Matchers.lessThan(2000L));
+    }
 }

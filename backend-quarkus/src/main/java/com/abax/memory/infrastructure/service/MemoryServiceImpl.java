@@ -469,6 +469,49 @@ public class MemoryServiceImpl implements MemoryService {
         return MemoryResponse.from(entity);
     }
 
+    /**
+     * Returns a memory fragment to DRAFT for rework (PENDING → DRAFT).
+     * Used by the unified review endpoint when action=REJECT.
+     *
+     * @param fragmentId UUID of the memory fragment
+     * @param tenantId   tenant scope identifier
+     * @param reviewerId identifier of the reviewer
+     * @param comment    rework reason (optional)
+     * @return updated MemoryResponse
+     * @throws NotFoundException if fragment not found or cross-tenant
+     * @throws IllegalArgumentException if transition is invalid
+     */
+    @Override
+    @Transactional
+    public MemoryResponse returnToDraft(UUID fragmentId, String tenantId, String reviewerId, String comment) {
+        var entity = requireEntityForTenant(fragmentId, tenantId);
+        var current = entity.getLifecycleState();
+
+        if (!current.canTransitionTo(LifecycleState.DRAFT)) {
+            throw new IllegalArgumentException(
+                    "Cannot return to DRAFT from lifecycle state " + current);
+        }
+
+        entity.setLifecycleState(LifecycleState.DRAFT);
+        entity.setReviewerId(reviewerId);
+        if (comment != null && !comment.isBlank()) {
+            entity.setReviewComment(comment);
+        }
+        entity.persist();
+        LOG.infov("Memory returned to DRAFT for rework: id={0}, tenant={1}, reviewer={2}",
+                fragmentId, tenantId, reviewerId);
+
+        // B3: Audit
+        auditService.recordAction(fragmentId, "REVIEW_REJECTED", reviewerId,
+                tenantId, Map.of(
+                        "previousState", current.name(),
+                        "newState", LifecycleState.DRAFT.name(),
+                        "decision", "rejected",
+                        "comment", comment != null ? comment : ""));
+
+        return MemoryResponse.from(entity);
+    }
+
     // ── EP-003: Scope Validation (A3) ───────────────────────────────
 
     /**

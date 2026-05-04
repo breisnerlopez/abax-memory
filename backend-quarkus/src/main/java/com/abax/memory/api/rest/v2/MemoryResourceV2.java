@@ -1,10 +1,16 @@
 package com.abax.memory.api.rest.v2;
 
 import com.abax.memory.api.dto.v2.CreateMemoryRequest;
+import com.abax.memory.api.dto.v2.ExtractRequest;
+import com.abax.memory.api.dto.v2.ExtractResponse;
 import com.abax.memory.api.dto.v2.MemoryResponse;
+import com.abax.memory.api.dto.v2.ReviewRequest;
 import com.abax.memory.api.dto.v2.SearchRequest;
 import com.abax.memory.api.dto.v2.SearchResponse;
 import com.abax.memory.api.dto.v2.UpdateMemoryRequest;
+import com.abax.memory.domain.model.AuditRecord;
+import com.abax.memory.domain.model.ExtractedEntity;
+import com.abax.memory.domain.service.AuditService;
 import com.abax.memory.domain.service.MemoryService;
 import com.abax.memory.infrastructure.security.TenantContext;
 import jakarta.inject.Inject;
@@ -30,6 +36,8 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -65,6 +73,9 @@ public class MemoryResourceV2 {
     MemoryService memoryService;
 
     @Inject
+    AuditService auditService;
+
+    @Inject
     TenantContext tenantContext;
 
     // ── Tenant resolution ───────────────────────────────────────────
@@ -80,6 +91,18 @@ public class MemoryResourceV2 {
         // In production, this will extract tenant_id from the JWT claim.
         // REPLACE_BEFORE_PROD
         tenantContext.resolveFromHeader(headerValue);
+        return tenantContext.getCurrentTenantId();
+    }
+
+    /**
+     * Resolves the current actor identity.
+     *
+     * <p>MOCK: Uses tenant ID as actor — no OIDC user identity available.
+     * REPLACE_BEFORE_PROD with JWT preferred_username or sub claim.</p>
+     */
+    // MOCK: tenant-as-actor identity resolution.
+    // REPLACE_BEFORE_PROD
+    private String resolveActorId() {
         return tenantContext.getCurrentTenantId();
     }
 
@@ -193,6 +216,105 @@ public class MemoryResourceV2 {
         String tenantId = resolveTenant(xTenantId);
         memoryService.softDeleteV2(id, tenantId);
         return Response.noContent().build();
+    }
+
+    // ── Review Workflow (EP-006 / UAT-S05) ───────────────────────────
+
+    /**
+     * Review workflow endpoint (UAT-S05).
+     *
+     * <p>Dispatches to the appropriate review method based on the action:
+     * <ul>
+     *   <li>{@code REQUEST} — submit for review: DRAFT → PENDING</li>
+     *   <li>{@code APPROVE} — approve and activate: PENDING → ACTIVE</li>
+     *   <li>{@code REJECT}  — send back for rework: PENDING → DRAFT</li>
+     * </ul>
+     */
+    @PUT
+    @Path("/{id}/review")
+    @Operation(summary = "Review a memory fragment", description = "Performs a review action on a memory fragment: request review, approve, or reject.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Review action completed successfully",
+                    content = @Content(schema = @Schema(implementation = MemoryResponse.class))),
+            @APIResponse(responseCode = "400", description = "Validation error or invalid lifecycle transition"),
+            @APIResponse(responseCode = "404", description = "Memory not found or cross-tenant access"),
+            @APIResponse(responseCode = "403", description = "Forbidden")
+    })
+    public Response reviewMemory(
+            @HeaderParam("X-Tenant-Id") String xTenantId,
+            @Parameter(description = "Memory fragment UUID", required = true)
+            @PathParam("id") UUID id,
+            @Valid ReviewRequest request) {
+
+        String tenantId = resolveTenant(xTenantId);
+        String actorId = resolveActorId();
+
+        MemoryResponse response = switch (request.action()) {
+            case REQUEST -> memoryService.requestReview(id, tenantId, actorId);
+            case APPROVE -> memoryService.approveReview(id, tenantId, actorId, request.comment());
+            case REJECT  -> memoryService.returnToDraft(id, tenantId, actorId, request.comment());
+        };
+
+        return Response.ok(response).build();
+    }
+
+    // ── Audit Trail (UAT-S06) ────────────────────────────────────────
+
+    /**
+     * Retrieves the audit trail for a memory fragment (UAT-S06).
+     *
+     * <p>Returns audit records ordered by {@code created_at} descending,
+     * scoped to the current tenant.</p>
+     */
+    @GET
+    @Path("/{id}/audit")
+    @Operation(summary = "Get audit trail", description = "Returns the full audit trail for a memory fragment, ordered by timestamp descending.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Audit trail retrieved"),
+            @APIResponse(responseCode = "404", description = "Memory not found or cross-tenant access"),
+            @APIResponse(responseCode = "403", description = "Forbidden")
+    })
+    public List<AuditRecord> getAuditTrail(
+            @HeaderParam("X-Tenant-Id") String xTenantId,
+            @Parameter(description = "Memory fragment UUID", required = true)
+            @PathParam("id") UUID id) {
+
+        String tenantId = resolveTenant(xTenantId);
+        // Verify the memory exists and belongs to the tenant
+        memoryService.getByIdV2(id, tenantId); // throws 404 if not found / cross-tenant
+        return auditService.findByMemoryId(id);
+    }
+
+    // ── Entity Extraction (UAT-S08) ──────────────────────────────────
+
+    /**
+     * Extracts named entities from text content (UAT-S08).
+     *
+     * <p>Does NOT persist anything — only analyzes and returns entities.
+     * Uses the configured {@code LlmService} (MockLlmService in test,
+     * OpenAiLlmService in production).</p>
+     */
+    @POST
+    @Path("/extract")
+    @Operation(summary = "Extract entities", description = "Extracts named entities from the provided text content using the LLM service.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Entities extracted successfully",
+                    content = @Content(schema = @Schema(implementation = ExtractResponse.class))),
+            @APIResponse(responseCode = "400", description = "Validation error — content is required"),
+            @APIResponse(responseCode = "403", description = "Forbidden")
+    })
+    public ExtractResponse extractEntities(
+            @HeaderParam("X-Tenant-Id") String xTenantId,
+            @Valid ExtractRequest request) {
+
+        String tenantId = resolveTenant(xTenantId);
+        List<ExtractedEntity> entities = memoryService.extractEntities(request.content(), tenantId);
+
+        List<ExtractResponse.ExtractedEntityDto> dtos = entities.stream()
+                .map(e -> new ExtractResponse.ExtractedEntityDto(e.name(), e.type(), e.confidence()))
+                .toList();
+
+        return new ExtractResponse(dtos);
     }
 
     /**

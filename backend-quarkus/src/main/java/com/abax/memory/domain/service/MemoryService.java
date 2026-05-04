@@ -144,6 +144,20 @@ public interface MemoryService {
      */
     MemoryResponse rejectReview(UUID fragmentId, String tenantId, String reviewerId, String comment);
 
+    /**
+     * Returns a memory fragment to DRAFT for rework (PENDING → DRAFT).
+     * Used by the unified review endpoint when action=REJECT.
+     *
+     * @param fragmentId UUID of the memory fragment
+     * @param tenantId   tenant scope identifier
+     * @param reviewerId identifier of the reviewer
+     * @param comment    rework reason (optional)
+     * @return updated MemoryResponse
+     * @throws jakarta.ws.rs.NotFoundException if fragment not found or cross-tenant
+     * @throws IllegalArgumentException if transition is invalid
+     */
+    MemoryResponse returnToDraft(UUID fragmentId, String tenantId, String reviewerId, String comment);
+
     // ── EP-003: Scope Validation ────────────────────────────────────
 
     /**

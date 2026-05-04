@@ -16,10 +16,12 @@ import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.containsString;
 
 /**
@@ -551,5 +553,276 @@ class MemoryResourceV2Test {
                 .statusCode(400)
                 .body("errorCode", equalTo("INVALID_REQUEST"))
                 .body("message", containsString("SensitivityLevel"));
+    }
+
+    // ── Review Workflow Tests (UAT-S05) ──────────────────────────────
+
+    @Test
+    @Order(20)
+    @DisplayName("PUT /api/v2/memories/{id}/review — REQUEST moves DRAFT → PENDING")
+    void reviewMemory_request_returns200() {
+        // Create memory in DRAFT
+        String id = given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "title", "Review Request Test",
+                        "content", "Content to be reviewed."
+                ))
+                .when()
+                .post(BASE_PATH)
+                .then()
+                .statusCode(201)
+                .body("lifecycleState", equalTo("draft"))
+                .extract()
+                .path("id");
+
+        // Request review: DRAFT → PENDING
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "action", "REQUEST",
+                        "comment", "Please review this memory."
+                ))
+                .when()
+                .put(BASE_PATH + "/" + id + "/review")
+                .then()
+                .statusCode(200)
+                .body("id", equalTo(id))
+                .body("lifecycleState", equalTo("pending"));
+    }
+
+    @Test
+    @Order(21)
+    @DisplayName("PUT /api/v2/memories/{id}/review — APPROVE moves PENDING → ACTIVE")
+    void reviewMemory_approve_returns200() {
+        // Create memory and move to PENDING
+        String id = given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "title", "Approve Test",
+                        "content", "Content to be approved."
+                ))
+                .when()
+                .post(BASE_PATH)
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        // REQUEST: DRAFT → PENDING
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of("action", "REQUEST"))
+                .when()
+                .put(BASE_PATH + "/" + id + "/review")
+                .then()
+                .statusCode(200)
+                .body("lifecycleState", equalTo("pending"));
+
+        // APPROVE: PENDING → ACTIVE
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "action", "APPROVE",
+                        "comment", "Looks good, approved."
+                ))
+                .when()
+                .put(BASE_PATH + "/" + id + "/review")
+                .then()
+                .statusCode(200)
+                .body("id", equalTo(id))
+                .body("lifecycleState", equalTo("active"))
+                .body("isConsumerVisible", equalTo(true));
+    }
+
+    @Test
+    @Order(22)
+    @DisplayName("PUT /api/v2/memories/{id}/review — REJECT moves PENDING → DRAFT")
+    void reviewMemory_reject_returns200() {
+        // Create memory and move to PENDING
+        String id = given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "title", "Reject Test",
+                        "content", "Content to be rejected."
+                ))
+                .when()
+                .post(BASE_PATH)
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        // REQUEST: DRAFT → PENDING
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of("action", "REQUEST"))
+                .when()
+                .put(BASE_PATH + "/" + id + "/review")
+                .then()
+                .statusCode(200);
+
+        // REJECT: PENDING → DRAFT
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "action", "REJECT",
+                        "comment", "Needs more detail in the root cause analysis."
+                ))
+                .when()
+                .put(BASE_PATH + "/" + id + "/review")
+                .then()
+                .statusCode(200)
+                .body("id", equalTo(id))
+                .body("lifecycleState", equalTo("draft"));
+    }
+
+    @Test
+    @Order(23)
+    @DisplayName("PUT /api/v2/memories/{id}/review — invalid action returns 400")
+    void reviewMemory_invalidAction_returns400() {
+        // First create a memory
+        String id = given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "title", "Invalid Action Test",
+                        "content", "Testing invalid review action."
+                ))
+                .when()
+                .post(BASE_PATH)
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        // Send invalid action
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "action", "INVALID_ACTION"
+                ))
+                .when()
+                .put(BASE_PATH + "/" + id + "/review")
+                .then()
+                .statusCode(400);
+    }
+
+    // ── Audit Trail Tests (UAT-S06) ──────────────────────────────────
+
+    @Test
+    @Order(24)
+    @DisplayName("GET /api/v2/memories/{id}/audit — returns audit records")
+    void getAuditTrail_returns200() {
+        // Create a memory (generates CREATE audit record)
+        String id = given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "title", "Audit Trail Test",
+                        "content", "Testing audit trail retrieval."
+                ))
+                .when()
+                .post(BASE_PATH)
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        // Request review to generate more audit records
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of("action", "REQUEST"))
+                .when()
+                .put(BASE_PATH + "/" + id + "/review")
+                .then()
+                .statusCode(200);
+
+        // Get audit trail
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .when()
+                .get(BASE_PATH + "/" + id + "/audit")
+                .then()
+                .statusCode(200)
+                .body("$", hasSize(greaterThanOrEqualTo(2)))          // at least CREATE + REVIEW_REQUESTED
+                .body("action", hasItems("CREATE", "REVIEW_REQUESTED"))
+                .body("[0].memoryId", equalTo(id))
+                .body("[0].createdAt", notNullValue());
+    }
+
+    @Test
+    @Order(25)
+    @DisplayName("GET /api/v2/memories/{id}/audit — returns 404 for non-existent memory")
+    void getAuditTrail_nonExistent_returns404() {
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .when()
+                .get(BASE_PATH + "/" + UUID.randomUUID() + "/audit")
+                .then()
+                .statusCode(404);
+    }
+
+    // ── Entity Extraction Tests (UAT-S08) ────────────────────────────
+
+    @Test
+    @Order(26)
+    @DisplayName("POST /api/v2/memories/extract — extracts entities from text")
+    void extractEntities_returns200() {
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "content", "The server outage on 2024-03-15 was caused by a memory leak in nginx. John from DevOps resolved it by restarting the service. Ticket PROJ-1234."
+                ))
+                .when()
+                .post(BASE_PATH + "/extract")
+                .then()
+                .statusCode(200)
+                .body("entities", notNullValue())
+                .body("entities.size()", greaterThan(0))
+                .body("entities[0].name", notNullValue())
+                .body("entities[0].type", notNullValue())
+                .body("entities[0].confidence", notNullValue());
+    }
+
+    @Test
+    @Order(27)
+    @DisplayName("POST /api/v2/memories/extract — returns 400 when content is blank")
+    void extractEntities_blankContent_returns400() {
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "content", "  "
+                ))
+                .when()
+                .post(BASE_PATH + "/extract")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    @Order(28)
+    @DisplayName("POST /api/v2/memories/extract — returns 400 when content is missing")
+    void extractEntities_missingContent_returns400() {
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of())
+                .when()
+                .post(BASE_PATH + "/extract")
+                .then()
+                .statusCode(400);
     }
 }

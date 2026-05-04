@@ -295,4 +295,68 @@ public class SearchResourceV2 {
                 "tenantId", tenantId
         )).build();
     }
+
+    /**
+     * Lists available domain profiles (UAT-S03 / HU-002.1.1).
+     *
+     * <p>Returns all active profiles with name, description, and config.
+     * Admin-only: requires {@code X-Role: admin} header.</p>
+     */
+    @GET
+    @Path("/admin/profiles")
+    @Tag(name = "Admin V2")
+    @Operation(summary = "List domain profiles", description = "Returns all active domain profiles with their configuration.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Profiles listed"),
+            @APIResponse(responseCode = "403", description = "Forbidden — not an admin")
+    })
+    public List<Map<String, Object>> listProfiles(
+            @HeaderParam("X-Tenant-Id") String xTenantId,
+            @HeaderParam("X-Role") String xRole) {
+        // MOCK: RBAC simulation via X-Role header.
+        // REPLACE_BEFORE_PROD with OIDC role claim validation.
+        if (xRole == null || !"admin".equalsIgnoreCase(xRole.trim())) {
+            throw new SecurityException("Admin role required to list profiles");
+        }
+
+        resolveTenant(xTenantId);
+        return com.abax.memory.infrastructure.persistence.DomainProfileEntity.listActive()
+                .stream()
+                .map(p -> {
+                    var profile = (com.abax.memory.infrastructure.persistence.DomainProfileEntity) p;
+                    return Map.<String, Object>of(
+                            "id", profile.getId().toString(),
+                            "name", profile.getName(),
+                            "version", profile.getVersion(),
+                            "description", profile.getDescription() != null ? profile.getDescription() : "",
+                            "active", profile.isActive(),
+                            "createdAt", profile.getCreatedAt() != null ? profile.getCreatedAt().toString() : null,
+                            "updatedAt", profile.getUpdatedAt() != null ? profile.getUpdatedAt().toString() : null
+                    );
+                })
+                .toList();
+    }
+
+    /**
+     * Health check endpoint for latency measurement (UAT-S10).
+     *
+     * <p>Returns a simple JSON response with status and timestamp.
+     * No heavy logic — designed for pure round-trip latency measurement.</p>
+     */
+    @GET
+    @Path("/admin/health")
+    @Tag(name = "Admin V2")
+    @Operation(summary = "Health check", description = "Simple health check endpoint for latency measurement. Returns status and current timestamp.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Service is healthy")
+    })
+    public Response health(
+            @HeaderParam("X-Tenant-Id") String xTenantId) {
+        // Resolve tenant to validate the header, but do no heavy work
+        resolveTenant(xTenantId);
+        return Response.ok(Map.of(
+                "status", "OK",
+                "timestamp", java.time.Instant.now().toString()
+        )).build();
+    }
 }
