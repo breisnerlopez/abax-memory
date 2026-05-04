@@ -1,0 +1,92 @@
+package com.abax.memory.api.dto.v2;
+
+import com.abax.memory.domain.enums.LifecycleState;
+import com.abax.memory.domain.enums.MemoryKind;
+import com.abax.memory.domain.enums.SensitivityLevel;
+import jakarta.validation.constraints.NotBlank;
+
+import java.util.List;
+
+/**
+ * Request DTO for POST /api/v2/search — unified search combining
+ * vector similarity and graph expansion transparently.
+ *
+ * <p>Extends the basic search parameters with graph-expansion
+ * controls. When {@code expandGraph} is {@code true}, the search
+ * engine expands the relationship graph from the top-K vector
+ * results and merges connected nodes into the result set.</p>
+ *
+ * <p>References: EP-005 v2, Unified Search</p>
+ */
+public class UnifiedSearchRequest {
+
+    @NotBlank(message = "query is required")
+    private String query;
+
+    private List<MemoryKind> kinds;
+    private List<LifecycleState> lifecycleStates;
+    private SensitivityLevel sensitivityMax;
+    private List<String> scopeIds;
+
+    private int page = 0;
+    private int size = 20;
+
+    private boolean expandGraph = true;
+    private int graphDepth = 2;
+    private int graphTopK = 5;
+
+    public UnifiedSearchRequest() {
+    }
+
+    // ── Convenience constructor for tests ───────────────────────────
+
+    public UnifiedSearchRequest(String query, List<MemoryKind> kinds,
+                                 List<LifecycleState> lifecycleStates,
+                                 SensitivityLevel sensitivityMax,
+                                 List<String> scopeIds,
+                                 int page, int size,
+                                 boolean expandGraph, int graphDepth, int graphTopK) {
+        this.query = query;
+        this.kinds = kinds;
+        this.lifecycleStates = lifecycleStates;
+        this.sensitivityMax = sensitivityMax;
+        this.scopeIds = scopeIds;
+        this.page = page;
+        this.size = size;
+        this.expandGraph = expandGraph;
+        this.graphDepth = graphDepth;
+        this.graphTopK = graphTopK;
+    }
+
+    // ── Getters / Setters ───────────────────────────────────────────
+
+    public String getQuery() { return query; }
+    public void setQuery(String query) { this.query = query; }
+
+    public List<MemoryKind> getKinds() { return kinds; }
+    public void setKinds(List<MemoryKind> kinds) { this.kinds = kinds; }
+
+    public List<LifecycleState> getLifecycleStates() { return lifecycleStates; }
+    public void setLifecycleStates(List<LifecycleState> lifecycleStates) { this.lifecycleStates = lifecycleStates; }
+
+    public SensitivityLevel getSensitivityMax() { return sensitivityMax; }
+    public void setSensitivityMax(SensitivityLevel sensitivityMax) { this.sensitivityMax = sensitivityMax; }
+
+    public List<String> getScopeIds() { return scopeIds; }
+    public void setScopeIds(List<String> scopeIds) { this.scopeIds = scopeIds; }
+
+    public int getPage() { return page; }
+    public void setPage(int page) { this.page = page; }
+
+    public int getSize() { return size; }
+    public void setSize(int size) { this.size = size; }
+
+    public boolean isExpandGraph() { return expandGraph; }
+    public void setExpandGraph(boolean expandGraph) { this.expandGraph = expandGraph; }
+
+    public int getGraphDepth() { return graphDepth; }
+    public void setGraphDepth(int graphDepth) { this.graphDepth = graphDepth; }
+
+    public int getGraphTopK() { return graphTopK; }
+    public void setGraphTopK(int graphTopK) { this.graphTopK = graphTopK; }
+}

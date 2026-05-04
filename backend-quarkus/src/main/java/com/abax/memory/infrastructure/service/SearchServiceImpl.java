@@ -3,8 +3,11 @@ package com.abax.memory.infrastructure.service;
 import com.abax.memory.api.dto.v2.GraphEdge;
 import com.abax.memory.api.dto.v2.GraphResponse;
 import com.abax.memory.api.dto.v2.MemoryResponse;
+import com.abax.memory.api.dto.v2.ScoredMemory;
 import com.abax.memory.api.dto.v2.SearchResponse;
 import com.abax.memory.api.dto.v2.SemanticSearchRequest;
+import com.abax.memory.api.dto.v2.UnifiedSearchRequest;
+import com.abax.memory.api.dto.v2.UnifiedSearchResponse;
 import com.abax.memory.domain.enums.LifecycleState;
 import com.abax.memory.domain.enums.MemoryKind;
 import com.abax.memory.domain.enums.SensitivityLevel;
@@ -189,6 +192,95 @@ public class SearchServiceImpl implements SearchService {
         Map<String, Map<String, Long>> facets = buildResultFacets(allResults);
 
         return new SearchResponse(pageItems, allResults.size(), page, size, facets);
+    }
+
+    // ── Unified Search ───────────────────────────────────────────────
+
+    @Override
+    public UnifiedSearchResponse unifiedSearch(UnifiedSearchRequest request, String tenantId) {
+        int page = Math.max(0, request.getPage());
+        int size = Math.max(1, Math.min(100, request.getSize()));
+
+        // Step 1: hybrid search (vector + keyword) — retrieve 2x size for richer merge pool
+        SemanticSearchRequest semiRequest = new SemanticSearchRequest(
+                request.getQuery(),
+                request.getKinds(),
+                request.getLifecycleStates(),
+                request.getSensitivityMax(),
+                request.getScopeIds(),
+                null, // fromDate — not used in unified search v1
+                null, // toDate
+                0,    // page 0 — we paginate after merge
+                Math.max(size * 2, 40), // wider retrieval
+                10    // topK not relevant at this stage
+        );
+        SearchResponse vectorResults = hybridSearch(semiRequest, tenantId);
+
+        Set<UUID> seenIds = new HashSet<>();
+        List<ScoredMemory> unified = new ArrayList<>();
+        int graphContributions = 0;
+
+        // Step 2: add vector (hybrid) results — assign score from hybrid ranking
+        // Note: hybridSearch already sorted results by hybrid score; we preserve the
+        // original order for relative ranking but normalize scores for graph blending.
+        for (int i = 0; i < vectorResults.items().size(); i++) {
+            MemoryResponse item = vectorResults.items().get(i);
+            seenIds.add(item.id());
+            // Normalize positional score: top result gets ~1.0, decaying linearly
+            double normalizedScore = 1.0 - ((double) i / Math.max(vectorResults.items().size(), 1)) * 0.3;
+            MemoryResponse scoredItem = withScore(item, normalizedScore);
+            unified.add(new ScoredMemory(scoredItem, "vector"));
+        }
+
+        // Step 3: expand graph from top-K results
+        if (request.isExpandGraph() && !vectorResults.items().isEmpty()) {
+            int topK = Math.max(1, Math.min(request.getGraphTopK(), vectorResults.items().size()));
+            List<MemoryResponse> topKResults = vectorResults.items().subList(0, topK);
+
+            for (MemoryResponse entry : topKResults) {
+                try {
+                    GraphResponse graph = expandGraph(entry.id(), request.getGraphDepth(), tenantId);
+                    if (graph.nodes() != null) {
+                        for (MemoryResponse node : graph.nodes()) {
+                            if (!seenIds.contains(node.id())) {
+                                seenIds.add(node.id());
+                                // Graph score: 70% of the connecting seed's score
+                                double seedScore = entry.score() != null ? entry.score() : 0.7;
+                                double graphScore = seedScore * 0.7;
+                                MemoryResponse scoredNode = withScore(node, graphScore);
+                                unified.add(new ScoredMemory(scoredNode, "graph"));
+                                graphContributions++;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    LOG.debugv("Graph expansion failed for seed {0}: {1}",
+                            entry.id(), e.getMessage());
+                    // Non-blocking: graph expansion errors don't fail the search
+                }
+            }
+        }
+
+        // Step 4: sort by score descending
+        unified.sort((a, b) -> Double.compare(b.getScore(), a.getScore()));
+
+        // Step 5: paginate
+        int fromIndex = page * size;
+        int toIndex = Math.min(fromIndex + size, unified.size());
+        List<ScoredMemory> pageItems = fromIndex < unified.size()
+                ? unified.subList(fromIndex, toIndex)
+                : List.of();
+
+        // Step 6: build facets from the full unified result set
+        List<MemoryResponse> allResponses = unified.stream()
+                .map(ScoredMemory::getMemory)
+                .toList();
+        Map<String, Map<String, Long>> facets = buildResultFacets(allResponses);
+
+        return new UnifiedSearchResponse(
+                pageItems, unified.size(), page, size,
+                request.isExpandGraph(), graphContributions, facets
+        );
     }
 
     // ── Find Similar ─────────────────────────────────────────────────
@@ -581,6 +673,24 @@ public class SearchServiceImpl implements SearchService {
      * Internal holder for hybrid search scoring.
      */
     private record ScoredResult(MemoryFragmentEntity entity, double score) {
+    }
+
+    /**
+     * Creates a copy of a {@link MemoryResponse} with the given score.
+     */
+    private static MemoryResponse withScore(MemoryResponse original, double score) {
+        return new MemoryResponse(
+                original.id(), original.tenantId(), original.scopeId(),
+                original.namespace(), original.kind(),
+                original.title(), original.content(), original.summary(),
+                original.lifecycleState(), original.sensitivityLevel(),
+                original.sourceType(), original.sourceRef(),
+                original.confidence(), original.embeddingId(),
+                original.reviewerId(), original.reviewComment(),
+                original.createdAt(), original.updatedAt(), original.deletedAt(),
+                original.isDeleted(), original.isConsumerVisible(),
+                score
+        );
     }
 
     /**

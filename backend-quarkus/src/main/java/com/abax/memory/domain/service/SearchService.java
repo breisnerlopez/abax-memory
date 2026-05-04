@@ -4,6 +4,8 @@ import com.abax.memory.api.dto.v2.GraphResponse;
 import com.abax.memory.api.dto.v2.MemoryResponse;
 import com.abax.memory.api.dto.v2.SearchResponse;
 import com.abax.memory.api.dto.v2.SemanticSearchRequest;
+import com.abax.memory.api.dto.v2.UnifiedSearchRequest;
+import com.abax.memory.api.dto.v2.UnifiedSearchResponse;
 
 import java.util.List;
 import java.util.UUID;
@@ -75,4 +77,19 @@ public interface SearchService {
      * @return number of fragments indexed
      */
     int reindexAll(String tenantId);
+
+    /**
+     * Performs a unified search combining vector (semantic + keyword hybrid)
+     * with graph expansion transparently.
+     *
+     * <p>The caller receives a single sorted result set — the consumer does
+     * not need to know whether any individual result came from vectors or
+     * graph traversal. The response metadata exposes the composition for
+     * debugging/observability.</p>
+     *
+     * @param request  query text, filters, and graph-expansion controls
+     * @param tenantId tenant scope identifier
+     * @return unified search response with merged vector and graph results
+     */
+    UnifiedSearchResponse unifiedSearch(UnifiedSearchRequest request, String tenantId);
 }

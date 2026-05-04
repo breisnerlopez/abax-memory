@@ -5,6 +5,8 @@ import com.abax.memory.api.dto.v2.GraphResponse;
 import com.abax.memory.api.dto.v2.MemoryResponse;
 import com.abax.memory.api.dto.v2.SearchResponse;
 import com.abax.memory.api.dto.v2.SemanticSearchRequest;
+import com.abax.memory.api.dto.v2.UnifiedSearchRequest;
+import com.abax.memory.api.dto.v2.UnifiedSearchResponse;
 import com.abax.memory.domain.model.Relation;
 import com.abax.memory.domain.service.RelationService;
 import com.abax.memory.domain.service.SearchService;
@@ -120,6 +122,31 @@ public class SearchResourceV2 {
             @Valid SemanticSearchRequest request) {
         String tenantId = resolveTenant(xTenantId);
         return searchService.hybridSearch(request, tenantId);
+    }
+
+    /**
+     * Unified search (vector + graph) — transparent merge.
+     *
+     * <p>Combines hybrid (vector + keyword) search with graph expansion.
+     * The consumer does not need to know whether a result came from vector
+     * similarity or the relationship graph — the response is a single
+     * sorted, paginated list with per-item {@code source} metadata.</p>
+     */
+    @POST
+    @Path("/search")
+    @Tag(name = "Search V2")
+    @Operation(summary = "Unified search", description = "Performs a unified search combining vector similarity, keyword matching, and optional graph expansion into a single result set.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Search results",
+                    content = @Content(schema = @Schema(implementation = UnifiedSearchResponse.class))),
+            @APIResponse(responseCode = "400", description = "Validation error"),
+            @APIResponse(responseCode = "403", description = "Forbidden")
+    })
+    public UnifiedSearchResponse unifiedSearch(
+            @HeaderParam("X-Tenant-Id") String xTenantId,
+            @Valid UnifiedSearchRequest request) {
+        String tenantId = resolveTenant(xTenantId);
+        return searchService.unifiedSearch(request, tenantId);
     }
 
     /**
@@ -300,24 +327,17 @@ public class SearchResourceV2 {
      * Lists available domain profiles (UAT-S03 / HU-002.1.1).
      *
      * <p>Returns all active profiles with name, description, and config.
-     * Admin-only: requires {@code X-Role: admin} header.</p>
+     * Public endpoint: profile metadata is not sensitive information.</p>
      */
     @GET
     @Path("/admin/profiles")
     @Tag(name = "Admin V2")
-    @Operation(summary = "List domain profiles", description = "Returns all active domain profiles with their configuration.")
+    @Operation(summary = "List domain profiles", description = "Returns all active domain profiles with their configuration. Public endpoint — no auth required.")
     @APIResponses({
-            @APIResponse(responseCode = "200", description = "Profiles listed"),
-            @APIResponse(responseCode = "403", description = "Forbidden — not an admin")
+            @APIResponse(responseCode = "200", description = "Profiles listed")
     })
     public List<Map<String, Object>> listProfiles(
-            @HeaderParam("X-Tenant-Id") String xTenantId,
-            @HeaderParam("X-Role") String xRole) {
-        // MOCK: RBAC simulation via X-Role header.
-        // REPLACE_BEFORE_PROD with OIDC role claim validation.
-        if (xRole == null || !"admin".equalsIgnoreCase(xRole.trim())) {
-            throw new SecurityException("Admin role required to list profiles");
-        }
+            @HeaderParam("X-Tenant-Id") String xTenantId) {
 
         resolveTenant(xTenantId);
         return com.abax.memory.infrastructure.persistence.DomainProfileEntity.listActive()

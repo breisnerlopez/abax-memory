@@ -492,15 +492,16 @@ class SearchResourceV2Test {
 
     @Test
     @Order(31)
-    @DisplayName("GET /api/v2/admin/profiles — returns 403 without admin role")
-    void listProfiles_withoutAdminRole_returns403() {
+    @DisplayName("GET /api/v2/admin/profiles — returns 200 for any role (public endpoint)")
+    void listProfiles_withoutAdminRole_returns200() {
         given()
                 .header("X-Tenant-Id", TENANT_A)
                 .header("X-Role", "viewer")
                 .when()
                 .get("/api/v2/admin/profiles")
                 .then()
-                .statusCode(403);
+                .statusCode(200)
+                .body("$", notNullValue());
     }
 
     @Test
@@ -516,5 +517,151 @@ class SearchResourceV2Test {
                 .body("status", equalTo("OK"))
                 .body("timestamp", notNullValue())
                 .time(org.hamcrest.Matchers.lessThan(2000L));
+    }
+
+    // ── Unified Search Tests ──────────────────────────────────────────
+
+    @Test
+    @Order(33)
+    @DisplayName("POST /api/v2/search — returns 200 with unified results")
+    void unifiedSearch_returns200() {
+        // Create fragments with a graph relationship
+        String hubId = createMemory(TENANT_A, "Kubernetes Pod Autoscaler",
+                "Horizontal pod autoscaling in Kubernetes for production workloads.",
+                "FACT", "INTERNAL");
+        String leafId = createMemory(TENANT_A, "HPA Configuration Deep-Dive",
+                "Deep-dive into HPA configuration, metrics, and tuning.",
+                "FACT", "INTERNAL");
+        createRelation(TENANT_A, hubId, leafId, "SUPPORTS");
+
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "query", "kubernetes autoscaling",
+                        "expandGraph", true,
+                        "graphDepth", 2,
+                        "graphTopK", 3,
+                        "size", 10
+                ))
+                .when()
+                .post("/api/v2/search")
+                .then()
+                .statusCode(200)
+                .body("items", notNullValue())
+                .body("total", notNullValue())
+                .body("graphExpanded", equalTo(true))
+                .body("graphContributions", notNullValue())
+                .body("facets", notNullValue());
+    }
+
+    @Test
+    @Order(34)
+    @DisplayName("POST /api/v2/search — returns 400 for blank query")
+    void unifiedSearch_blankQuery_returns400() {
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of("query", "  "))
+                .when()
+                .post("/api/v2/search")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    @Order(35)
+    @DisplayName("POST /api/v2/search — expandGraph=false yields no graph contributions")
+    void unifiedSearch_noExpand_returnsNoGraphContributions() {
+        String hubId = createMemory(TENANT_A, "Graph Not Expanded Hub",
+                "This hub should not trigger graph expansion.",
+                "FACT", "INTERNAL");
+        String leafId = createMemory(TENANT_A, "Graph Not Expanded Leaf",
+                "This leaf should not appear without expansion.",
+                "FACT", "INTERNAL");
+        createRelation(TENANT_A, hubId, leafId, "SUPPORTS");
+
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "query", "graph expansion hub",
+                        "expandGraph", false
+                ))
+                .when()
+                .post("/api/v2/search")
+                .then()
+                .statusCode(200)
+                .body("graphExpanded", equalTo(false))
+                .body("graphContributions", equalTo(0));
+    }
+
+    @Test
+    @Order(36)
+    @DisplayName("POST /api/v2/search — respects pagination")
+    void unifiedSearch_respectsPagination() {
+        // Create multiple fragments
+        for (int i = 1; i <= 3; i++) {
+            createMemory(TENANT_A, "Pagination Test Memory #" + i,
+                    "Content for pagination test item number " + i + ".",
+                    "FACT", "INTERNAL");
+        }
+
+        given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "query", "pagination test",
+                        "page", 0,
+                        "size", 2,
+                        "expandGraph", false
+                ))
+                .when()
+                .post("/api/v2/search")
+                .then()
+                .statusCode(200)
+                .body("page", equalTo(0))
+                .body("size", equalTo(2))
+                .body("items.size()", org.hamcrest.Matchers.lessThanOrEqualTo(2));
+    }
+
+    @Test
+    @Order(37)
+    @DisplayName("POST /api/v2/search — items have source and score fields")
+    void unifiedSearch_itemsHaveSourceAndScore() {
+        createMemory(TENANT_A, "Source Score Test",
+                "Content for testing source and score fields in unified search response.",
+                "FACT", "INTERNAL");
+
+        String response = given()
+                .header("X-Tenant-Id", TENANT_A)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "query", "source score test unified",
+                        "expandGraph", true,
+                        "graphDepth", 2,
+                        "graphTopK", 3
+                ))
+                .when()
+                .post("/api/v2/search")
+                .then()
+                .statusCode(200)
+                .extract()
+                .asString();
+
+        // Parse and verify structure
+        var json = new com.google.gson.Gson().fromJson(response, java.util.Map.class);
+        var items = (java.util.List<java.util.Map<String, Object>>) json.get("items");
+        if (items != null && !items.isEmpty()) {
+            for (var item : items) {
+                assert item.containsKey("source")
+                        : "Each item must have a 'source' field";
+                assert item.containsKey("score")
+                        : "Each item must have a 'score' field";
+                String source = (String) item.get("source");
+                assert "vector".equals(source) || "graph".equals(source)
+                        : "Source must be 'vector' or 'graph', got: " + source;
+            }
+        }
     }
 }

@@ -35,7 +35,8 @@ public record MemoryResponse(
         Instant updatedAt,
         Instant deletedAt,
         boolean isDeleted,
-        boolean isConsumerVisible
+        boolean isConsumerVisible,
+        Double score
 ) {
 
     /**
@@ -65,7 +66,8 @@ public record MemoryResponse(
                 entity.isDeleted(),
                 entity.isDeleted()
                         ? false
-                        : entity.getLifecycleState() != null && entity.getLifecycleState().isConsumerVisible()
+                        : entity.getLifecycleState() != null && entity.getLifecycleState().isConsumerVisible(),
+                null  // score is set by search services, not from entity
         );
     }
 }
