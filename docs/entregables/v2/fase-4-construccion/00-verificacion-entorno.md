@@ -3,22 +3,22 @@
 - **Fase**: 4 — Construcción
 - **Responsable**: DevOps / Release Engineer
 - **Fecha**: 2026-05-03
-- **Estado**: Completado (con advertencias)
+- **Estado**: APROBADO por Tech Lead — 2026-05-03
 - **Bloqueante**: SÍ — primer entregable de Fase 4
 
 ---
 
 ## 1. Resumen Ejecutivo
 
-Verificación del runtime, dependencias y build del proyecto Abax-Memory v2.0.0 (backend Quarkus). El proyecto **compila exitosamente** (`mvn validate`, `mvn compile`, `mvn test-compile`), pero se detectaron **2 dependencias ausentes** y **1 advertencia de versión de Maven** que requieren atención antes de avanzar a la implementación de features v2.
+Verificación del runtime, dependencias y build del proyecto Abax-Memory v2.0.0 (backend Quarkus). El proyecto **compila exitosamente** (`mvn validate`, `mvn compile`, `mvn test-compile`). Las **8 dependencias requeridas para v2 están presentes**, incluyendo Testcontainers 1.20.1 (agregado 2026-05-03). El runtime (Java 21, Maven 3.9.9, Docker 29.4.2) cumple todos los requisitos. Se documentan **4 riesgos no bloqueantes** (ver sección 13).
 
 | Indicador | Resultado |
 |---|---|
 | Compilación | ✅ BUILD SUCCESS |
 | Tests compilan | ✅ BUILD SUCCESS |
-| Dependencias v2 requeridas | ⚠️ 6/8 presentes |
+| Dependencias v2 requeridas | ✅ 8/8 presentes |
 | Runtime Java | ✅ 21.0.10 |
-| Runtime Maven | ⚠️ 3.8.7 (requiere 3.9+) |
+| Runtime Maven | ✅ 3.9.9 (SDKMAN) |
 | Entorno | Host Linux (no container) |
 
 ---
@@ -45,31 +45,21 @@ OpenJDK 64-Bit Server VM (build 21.0.10+7-Ubuntu-124.04, mixed mode, sharing)
 | Campo | Valor |
 |---|---|
 | Comando | `mvn --version` |
-| Versión detectada | Apache Maven **3.8.7** |
+| Versión detectada | Apache Maven **3.9.9** |
 | Requerido | Maven 3.9+ |
-| Estado | ⚠️ **ADVERTENCIA** — por debajo del mínimo recomendado |
+| Estado | ✅ **PASA** — actualizado vía SDKMAN (2026-05-03) |
 
 ```
-Apache Maven 3.8.7
-Maven home: /usr/share/maven
-Java version: 21.0.10, vendor: Ubuntu
+Apache Maven 3.9.9 (8e8579a9e76f7d015ee5ec7bfcdc97d260186937)
+Maven home: /root/.sdkman/candidates/maven/current
+Java version: 21.0.10, vendor: Ubuntu, runtime: /usr/lib/jvm/java-21-openjdk-amd64
+Default locale: en, platform encoding: UTF-8
+OS name: "linux", version: "6.8.0-58-generic", arch: "amd64", family: "unix"
 ```
 
-**Análisis**: Maven 3.8.7 es inferior al requisito 3.9+ especificado para Quarkus 3.15.3. Sin embargo, `mvn validate`, `mvn compile`, y `mvn test-compile` **pasan exitosamente** con esta versión. El riesgo es que ciertos plugins o features de Quarkus (como `quarkus:dev` con reload mejorado, o el nuevo resolver de dependencias) puedan requerir 3.9+. **Se recomienda actualizar a Maven 3.9.x** antes de iniciar desarrollo intensivo.
+**Análisis**: Maven **3.9.9 instalado vía SDKMAN** (2026-05-03). Cumple con el requisito 3.9+ para Quarkus 3.15.3. SDKMAN gestiona Maven en `~/.sdkman/candidates/maven/current`, sin afectar el Maven del sistema (`/usr/share/maven`).
 
-> **Nota**: Estamos en **host Linux** (no container). La actualización de Maven requiere aprobación explícita del usuario. No se ejecutará `sudo apt install` sin autorización.
-
-**Recomendación de actualización (host)**:
-```bash
-# Opción 1: sdkman (recomendado, no requiere sudo)
-curl -s "https://get.sdkman.io" | bash
-source "$HOME/.sdkman/bin/sdkman-init.sh"
-sdk install maven 3.9.9
-
-# Opción 2: descarga manual
-wget https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz
-tar xzf apache-maven-3.9.9-bin.tar.gz -C /opt/
-```
+> **Nota**: Actualización de Maven completada vía SDKMAN (2026-05-03). El PATH de SDKMAN se carga automáticamente desde `.bashrc`. Para usar Maven 3.9.9 en nuevas sesiones: `source "$HOME/.sdkman/bin/sdkman-init.sh"`.
 
 ### 2.3 Node.js
 
@@ -128,46 +118,46 @@ tar xzf apache-maven-3.9.9-bin.tar.gz -C /opt/
 | 4 | **Keycloak OIDC** | `io.quarkus:quarkus-oidc` | ✅ Línea 74-75 | **PASA** | + `quarkus-smallrye-jwt` para JWT verification |
 | 5 | **OpenAI client** | `dev.langchain4j:langchain4j-open-ai:1.0.0-beta1` | ✅ Línea 90-92 | **PASA** | LangChain4j puro, NO la extensión Quarkiverse |
 | 6 | **Flyway** | `io.quarkus:quarkus-flyway` | ✅ Línea 62-64 | **PASA** | Migraciones en `db/migration/V1__baseline.sql` |
-| 7 | **Testcontainers** | — | ❌ **AUSENTE** | **FALLA** | No declarado en `pom.xml` ni en dependencias transitivas |
+| 7 | **Testcontainers** | `org.testcontainers:testcontainers`, `postgresql`, `qdrant` | ✅ 1.20.1 | **PASA** | Agregado a `pom.xml` (líneas 119-134) — 2026-05-03. Versión gestionada por `quarkus-bom` |
 | 8 | **RestAssured** | `io.rest-assured:rest-assured` | ✅ Línea 99-102 | **PASA** | Scope test |
 
-**Resumen**: **6/8** dependencias presentes. **2 requieren atención** (Qdrant sin SDK, Testcontainers ausente).
+**Resumen**: **8/8** dependencias presentes. **1 requiere atención futura** (Qdrant sin SDK tipado — aceptable para inicio de construcción, evaluar migración en v2.1).
 
 ### 4.3 Análisis detallado de hallazgos
 
-#### 4.3.1 ❌ Testcontainers — AUSENTE
+#### 4.3.1 ✅ Testcontainers — RESUELTO (2026-05-03)
 
-Testcontainers **no está declarado** en `pom.xml`. La configuración actual de tests (`application.properties`, perfil `%test`) usa **H2 en memoria**:
-
-```properties
-%test.quarkus.datasource.db-kind=h2
-%test.quarkus.datasource.jdbc.url=jdbc:h2:mem:abax-memory;MODE=PostgreSQL
-%test.quarkus.oidc.enabled=false
-```
-
-Para v2.0.0, donde se requiere testing de integración contra servicios reales (Qdrant, PostgreSQL, Keycloak), **Testcontainers es necesario**. Dependencias recomendadas a agregar:
+Testcontainers fue agregado a `pom.xml` (líneas 119-134) con los tres artefactos necesarios para v2.0.0:
 
 ```xml
-<!-- Testcontainers para v2 -->
+<!-- Testcontainers para tests de integracion v2 (version gestionada por quarkus-bom) -->
 <dependency>
     <groupId>org.testcontainers</groupId>
     <artifactId>testcontainers</artifactId>
-    <version>1.20.6</version>
     <scope>test</scope>
 </dependency>
 <dependency>
     <groupId>org.testcontainers</groupId>
     <artifactId>postgresql</artifactId>
-    <version>1.20.6</version>
     <scope>test</scope>
 </dependency>
 <dependency>
     <groupId>org.testcontainers</groupId>
     <artifactId>qdrant</artifactId>
-    <version>1.20.6</version>
     <scope>test</scope>
 </dependency>
 ```
+
+**Versión resuelta**: `1.20.1` (gestionada por el BOM de Quarkus 3.15.3, confirmada en `mvn dependency:tree`).
+
+**Verificación**:
+- `mvn compile` → BUILD SUCCESS ✅
+- `mvn test-compile` → BUILD SUCCESS ✅
+- `mvn dependency:tree` → `org.testcontainers:testcontainers:jar:1.20.1:test` ✅
+- `org.testcontainers:postgresql:jar:1.20.1:test` ✅
+- `org.testcontainers:qdrant:jar:1.20.1:test` ✅
+
+> **Nota**: La configuración de tests (`application.properties`, perfil `%test`) mantiene **H2 en memoria** para tests unitarios rápidos. Testcontainers se usará para tests de integración v2 que requieran servicios reales (PostgreSQL, Qdrant).
 
 #### 4.3.2 ⚠️ Qdrant — Integración HTTP custom (sin SDK)
 
@@ -432,8 +422,8 @@ Durante la preparación del entorno para este entregable, al hacer checkout a la
 
 | # | Acción | Prioridad | Responsable |
 |---|---|---|---|
-| 1 | Actualizar Maven a 3.9+ (vía `sdkman`, previa aprobación del usuario) | ALTA | DevOps + Usuario |
-| 2 | Agregar dependencia `testcontainers` (PostgreSQL + Qdrant) en `pom.xml` | ALTA | Developer Backend |
+| 1 | ~~Actualizar Maven a 3.9+~~ ✅ **COMPLETADO** (Maven 3.9.9 vía SDKMAN, 2026-05-03) | ALTA | DevOps ✅ |
+| 2 | ~~Agregar dependencia `testcontainers` (PostgreSQL + Qdrant) en `pom.xml`~~ ✅ **COMPLETADO** (2026-05-03) | ALTA | Developer Backend ✅ |
 | 3 | Evaluar migración a `quarkus-langchain4j-qdrant` (SDK tipado Qdrant) | MEDIA | Tech Lead |
 | 4 | Evaluar migración a `quarkus-langchain4j-openai` (Quarkiverse extension) | MEDIA | Tech Lead |
 | 5 | Remover secret hardcodeado `QUARKUS_OIDC_CREDENTIALS_SECRET` de `application.properties` | ALTA | DevOps |
@@ -447,12 +437,12 @@ Durante la preparación del entorno para este entregable, al hacer checkout a la
 | Gate | Estado | Condición |
 |---|---|---|
 | Runtime (Java 21) | ✅ | |
-| Runtime (Maven 3.9+) | ⚠️ | Condicional: builds pasan con 3.8.7, riesgo bajo |
+| Runtime (Maven 3.9+) | ✅ | Maven 3.9.9 vía SDKMAN |
 | Build (`mvn compile`) | ✅ | |
-| Dependencias v2 completas | ❌ | Testcontainers ausente |
+| Dependencias v2 completas | ✅ | 8/8 presentes (Testcontainers agregado 2026-05-03) |
 | Entorno documentado | ✅ | `docs/setup.md` generado |
 
-**Gate de entrada a Construcción v2**: ⚠️ **CONDICIONAL** — El proyecto compila pero Testcontainers debe agregarse antes de escribir tests de integración v2. El Maven 3.8.7 es funcional pero debe actualizarse a 3.9+ para cumplir con el estándar Enterprise.
+**Gate de entrada a Construcción v2**: ✅ **APROBADO** — Todas las dependencias requeridas están presentes (8/8). Maven 3.9.9 actualizado. Testcontainers 1.20.1 agregado a `pom.xml`. Compilación y test-compilación exitosas. El Qdrant HTTP client custom es aceptable para iniciar construcción (migrar a SDK tipado se evalúa para v2.1).
 
 ---
 
@@ -465,3 +455,31 @@ Durante la preparación del entorno para este entregable, al hacer checkout a la
 - **Flyway**: Herramienta de migración de base de datos versionada (control de cambios de esquema SQL).
 - **RestAssured**: Librería Java para testing de APIs REST con sintaxis fluida estilo BDD.
 - **Stub / InMemory**: Implementación simulada de un servicio que opera en memoria RAM sin conexión al servicio real — útil para desarrollo pero riesgo en producción.
+
+---
+
+## 13. Aprobación Tech Lead
+
+| Campo | Valor |
+|---|---|
+| **Revisor** | Tech Lead |
+| **Fecha** | 2026-05-03 |
+| **Veredicto** | ✅ **APROBADO** |
+| **Gate** | **ENV-VERIFICATION APPROVED. Fase 4 Construcción puede comenzar.** |
+
+### Evidencia revisada
+
+- `pom.xml` — Testcontainers presente (líneas 119-134, 3 artefactos, v1.20.1)
+- `mvn compile` → BUILD SUCCESS
+- `mvn test-compile` → BUILD SUCCESS
+- `mvn dependency:tree` → `org.testcontainers:*:1.20.1:test` confirmado
+- Java 21.0.10, Maven 3.9.9 (SDKMAN), Docker 29.4.2, Node 22.22.0
+
+### Riesgos aceptados (no bloqueantes)
+
+| # | Riesgo | Mitigación |
+|---|---|---|
+| R1 | Qdrant HTTP client custom sin SDK tipado (sin retry/backoff, JSON manual) | Aceptable para inicio. Evaluar migración a `quarkus-langchain4j-qdrant` en v2.1. El `InMemorySearchIndexer` NO debe usarse en producción — ya identificado por anti-mock-review de v1. |
+| R2 | Secret OIDC hardcodeado en `application.properties` (SEC-01) | No bloquea construcción. Debe resolverse antes de despliegue a producción. Acción asignada a DevOps en Plan de Acción #5. |
+| R3 | LangChain4j usado sin extensión Quarkiverse (configuración manual de beans) | Deuda técnica menor. No bloquea. La extensión Quarkiverse (`quarkus-langchain4j-openai`) simplificaría configuración pero es funcionalmente equivalente. |
+| R4 | Git conflicts en `bitacora.md` y `registro-entregables.md` | Escalados al Orquestador. No afectan el código fuente.

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abax-Memory v2.0.0 — Kickoff</title>
+<style>
+  /* ==========================================================
+     RESET + BASE
+     ========================================================== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    transition: background 200ms ease, color 200ms ease;
+  }
+  h1, h2, h3 { font-weight: 800; line-height: 1.1; }
+
+  /* ==========================================================
+     PRESET: CORPORATE MINIMAL
+     ========================================================== */
+  body[data-style="corporate-minimal"] {
+    --bg: #FFFFFF;
+    --bg-alt: #F5F5F7;
+    --text: #1a1a2e;
+    --text-muted: #4a4a5e;
+    --accent: #0066cc;
+    --accent-strong: #e94560;
+    --border: #d8d8e0;
+  }
+
+  /* ==========================================================
+     LAYOUT: SLIDE
+     ========================================================== */
+  .slide {
+    min-height: 100vh;
+    padding: 8vh 10vw;
+    display: grid;
+    align-content: start;
+    gap: 1.5rem;
+    page-break-after: always;
+    border-bottom: 1px solid var(--border);
+  }
+  .slide:last-child { border-bottom: none; }
+
+  .slide-eyebrow {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .slide h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
+  .slide h2 { font-size: clamp(2rem, 4vw, 3rem); }
+  .slide h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); color: var(--text-muted); font-weight: 600; }
+  .slide p, .slide li { font-size: clamp(1rem, 1.5vw, 1.125rem); max-width: 70ch; }
+
+  /* ==========================================================
+     COMPONENTS
+     ========================================================== */
+  ul, ol { padding-left: 1.5rem; display: grid; gap: 0.75rem; }
+  ul li::marker, ol li::marker { color: var(--accent); }
+
+  table { border-collapse: collapse; width: 100%; max-width: 60rem; }
+  th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+  th { font-weight: 700; color: var(--accent-strong); }
+
+  .card {
+    background: var(--bg-alt);
+    padding: 2rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    max-width: 42rem;
+  }
+
+  .cta {
+    background: var(--accent);
+    color: #FFFFFF;
+    padding: 3rem 4rem;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 1rem;
+  }
+  .cta-question { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; }
+
+  .kpi {
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--accent-strong);
+    letter-spacing: -0.03em;
+  }
+  .kpi-label { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .highlight-number {
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--accent-strong);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .metadata-line {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Print */
+  @media print {
+    .slide { min-height: auto; page-break-after: always; padding: 4vh 6vw; }
+  }
+</style>
+</head>
+<body data-style="corporate-minimal">
+
+<!-- ============================================================
+     SLIDE 1 — COVER / PORTADA
+     ============================================================ -->
+<section class="slide" aria-label="Portada">
+  <span class="slide-eyebrow">Kickoff · Fase 1: Inicio</span>
+  <h1>Abax-Memory v2.0.0</h1>
+  <h3>Motor de Memoria Genérico Multi-Dominio</h3>
+  <p class="metadata-line">2026-05-03 · Project Manager</p>
+</section>
+
+<!-- ============================================================
+     SLIDE 2 — AGENDA
+     ============================================================ -->
+<section class="slide" aria-label="Agenda">
+  <span class="slide-eyebrow">Agenda</span>
+  <h2>Qué vamos a cubrir</h2>
+  <ol>
+    <li>¿Por qué v2?</li>
+    <li>Visión y Alcance</li>
+    <li>Equipo y Gobernanza</li>
+    <li>Cronograma</li>
+    <li>Riesgos Principales</li>
+    <li>Próximos Pasos</li>
+  </ol>
+</section>
+
+<!-- ============================================================
+     SLIDE 3 — ¿POR QUÉ v2?
+     ============================================================ -->
+<section class="slide" aria-label="De v1 a v2">
+  <span class="slide-eyebrow">Contexto</span>
+  <h2>De v1 a v2: La Evolución</h2>
+  <table>
+    <thead>
+      <tr><th>v1.0.0 (CERRADO)</th><th>v2.0.0 (INICIO)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Motor IT ops específico</td><td>Motor genérico multi-dominio</td></tr>
+      <tr><td>1 dominio fijo</td><td>Perfiles de dominio configurables</td></tr>
+      <tr><td>API v1 (español)</td><td>API v2 (English-Only)</td></tr>
+      <tr><td>Single-tenant lógico</td><td>Scoping multi-tenant</td></tr>
+      <tr><td>MVP funcional (v1)</td><td>MVP completo (v2)</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 1rem;"><strong>Decisión del sponsor:</strong> v1 descartado, sin backward compat.</p>
+</section>
+
+<!-- ============================================================
+     SLIDE 4 — VISIÓN
+     ============================================================ -->
+<section class="slide" aria-label="Visión del Producto">
+  <span class="slide-eyebrow">Visión</span>
+  <h2>Visión del Producto</h2>
+  <p><strong>Abax-Memory v2 es un motor de memoria aumentada con IA para cualquier profesional, en cualquier dominio.</strong></p>
+  <ul>
+    <li><strong>5 roles</strong> de usuario</li>
+    <li><strong>3 perfiles</strong> de dominio (Ops, Agent, Business)</li>
+    <li><strong>8 tipos</strong> de entidad (kind)</li>
+    <li><strong>6 estados</strong> de ciclo de vida</li>
+    <li><strong>9 tipos</strong> de relación</li>
+  </ul>
+</section>
+
+<!-- ============================================================
+     SLIDE 5 — ALCANCE (KPI)
+     ============================================================ -->
+<section class="slide" aria-label="Alcance del MVP">
+  <span class="slide-eyebrow">Alcance</span>
+  <h2>Alcance del MVP</h2>
+  <table>
+    <thead>
+      <tr><th>Métrica</th><th>Valor</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Épicas</td><td>10</td></tr>
+      <tr><td>Features</td><td>85+</td></tr>
+      <tr><td>Historias de Usuario</td><td>69</td></tr>
+      <tr><td>MVP (Must)</td><td>66</td></tr>
+      <tr><td>Post-MVP</td><td>3</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 1rem;"><strong>R1 Core:</strong> 43 historias &nbsp;|&nbsp; <strong>R2 Completo:</strong> 23 historias</p>
+</section>
+
+<!-- ============================================================
+     SLIDE 6 — EQUIPO
+     ============================================================ -->
+<section class="slide" aria-label="Equipo del Proyecto">
+  <span class="slide-eyebrow">Equipo</span>
+  <h2>Equipo del Proyecto</h2>
+  <table>
+    <thead>
+      <tr><th>Rol</th><th>Responsable</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Project Manager</td><td>@project-manager</td></tr>
+      <tr><td>Business Analyst</td><td>@business-analyst</td></tr>
+      <tr><td>Solution Architect</td><td>@solution-architect</td></tr>
+      <tr><td>Tech Lead</td><td>@tech-lead</td></tr>
+      <tr><td>Backend Dev</td><td>@developer-backend</td></tr>
+      <tr><td>Frontend Dev</td><td>@developer-frontend</td></tr>
+      <tr><td>QA Functional</td><td>@qa-functional</td></tr>
+      <tr><td>DevOps</td><td>@devops</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 1rem;">Metodología: <strong>Cascada</strong> con releases incrementales (R1 + R2)</p>
+</section>
+
+<!-- ============================================================
+     SLIDE 7 — GOBERNANZA
+     ============================================================ -->
+<section class="slide" aria-label="Gobernanza">
+  <span class="slide-eyebrow">Gobernanza</span>
+  <h2>Gobernanza del Proyecto</h2>
+  <p><strong>Modelo:</strong> Ligero (Lightweight)</p>
+  <ul>
+    <li><strong>Decisiones técnicas:</strong> ADR (Architecture Decision Record)</li>
+    <li><strong>CCB (Change Control Board):</strong> PM + TL + Arch + BA</li>
+    <li><strong>Reportes:</strong> Semanales (PM) + por Gate (aprobación sponsor)</li>
+    <li><strong>Escalamiento:</strong> PM → Sponsor en 48h</li>
+  </ul>
+</section>
+
+<!-- ============================================================
+     SLIDE 8 — CRONOGRAMA
+     ============================================================ -->
+<section class="slide" aria-label="Cronograma Preliminar">
+  <span class="slide-eyebrow">Plan</span>
+  <h2>Cronograma Preliminar</h2>
+  <table>
+    <thead>
+      <tr><th>Fase</th><th>Inicio</th><th>Fin</th><th>Duración</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>F1 Inicio</td><td>04-May</td><td>07-May</td><td>3 días</td></tr>
+      <tr><td>F2 Análisis</td><td>08-May</td><td>28-May</td><td>3 sem</td></tr>
+      <tr><td>F3 Diseño</td><td>29-May</td><td>19-Jun</td><td>3 sem</td></tr>
+      <tr><td>F4 Construcción</td><td>20-Jun</td><td>20-Nov</td><td>22 sem</td></tr>
+      <tr><td>F5 QA</td><td>21-Nov</td><td>18-Dic</td><td>4 sem</td></tr>
+      <tr><td>F6 UAT</td><td>19-Dic</td><td>22-Ene</td><td>5 sem</td></tr>
+      <tr><td>F7 Despliegue</td><td>23-Ene</td><td>29-Ene</td><td>1 sem</td></tr>
+      <tr><td>F8 Estabilización</td><td>30-Ene</td><td>19-Feb</td><td>3 sem</td></tr>
+      <tr><td>F9 Cierre</td><td>20-Feb</td><td>26-Feb</td><td>1 sem</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================
+     SLIDE 9 — HITOS
+     ============================================================ -->
+<section class="slide" aria-label="Hitos Clave">
+  <span class="slide-eyebrow">Hitos</span>
+  <h2>Hitos Clave</h2>
+  <table>
+    <thead>
+      <tr><th>Hito</th><th>Fecha</th><th>Criterio</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>M1 Kickoff</td><td>04-May</td><td>Acta firmada</td></tr>
+      <tr><td>M2 Design Gate</td><td>19-Jun</td><td>Arquitectura aprobada</td></tr>
+      <tr><td>M3 Gate R1</td><td>18-Sep</td><td>R1 Core verificado</td></tr>
+      <tr><td>M4 Build Complete</td><td>20-Nov</td><td>MVP construido</td></tr>
+      <tr><td>M5 QA Gate</td><td>18-Dic</td><td>0 críticos abiertos</td></tr>
+      <tr><td>M6 UAT Sign-off</td><td>22-Ene</td><td>Sponsor aprueba</td></tr>
+      <tr><td style="font-weight: 700;">M7 Go-Live</td><td style="font-weight: 700;">29-Ene</td><td style="font-weight: 700;">En producción</td></tr>
+      <tr><td>M8 Cierre</td><td>26-Feb</td><td>Lecciones aprendidas</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================
+     SLIDE 10 — RIESGOS
+     ============================================================ -->
+<section class="slide" aria-label="Riesgos Principales">
+  <span class="slide-eyebrow">Riesgos</span>
+  <h2>Riesgos Principales (Top 5)</h2>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Riesgo</th><th>Score</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>R-008</td><td>Perfiles de dominio insuficientes</td><td>12</td></tr>
+      <tr><td>R-001</td><td>Stack flexible sin ADR</td><td>12</td></tr>
+      <tr><td>R-002</td><td>English-Only adoption friction</td><td>12</td></tr>
+      <tr><td>R-014</td><td>Presión de cronograma</td><td>10</td></tr>
+      <tr><td>R-011</td><td>Fallo en benchmarks (BEIR)</td><td>10</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 1rem;"><strong>17 riesgos totales.</strong> Revisión semanal + por gate.</p>
+</section>
+
+<!-- ============================================================
+     SLIDE 11 — PRÓXIMOS PASOS
+     ============================================================ -->
+<section class="slide" aria-label="Próximos Pasos">
+  <span class="slide-eyebrow">Próximos pasos</span>
+  <h2>Roadmap del Proyecto</h2>
+  <ol>
+    <li>✅ <strong>Fase 0 — Descubrimiento</strong> (COMPLETADA)</li>
+    <li>🔄 <strong>Fase 1 — Inicio</strong> (EN CURSO — esta presentación)</li>
+    <li>⬜ Fase 2 — Análisis Funcional</li>
+    <li>⬜ Fase 3 — Diseño Técnico</li>
+    <li>⬜ Fase 4 — Construcción (R1 + R2)</li>
+    <li>⬜ Fases 5-9 — QA → Cierre</li>
+  </ol>
+  <p style="margin-top: 1rem;"><strong>Go-Live objetivo: 29 de Enero 2027</strong></p>
+</section>
+
+<!-- ============================================================
+     SLIDE 12 — CTA / CIERRE
+     ============================================================ -->
+<section class="slide" aria-label="Llamado a la acción">
+  <span class="slide-eyebrow">Decisión solicitada</span>
+  <h2>¿Preguntas?</h2>
+  <p>Hemos revisado la visión, el alcance, el equipo, el cronograma y los riesgos principales del proyecto Abax-Memory v2.0.0.</p>
+  <div class="cta">
+    <span class="cta-question">¿Aprobamos el acta de constitución y arrancamos Fase 2?</span>
+  </div>
+</section>
+
+</body>
+</html>

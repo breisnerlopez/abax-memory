@@ -158,6 +158,191 @@ Si todo esta bien, deberias poder:
 
 ---
 
+## Verificación del Stack
+
+Para una verificación rápida de todos los servicios de infraestructura, ejecuta:
+
+```bash
+./scripts/verify-stack.sh
+```
+
+### Salida esperada (stack saludable)
+
+```
+══════════════════════════════════════════════════════════
+  Abax-Memory v2.0.0 — Stack Verification
+  2026-05-04 HH:MM:SS
+══════════════════════════════════════════════════════════
+
+  [1/4] PostgreSQL (localhost:5432) ... UP
+  [2/4] Qdrant (localhost:6333) ...... UP (v1.17.1)
+  [3/4] Keycloak (localhost:8443) .... UP (realm: abax-memory)
+  [4/4] OpenAI API Key ............... SET (164 chars)
+
+──────────────────────────────────────────────────────────
+  Resultado: 4/4 servicios UP  ✓ STACK HEALTHY
+══════════════════════════════════════════════════════════
+```
+
+### Resultados posibles
+
+| Servicios UP | Estado | Exit Code | Acción |
+|---|---|---|---|
+| 4/4 | `✓ STACK HEALTHY` | 0 | Listo para desarrollar |
+| 3/4 | `⚠ STACK DEGRADED` | 1 | Revisar el servicio caído |
+| ≤2/4 | `✗ STACK DOWN` | 1 | Levantar infraestructura con `docker compose up -d` |
+
+> **Nota sobre OpenAI**: si la API key no está configurada, el backend usará `InMemoryEmbeddingProvider` (solo para desarrollo/tests, NO para producción). Esto permite trabajar sin costo de API durante el desarrollo.
+
+### Troubleshooting común
+
+**PostgreSQL DOWN**:
+```bash
+docker compose up -d postgres
+docker compose ps postgres  # debe mostrar "healthy"
+```
+
+**Qdrant DOWN**:
+```bash
+docker compose up -d qdrant
+curl http://localhost:6333/healthz  # debe mostrar "healthz check passed"
+```
+
+**Keycloak DOWN**:
+```bash
+docker compose up -d keycloak
+# Keycloak puede tardar 30-60s en iniciar. Espera y reintenta:
+sleep 30 && curl -s http://localhost:8443/realms/abax-memory | head -c 50
+```
+
+**OpenAI API Key no configurada**:
+```bash
+export OPENAI_API_KEY="sk-proj-..."
+# Verificar longitud (debe ser ~164 caracteres):
+echo ${#OPENAI_API_KEY}
+```
+
+**Puertos ocupados**:
+```bash
+sudo lsof -i :5432  # PostgreSQL
+sudo lsof -i :6333  # Qdrant
+sudo lsof -i :8443  # Keycloak
+sudo lsof -i :8080  # Backend Quarkus
+```
+
+---
+
+## Credenciales de Desarrollo
+
+Esta seccion describe como configurar las credenciales necesarias en entorno local de desarrollo. **Ninguna de estas credenciales debe usarse en produccion.**
+
+### OPENAI_API_KEY
+
+La API Key de OpenAI es la unica variable **obligatoria** para que el backend funcione
+(validacion de requerimientos con IA y generacion de embeddings).
+
+```bash
+export OPENAI_API_KEY="sk-proj-..."
+```
+
+> **Donde obtenerla**: [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
+> **Formato esperado**: `sk-proj-...` (164 caracteres). Keys que comienzan con `sk-svcacct-`
+> tambien son validas si son service accounts del proyecto.
+
+**Verificacion**:
+```bash
+echo "Key length: ${#OPENAI_API_KEY}"               # Debe ser ~164
+curl -s https://api.openai.com/v1/models \
+  -H "Authorization: Bearer ${OPENAI_API_KEY}" | \
+  python3 -c "import sys,json; print(len(json.load(sys.stdin)['data']), 'models')"
+```
+
+### Qdrant (Base de Datos Vectorial)
+
+Qdrant almacena los embeddings semánticos de los requerimientos y permite búsqueda por similitud.
+
+**Levantar con Docker**:
+```bash
+docker run -d --name qdrant \
+  -p 6333:6333 -p 6334:6334 \
+  qdrant/qdrant:v1.17.1
+```
+
+**Levantar con Docker Compose** (recomendado, desde la raiz del proyecto):
+```bash
+docker compose up -d qdrant
+```
+
+**Verificacion**:
+```bash
+curl -s http://localhost:6333/          # Debe mostrar JSON con version 1.17.1
+curl -s http://localhost:6333/healthz   # Debe mostrar "healthz check passed"
+```
+
+### Keycloak (Identity Provider)
+
+Keycloak gestiona autenticacion y autorizacion via OIDC/OAuth 2.0 para el backend y los usuarios.
+
+**Levantar con Docker**:
+```bash
+docker run -d --name keycloak \
+  -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+  -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+  -p 8443:8080 \
+  quay.io/keycloak/keycloak:26.1.0 start-dev
+```
+
+**Levantar con Docker Compose** (recomendado, desde la raiz del proyecto):
+```bash
+docker compose up -d keycloak
+```
+
+> **Nota**: Keycloak en modo `start-dev` puede tardar **30-60s** en iniciar completamente.
+> Durante ese tiempo, el endpoint `/` devolvera HTTP 503 o Connection Refused. Espera y reintenta.
+
+**Verificacion**:
+```bash
+# Verificar que responde (puede devolver HTTP 302 - redirect, eso es correcto)
+curl -s -o /dev/null -w "HTTP %{http_code}" http://localhost:8443/
+
+# Verificar el realm de Abax-Memory
+curl -s http://localhost:8443/realms/abax-memory | python3 -m json.tool
+```
+
+**Credenciales de administrador (solo desarrollo)**:
+| Campo | Valor |
+|---|---|
+| URL Admin Console | [http://localhost:8443/admin](http://localhost:8443/admin) |
+| Usuario | `admin` |
+| Contraseña | `admin` |
+| Realm | `abax-memory` |
+| Client ID (API) | `abax-memory-api` |
+
+### PostgreSQL
+
+Aunque la mayoria de los tests unitarios usan H2 en memoria, el entorno completo requiere PostgreSQL.
+
+**Levantar con Docker Compose**:
+```bash
+docker compose up -d postgres
+```
+
+**Verificacion**:
+```bash
+docker compose ps postgres  # Debe mostrar estado "healthy"
+```
+
+**Credenciales de desarrollo**:
+| Campo | Valor |
+|---|---|
+| Host | `localhost` |
+| Puerto | `5432` |
+| Base de datos | `pmoadb` |
+| Usuario | `pmoa` |
+| Contraseña | `pmoa` |
+
+---
+
 ## Variables de Entorno
 
 ### Obligatorias

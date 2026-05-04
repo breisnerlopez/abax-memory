@@ -563,6 +563,61 @@ gantt
 | Decision del gate | **PENDIENTE DE APROBACION** |
 | Efecto sobre Fase 4 | **Condicionada** — Construccion v2.0.0 habilitada al aprobar |
 
+### Fase 4 — Construccion v2.0.0 (COMPLETADA — Gate ⚠️ Pendiente) — 2026-05-03
+
+| ID | Entregable | Path | Responsable | Estado |
+|---|---|---|---|---|
+| F4v2-DEL-001 | Verificacion de Entorno | `docs/entregables/v2/fase-4-construccion/00-verificacion-entorno.md` | tech-lead | ✅ Completado |
+| F4v2-DEL-002 | Codigo Backend | `src/main/java/com/abax/` | developer-backend | ✅ Completado (58+ archivos, 6 entidades JPA, 13 endpoints, 9 migraciones Flyway) |
+| F4v2-DEL-003 | Codigo Frontend | `src/main/frontend/` | developer-frontend | ✅ Completado (6 pantallas, 7 componentes, 48 tests) |
+| F4v2-DEL-004 | Tests (137 totales) | Proyecto | developer-backend + developer-frontend | ✅ Completado (89 backend + 48 frontend) |
+| F4v2-DEL-005 | Presentacion de Avance | `docs/entregables/v2/fase-4-construccion/presentacion-avance.html` | project-manager | ✅ Completado |
+| F4v2-DEL-006 | Code Review — Capa 2 Anti-Mock | `docs/entregables/v2/fase-4-construccion/code-review-anti-mock.md` | tech-lead | ✅ APROBADO CON OBSERVACIONES |
+| F4v2-DEL-007 | Feature-Spec Compliance — Capa 3 | `docs/entregables/v2/fase-4-construccion/feature-spec-compliance.md` | tech-lead | ✅ APROBADO CON OBSERVACIONES (78% REAL) |
+
+### Gate de Fase 4 — Construccion v2.0.0
+
+| Indicador | Valor |
+|---|---|
+| Fecha de decision | 2026-05-03 |
+| Aprobador | Usuario sponsor |
+| Entregables obligatorios | 7/7 |
+| Completitud documental | 100% |
+| Decision del gate | **PENDIENTE DE APROBACION** |
+| Efecto sobre Fase 5 | **Condicionada** — QA v2.0.0 habilitada al aprobar |
+
+### Metricas de Construccion — Fase 4 v2.0.0
+
+| Metrica | Valor |
+|---|---|
+| Archivos Java | 58+ |
+| Entidades JPA | 6 |
+| Endpoints REST | 13 |
+| Migraciones Flyway | 9 |
+| Pantallas React | 6 |
+| Componentes React | 7 |
+| Tests Backend | 89 |
+| Tests Frontend | 48 |
+| Tests Totales | **137** |
+| Marcas REPLACE_BEFORE_PROD | 40 en 11 archivos |
+
+### Servicios Externos — Fase 4 v2.0.0
+
+| Servicio | Estado |
+|---|---|
+| Qdrant | 🟢 Operativo |
+| Keycloak | 🟢 Operativo |
+| OpenAI | 🟢 Operativo |
+
+### Auditoria de Capas — Fase 4 v2.0.0
+
+| Capa | Resultado |
+|---|---|
+| Capa 2 — Anti-Mock Review | **APROBADO CON OBSERVACIONES** |
+| Capa 3 — Feature-Spec Compliance | **APROBADO CON OBSERVACIONES** (78% REAL) |
+
+---
+
 ### Dashboard de fases — v2.0.0
 
 | Fase | Semaforo | Estado |
@@ -571,3 +626,4 @@ gantt
 | F1 — Inicio v2 | 🟢 Verde | Completada |
 | F2 — Analisis Funcional v2 | 🟢 Verde | Completada |
 | F3 — Diseno Tecnico v2 | 🟡 Amarillo | Completada — Gate pendiente |
+| F4 — Construccion v2 | 🟡 Amarillo | Completada — Gate ⚠️ pendiente |

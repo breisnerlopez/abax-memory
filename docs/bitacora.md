@@ -848,6 +848,56 @@ Con base en el reporte de ejecucion UAT (F6-DEL-002) y el acta de aceptacion UAT
 
 **Gate**: ⚠️ Pendiente de aprobacion por el usuario sponsor — 2026-05-03
 
+### Fase 4 — Construccion v2.0.0 (COMPLETADA — Gate ⚠️ Pendiente) — 2026-05-03
+
+| Entregable | Path |
+|---|---|
+| 00 — Verificacion de Entorno | `docs/entregables/v2/fase-4-construccion/00-verificacion-entorno.md` |
+| Codigo Backend | `src/main/java/com/abax/` (58+ archivos Java) |
+| Codigo Frontend | `src/main/frontend/` (6 pantallas, 7 componentes) |
+| Tests | 89 backend + 48 frontend = 137 tests totales |
+| Presentacion de Avance | `docs/entregables/v2/fase-4-construccion/presentacion-avance.html` |
+| Code Review — Capa 2 Anti-Mock | `docs/entregables/v2/fase-4-construccion/code-review-anti-mock.md` |
+| Feature-Spec Compliance — Capa 3 | `docs/entregables/v2/fase-4-construccion/feature-spec-compliance.md` |
+
+**Gate**: ⚠️ Pendiente de aprobacion por el usuario sponsor — 2026-05-03
+
+#### Metricas de Construccion — Fase 4 v2.0.0
+
+| Metrica | Valor |
+|---|---|
+| Archivos Java Backend | 58+ |
+| Entidades JPA | 6 |
+| Endpoints REST | 13 |
+| Migraciones Flyway | 9 |
+| Pantallas React Frontend | 6 |
+| Componentes React | 7 |
+| Tests Backend | 89 |
+| Tests Frontend | 48 |
+| Tests Totales | **137** |
+
+#### Servicios Externos
+
+| Servicio | Estado |
+|---|---|
+| Qdrant | 🟢 Operativo |
+| Keycloak | 🟢 Operativo |
+| OpenAI | 🟢 Operativo |
+
+#### Marcas de Mock (REPLACE_BEFORE_PROD)
+
+| Indicador | Valor |
+|---|---|
+| Marcas REPLACE_BEFORE_PROD | 40 |
+| Archivos afectados | 11 |
+
+#### Auditoria de Capas
+
+| Capa | Resultado |
+|---|---|
+| Capa 2 — Anti-Mock Review | **APROBADO CON OBSERVACIONES** |
+| Capa 3 — Feature-Spec Compliance | **APROBADO CON OBSERVACIONES** (78% REAL) |
+
 ### Proximo paso
 
-Fase 4 — Construccion (v2.0.0) habilitada condicionada a aprobacion del gate F3. Pendiente delegacion del orquestador.
+Fase 5 — Pruebas QA (v2.0.0) habilitada condicionada a aprobacion del gate F4. Pendiente delegacion del orquestador.

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abax-Memory v2.0.0 — Propuesta Funcional</title>
+<style>
+  /* ==========================================================
+     RESET + BASE
+     ========================================================== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    transition: background 200ms ease, color 200ms ease;
+  }
+  h1, h2, h3 { font-family: "Inter", "Segoe UI", sans-serif; font-weight: 800; line-height: 1.1; }
+
+  /* ==========================================================
+     PRESET: CORPORATE MINIMAL
+     ========================================================== */
+  body {
+    --bg: #FFFFFF;
+    --bg-alt: #F5F5F7;
+    --text: #1a1a2e;
+    --text-muted: #4a4a5e;
+    --accent: #0066cc;
+    --accent-strong: #e94560;
+    --border: #d8d8e0;
+  }
+
+  /* ==========================================================
+     LAYOUT: SLIDE
+     ========================================================== */
+  .slide {
+    min-height: 100vh;
+    padding: 8vh 10vw;
+    display: grid;
+    align-content: start;
+    gap: 1.5rem;
+    page-break-after: always;
+    border-bottom: 1px solid var(--border);
+  }
+  .slide:last-child { border-bottom: none; }
+
+  .slide-eyebrow {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .slide h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
+  .slide h2 { font-size: clamp(2rem, 4vw, 3rem); }
+  .slide h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); color: var(--text-muted); font-weight: 600; }
+  .slide p, .slide li { font-size: clamp(1rem, 1.5vw, 1.125rem); max-width: 70ch; }
+
+  /* List */
+  ul, ol { padding-left: 1.5rem; display: grid; gap: 0.75rem; }
+  ul li::marker, ol li::marker { color: var(--accent); }
+
+  /* Table */
+  table { border-collapse: collapse; width: 100%; max-width: 60rem; }
+  th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+  th { font-weight: 700; color: var(--accent-strong); }
+
+  /* Card */
+  .card {
+    background: var(--bg-alt);
+    padding: 2rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    max-width: 42rem;
+  }
+
+  /* KPI */
+  .kpi {
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--accent-strong);
+    letter-spacing: -0.03em;
+  }
+  .kpi-label { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* CTA */
+  .cta {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 3rem 4rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .cta-question { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; }
+
+  /* Metadata row */
+  .meta { color: var(--text-muted); font-size: 0.9375rem; }
+
+  /* Badge / tag */
+  .tag {
+    display: inline-block;
+    background: var(--bg-alt);
+    color: var(--accent);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  /* Print */
+  @media print {
+    .slide { min-height: auto; page-break-after: always; padding: 4vh 6vw; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SLIDE 1 — COVER
+     ============================================================ -->
+<section class="slide" aria-label="Portada">
+  <span class="slide-eyebrow">Propuesta funcional · Decisión solicitada</span>
+  <h1>Abax-Memory v2.0.0</h1>
+  <h2>Propuesta Funcional</h2>
+  <h3>Fase 2: Análisis Funcional</h3>
+  <p class="meta">2026-05-03 · Business Analyst · Audiencia: Comité Directivo</p>
+</section>
+
+<!-- ============================================================
+     SLIDE 2 — AGENDA
+     ============================================================ -->
+<section class="slide" aria-label="Agenda">
+  <span class="slide-eyebrow">Agenda</span>
+  <h2>Qué vamos a cubrir</h2>
+  <ol>
+    <li>Modelo de Datos Genérico</li>
+    <li>Perfiles de Dominio</li>
+    <li>API v2</li>
+    <li>Búsqueda Semántica + Graph</li>
+    <li>Gobernanza y Trazabilidad</li>
+    <li>Frontend Multi-Dominio</li>
+    <li>Reglas de Negocio</li>
+    <li>Criterios de Aceptación</li>
+  </ol>
+</section>
+
+<!-- ============================================================
+     SLIDE 3 — MODELO DE DATOS (MemoryFragment)
+     ============================================================ -->
+<section class="slide" aria-label="Modelo de datos MemoryFragment">
+  <span class="slide-eyebrow">Modelo de datos</span>
+  <h2>MemoryFragment</h2>
+  <table>
+    <thead>
+      <tr><th>Dimensión</th><th>Valores</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Kinds</td><td>8 (decision, incident, entity, knowledge, feature, agent_memory, document, custom)</td></tr>
+      <tr><td>Lifecycle</td><td>6 estados (draft, review, approved, deprecated, archived, deleted)</td></tr>
+      <tr><td>Sensitivity</td><td>4 niveles (public, internal, confidential, restricted)</td></tr>
+      <tr><td>Relationship types</td><td>9 tipos con direccionalidad</td></tr>
+      <tr><td>Scopes</td><td>Aislamiento multi-tenant</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================
+     SLIDE 4 — PERFILES DE DOMINIO
+     ============================================================ -->
+<section class="slide" aria-label="Perfiles de dominio">
+  <span class="slide-eyebrow">Segmentación por audiencia</span>
+  <h2>Perfiles de Dominio</h2>
+  <table>
+    <thead>
+      <tr><th>Perfil</th><th>Audiencia</th><th>Kinds activos</th><th>Default sensitivity</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Ops</td><td>SRE, DevOps, IT</td><td>decision, incident, knowledge, document</td><td>internal</td></tr>
+      <tr><td>Agent</td><td>Agentes IA autónomos</td><td>agent_memory, decision, entity, knowledge</td><td>internal</td></tr>
+      <tr><td>Business</td><td>Legal, CRM, Finanzas</td><td>entity, document, decision, custom</td><td>confidential</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Extensibilidad</strong>: cualquier industria puede definir su perfil.</p>
+</section>
+
+<!-- ============================================================
+     SLIDE 5 — API v2
+     ============================================================ -->
+<section class="slide" aria-label="API REST v2">
+  <span class="slide-eyebrow">Contrato de interfaz</span>
+  <h2>API REST v2</h2>
+  <table>
+    <thead>
+      <tr><th>Categoría</th><th>Endpoints</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>CRUD</td><td>5 (crear, leer, actualizar, eliminar, listar)</td></tr>
+      <tr><td>Búsqueda</td><td>3 (semántica, híbrida, similitud)</td></tr>
+      <tr><td>Graph</td><td>2 (expandir, travesar)</td></tr>
+      <tr><td>Revisión</td><td>2 (solicitar, aprobar/rechazar)</td></tr>
+      <tr><td>Admin</td><td>4 (perfiles, scopes, auditoría, batch)</td></tr>
+    </tbody>
+  </table>
+  <p>
+    <span class="tag">16 endpoints</span>
+    <span class="tag">English-Only</span>
+    <span class="tag">OpenAPI 3.1</span>
+    <span class="tag">OIDC + RBAC</span>
+  </p>
+</section>
+
+<!-- ============================================================
+     SLIDE 6 — BÚSQUEDA SEMÁNTICA
+     ============================================================ -->
+<section class="slide" aria-label="Búsqueda semántica y graph">
+  <span class="slide-eyebrow">Motor de búsqueda</span>
+  <h2>Búsqueda Semántica + Graph</h2>
+  <p><strong>Flujo</strong>: Query → Embedding → Qdrant → Re-ranking → Filtros → Respuesta</p>
+  <ul>
+    <li><strong>9 dimensiones de filtros</strong> — kind, lifecycle, scope, sensitivity, fecha, y más</li>
+    <li><strong>Re-ranking</strong> con 5 señales y pesos configurables</li>
+    <li><strong>Multi-hop traversal</strong> para grafos de decisión</li>
+    <li><strong>Scoring transparente</strong> — cada resultado explica su relevancia</li>
+  </ul>
+</section>
+
+<!-- ============================================================
+     SLIDE 7 — GOBERNANZA
+     ============================================================ -->
+<section class="slide" aria-label="Gobernanza y trazabilidad">
+  <span class="slide-eyebrow">Control y cumplimiento</span>
+  <h2>Gobernanza y Trazabilidad</h2>
+  <div class="card">
+    <ul>
+      <li><strong>Audit log</strong> — 9 acciones auditadas con registro inmutable</li>
+      <li><strong>Linaje de decisiones</strong> — trazabilidad completa de origen a resultado</li>
+      <li><strong>Revisión humana</strong> — umbral configurable por perfil de dominio</li>
+      <li><strong>Soft-delete</strong> — sin pérdida de datos, recuperable</li>
+      <li><strong>RBAC</strong> — 5 roles × 12 operaciones con granularidad fina</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 8 — FRONTEND
+     ============================================================ -->
+<section class="slide" aria-label="Frontend multi-dominio">
+  <span class="slide-eyebrow">Experiencia de usuario</span>
+  <h2>Frontend Multi-Dominio</h2>
+  <p>6 pantallas principales:</p>
+  <ol>
+    <li><strong>Búsqueda</strong> — motor de búsqueda unificado con filtros contextuales</li>
+    <li><strong>Detalle</strong> — vista completa del fragmento con relaciones y linaje</li>
+    <li><strong>Creación / Edición</strong> — formulario contextual según kind y perfil</li>
+    <li><strong>Revisión</strong> — cola de revisión pendiente con flujo de aprobación</li>
+    <li><strong>Admin</strong> — perfiles, scopes, configuración del sistema</li>
+    <li><strong>Dashboard</strong> — métricas, actividad y estado del sistema</li>
+  </ol>
+</section>
+
+<!-- ============================================================
+     SLIDE 9 — REGLAS DE NEGOCIO (KPI BLOCK)
+     ============================================================ -->
+<section class="slide" aria-label="Reglas de negocio">
+  <span class="slide-eyebrow">Especificación formal</span>
+  <h2>Reglas de Negocio</h2>
+  <table>
+    <thead>
+      <tr><th>Métrica</th><th>Valor</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Reglas explícitas</td><td>20 (BR-001 a BR-020)</td></tr>
+      <tr><td>Reglas implícitas</td><td>9</td></tr>
+      <tr><td>Categorías</td><td>7</td></tr>
+      <tr><td>Conflictos identificados</td><td>8 (todos con resolución documentada)</td></tr>
+      <tr><td>Jerarquía</td><td>4 niveles</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================
+     SLIDE 10 — CRITERIOS DE ACEPTACIÓN
+     ============================================================ -->
+<section class="slide" aria-label="Criterios de aceptación">
+  <span class="slide-eyebrow">Verificación y calidad</span>
+  <h2>Criterios de Aceptación</h2>
+  <table>
+    <thead>
+      <tr><th>Tipo</th><th>Cantidad</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Funcionales (por épica)</td><td>72</td></tr>
+      <tr><td>De sistema</td><td>13</td></tr>
+      <tr><td>No funcionales</td><td>11</td></tr>
+      <tr><td><strong>Total verificables</strong></td><td><strong>94</strong></td></tr>
+    </tbody>
+  </table>
+  <p class="meta">Checklist QA lista para Fase 5 — UAT. Todos los criterios en formato Given/When/Then.</p>
+</section>
+
+<!-- ============================================================
+     SLIDE 11 — CRITERIOS DE ÉXITO
+     ============================================================ -->
+<section class="slide" aria-label="Criterios de éxito del sistema">
+  <span class="slide-eyebrow">Medición de resultados</span>
+  <h2>Criterios de Éxito del Sistema</h2>
+  <table>
+    <thead>
+      <tr><th>#</th><th>Métrica</th><th>Meta</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>CE-01</td><td>BEIR SciFact NDCG@10</td><td>≥ 0.80</td></tr>
+      <tr><td>CE-03</td><td>LoCoMo retrieval</td><td>≥ 0.80</td></tr>
+      <tr><td>CE-05</td><td>Latencia búsqueda p95</td><td>&lt; 500ms</td></tr>
+      <tr><td>CE-08</td><td>Cobertura kinds</td><td>8/8</td></tr>
+      <tr><td>CE-12</td><td>Trazabilidad</td><td>100%</td></tr>
+    </tbody>
+  </table>
+  <p class="meta">13 criterios medibles con método de verificación definido. 5 de 13 mostrados arriba.</p>
+</section>
+
+<!-- ============================================================
+     SLIDE 12 — PRÓXIMOS PASOS
+     ============================================================ -->
+<section class="slide" aria-label="Próximos pasos">
+  <span class="slide-eyebrow">Roadmap</span>
+  <h2>Próximos Pasos</h2>
+  <table>
+    <thead>
+      <tr><th>Fase</th><th>Estado</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Fase 0 — Descubrimiento</td><td>✅ Completada</td></tr>
+      <tr><td>Fase 1 — Inicio</td><td>✅ Completada</td></tr>
+      <tr><td>Fase 2 — Análisis Funcional</td><td>🔄 En curso (esta presentación)</td></tr>
+      <tr><td>Fase 3 — Diseño Técnico</td><td>⬜ Pendiente de aprobación</td></tr>
+      <tr><td>Fase 4 — Construcción</td><td>⬜ Pendiente</td></tr>
+      <tr><td>Fases 5-9 — QA → Cierre</td><td>⬜ Pendiente</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================
+     SLIDE 13 — CTA (CIERRE)
+     ============================================================ -->
+<section class="slide" aria-label="Llamado a la acción">
+  <span class="slide-eyebrow">Decisión solicitada</span>
+  <h2>¿Aprobamos la propuesta funcional?</h2>
+  <p>¿El modelo de datos, la API, las reglas de negocio y los criterios de aceptación reflejan correctamente la solución requerida?</p>
+  <div class="cta">
+    <span class="cta-question">Gate: Avanzar a Fase 3 — Diseño Técnico</span>
+  </div>
+  <p class="meta" style="margin-top: 1rem;">Aprobación requerida del Comité Directivo para continuar.</p>
+</section>
+
+</body>
+</html>
