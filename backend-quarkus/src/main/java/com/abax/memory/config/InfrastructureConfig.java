@@ -3,6 +3,9 @@ package com.abax.memory.config;
 import com.abax.memory.infrastructure.ai.EmbeddingProvider;
 import com.abax.memory.infrastructure.ai.InMemoryEmbeddingProvider;
 import com.abax.memory.infrastructure.ai.OpenAIEmbeddingProvider;
+import com.abax.memory.infrastructure.qdrant.InMemoryQdrantClient;
+import com.abax.memory.infrastructure.qdrant.QdrantClient;
+import com.abax.memory.infrastructure.qdrant.QdrantEmbeddingClient;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -46,6 +49,9 @@ public class InfrastructureConfig {
     @ConfigProperty(name = "abax.v2.qdrant.api-key")
     Optional<String> qdrantApiKey;
 
+    @ConfigProperty(name = "abax.v2.qdrant.mock", defaultValue = "false")
+    boolean qdrantMock;
+
     // ── OpenAI embedding configuration ────────────────────────────
 
     @ConfigProperty(name = "abax.v2.openai.api-key")
@@ -64,6 +70,43 @@ public class InfrastructureConfig {
     int openaiTimeoutSeconds;
 
     // ── CDI Producers ─────────────────────────────────────────────
+
+    /**
+     * Produces the {@link QdrantClient} bean.
+     * <p>
+     * Resolution strategy:
+     * <ol>
+     *   <li>If {@code abax.v2.qdrant.mock=true}, returns {@link InMemoryQdrantClient}
+     *       directly (for test environments where the embedding dimension doesn't
+     *       match Qdrant's collection).</li>
+     *   <li>Otherwise, creates a real {@link QdrantEmbeddingClient} connecting to
+     *       the configured Qdrant server.</li>
+     *   <li>If the health check fails (Qdrant is unreachable), falls back
+     *       to {@link InMemoryQdrantClient} with a
+     *       {@code REPLACE_BEFORE_PROD} warning.</li>
+     * </ol>
+     * </p>
+     */
+    @Produces
+    @Singleton
+    public QdrantClient qdrantClient() {
+        // Test environments can force mock mode
+        if (qdrantMock) {
+            LOG.infov("abax.v2.qdrant.mock=true — using InMemoryQdrantClient (test mode)");
+            return new InMemoryQdrantClient();
+        }
+
+        // Try connecting to the real Qdrant server
+        var realClient = new QdrantEmbeddingClient(qdrantHost, qdrantPort, qdrantUseTls);
+        if (realClient.isHealthy()) {
+            LOG.infov("QdrantClient ACTIVE — connected to {0}:{1}", qdrantHost, qdrantPort);
+            return realClient;
+        }
+
+        LOG.warnv("Qdrant server not reachable at {0}:{1} — "
+                + "using InMemoryQdrantClient (REPLACE_BEFORE_PROD)", qdrantHost, qdrantPort);
+        return new InMemoryQdrantClient();
+    }
 
     /**
      * Produces the {@link EmbeddingProvider} bean.

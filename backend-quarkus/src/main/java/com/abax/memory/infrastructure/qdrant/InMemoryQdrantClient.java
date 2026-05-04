@@ -1,6 +1,5 @@
 package com.abax.memory.infrastructure.qdrant;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * brute-force cosine-similarity search over all stored points.</strong></p>
  *
  * <p><strong>REPLACE_BEFORE_PROD: swap this bean with a real Qdrant HTTP/gRPC
- * client implementation (e.g. {@code QdrantRestClient}) that connects to
+ * client implementation (e.g. {@code QdrantEmbeddingClient}) that connects to
  * the configured Qdrant 1.17 instance.</strong></p>
+ *
+ * <p>This class is instantiated manually by {@code InfrastructureConfig}
+ * when the real Qdrant server is unreachable. It is NOT a CDI bean.</p>
  *
  * <p>Limitations of this mock:
  * <ul>
@@ -27,8 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * </p>
  */
 // MOCK: Qdrant no disponible en entorno de build
-// REPLACE_BEFORE_PROD: conectar a Qdrant real via REST/gRPC
-@ApplicationScoped
+// REPLACE_BEFORE_PROD: InfrastructureConfig already tries real Qdrant first
 public class InMemoryQdrantClient implements QdrantClient {
 
     private final Map<String, StoredPoint> store = new ConcurrentHashMap<>();

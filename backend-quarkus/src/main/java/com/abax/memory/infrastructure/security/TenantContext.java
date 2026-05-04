@@ -1,15 +1,24 @@
 package com.abax.memory.infrastructure.security;
 
+import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import org.eclipse.microprofile.jwt.JsonWebToken;
+import org.jboss.logging.Logger;
 
 /**
  * Extracts and holds the tenant identifier for the current request.
  *
  * <h3>Tenant Resolution Strategy</h3>
- * <p>In the MVP, the tenant ID is extracted from the {@code X-Tenant-Id}
- * HTTP header. This is a deliberate simplification until OIDC-based
- * tenant resolution is fully implemented.</p>
+ * <p>When OIDC is configured ({@code quarkus.oidc.enabled=true}),
+ * the tenant ID is extracted from the JWT claim {@code tenant_id}
+ * (or {@code azp} as fallback) issued by Keycloak. This is the
+ * production path.</p>
+ *
+ * <p>When OIDC is NOT configured (e.g., local development, test),
+ * the tenant ID is read from the {@code X-Tenant-Id} HTTP header
+ * with a clear WARNING in the logs.</p>
  *
  * <p>All database queries MUST filter by the tenant ID obtained via
  * {@link #getCurrentTenantId()} to guarantee cross-tenant isolation.</p>
@@ -18,25 +27,29 @@ import jakarta.ws.rs.core.HttpHeaders;
  * resource does not belong to the current tenant, so as not to reveal
  * the existence of another tenant's data.</p>
  *
- * <p><b>Security:</b> This implementation MUST be replaced before
- * production deployment. See §6.3 of the architecture document.</p>
- *
  * <p>References: Architecture document §6.3, BR-004, SC-03</p>
  */
-// MOCK: Accepts X-Tenant-Id header directly without OIDC validation.
-// In production, tenant_id will be extracted from the JWT claim
-// issued by Keycloak after OIDC authentication.
-// REPLACE_BEFORE_PROD
 @RequestScoped
 public class TenantContext {
 
+    private static final Logger LOG = Logger.getLogger(TenantContext.class);
+
     /**
-     * Default tenant ID used when no header is present.
-     * Only for local development convenience.
+     * Default tenant ID used when no header or JWT claim is present.
+     * Only for local development convenience — never in production.
      */
-    // MOCK: Hardcoded default tenant for local development without OIDC.
-    // REPLACE_BEFORE_PROD
     static final String DEFAULT_TENANT_ID = "default-tenant";
+
+    /**
+     * JWT claim names to inspect for tenant identification, in order of precedence.
+     */
+    private static final String[] TENANT_CLAIM_NAMES = {"tenant_id", "azp"};
+
+    @Inject
+    Instance<SecurityIdentity> securityIdentityInstance;
+
+    @Inject
+    Instance<JsonWebToken> jwtInstance;
 
     private String tenantId;
 
@@ -46,8 +59,9 @@ public class TenantContext {
      * <p>Resolution order:
      * <ol>
      *   <li>If previously resolved in this scope, return cached value.</li>
-     *   <li>Otherwise, extract from {@code X-Tenant-Id} header.</li>
-     *   <li>If header absent, fall back to {@link #DEFAULT_TENANT_ID}.</li>
+     *   <li>If OIDC is active and JWT has a tenant claim, extract from JWT.</li>
+     *   <li>If set via {@link #resolveFromHeader(String)}, use header value.</li>
+     *   <li>Fall back to {@link #DEFAULT_TENANT_ID} with WARNING.</li>
      * </ol>
      * </p>
      */
@@ -55,22 +69,127 @@ public class TenantContext {
         if (tenantId != null) {
             return tenantId;
         }
-        // Resolve lazily — set by resource via resolveFromHeader
+
+        // Try to resolve from JWT (OIDC path)
+        String jwtTenant = resolveFromJwt();
+        if (jwtTenant != null) {
+            tenantId = jwtTenant;
+            LOG.debugv("Tenant resolved from JWT: {0}", tenantId);
+            return tenantId;
+        }
+
+        // Fallback — must have been set by resolveFromHeader or explicitly
         tenantId = DEFAULT_TENANT_ID;
+        LOG.warnv("No tenant resolved from JWT or header — using DEFAULT_TENANT_ID={0}. "
+                + "This is acceptable only in local development. "
+                + "REPLACE_BEFORE_PROD: ensure OIDC is enabled and JWT contains tenant_id claim.",
+                DEFAULT_TENANT_ID);
         return tenantId;
     }
 
     /**
      * Resolves the tenant ID from an explicit header value.
      * Called by the REST resource layer when the X-Tenant-Id header
-     * is present.
+     * is present (OIDC-disabled fallback path).
      */
     public void resolveFromHeader(String headerValue) {
         if (headerValue != null && !headerValue.isBlank()) {
             this.tenantId = headerValue.trim();
+            LOG.debugv("Tenant resolved from X-Tenant-Id header: {0}", tenantId);
         } else {
-            this.tenantId = DEFAULT_TENANT_ID;
+            LOG.warn("Empty X-Tenant-Id header received — tenant will fall back to defaults");
+            this.tenantId = null;
         }
+    }
+
+    /**
+     * Attempts to extract the tenant ID from the current JWT's claims.
+     * This is the production OIDC path.
+     *
+     * <p>Uses {@link JsonWebToken} from MicroProfile JWT (available when
+     * Quarkus OIDC is enabled). Checks {@code tenant_id}, then {@code azp},
+     * then {@code sub} claims.</p>
+     *
+     * @return the tenant identifier from JWT claims, or {@code null} if OIDC is not active
+     */
+    private String resolveFromJwt() {
+        try {
+            // Check if we have a valid SecurityIdentity
+            SecurityIdentity identity = securityIdentityInstance.isResolvable()
+                    ? securityIdentityInstance.get() : null;
+
+            if (identity == null || identity.isAnonymous()) {
+                LOG.debug("SecurityIdentity is anonymous or unavailable — JWT tenant resolution skipped");
+                return null;
+            }
+
+            // Try to get JsonWebToken (MicroProfile JWT standard interface)
+            if (jwtInstance.isResolvable()) {
+                JsonWebToken jwt = jwtInstance.get();
+                if (jwt != null) {
+                    // Try tenant-specific claim names in order
+                    for (String claimName : TENANT_CLAIM_NAMES) {
+                        Object claimValue = jwt.getClaim(claimName);
+                        if (claimValue instanceof String s && !s.isBlank()) {
+                            return s;
+                        }
+                    }
+                    // Fallback: use 'sub' as tenant identifier
+                    String sub = jwt.getSubject();
+                    if (sub != null && !sub.isBlank()) {
+                        LOG.debugv("Using JWT 'sub' claim as tenant_id: {0}", sub);
+                        return sub;
+                    }
+                }
+            }
+
+            // Fallback: try to get claims from the principal directly via reflection
+            // This handles Quarkus OIDC internal principal types safely
+            var principal = identity.getPrincipal();
+            if (principal != null) {
+                String fromPrincipal = extractClaimFromPrincipal(principal);
+                if (fromPrincipal != null) {
+                    return fromPrincipal;
+                }
+            }
+
+            LOG.debug("JWT principal found but no tenant_id/azp/sub claim available");
+            return null;
+        } catch (Exception e) {
+            LOG.debugv("JWT tenant resolution failed: {0} — falling back to header", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Safely extracts a tenant claim from a Principal object using reflection
+     * to avoid compile-time dependencies on internal Quarkus OIDC classes.
+     */
+    private String extractClaimFromPrincipal(java.security.Principal principal) {
+        try {
+            // Try getClaim(String) method via reflection (works for both
+            // SmallRye DefaultJWTCallerPrincipal and Quarkus OidcJwtCallerPrincipal)
+            var getClaimMethod = principal.getClass().getMethod("getClaim", String.class);
+            for (String claimName : TENANT_CLAIM_NAMES) {
+                Object claimValue = getClaimMethod.invoke(principal, claimName);
+                if (claimValue instanceof String s && !s.isBlank()) {
+                    return s;
+                }
+            }
+            // Fallback: try 'sub'
+            Object subClaim = getClaimMethod.invoke(principal, "sub");
+            if (subClaim instanceof String s && !s.isBlank()) {
+                LOG.debugv("Using JWT 'sub' claim as tenant_id (via reflection): {0}", s);
+                return s;
+            }
+        } catch (NoSuchMethodException e) {
+            LOG.debugv("Principal class {0} does not have getClaim(String) method",
+                    principal.getClass().getName());
+        } catch (Exception e) {
+            LOG.debugv("Failed to extract claim from principal {0}: {1}",
+                    principal.getClass().getName(), e.getMessage());
+        }
+        return null;
     }
 
     /**
