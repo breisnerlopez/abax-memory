@@ -1,5 +1,8 @@
 package com.abax.memory.domain.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -10,22 +13,21 @@ import java.util.Set;
  * Transitions are validated by {@link #canTransitionTo(LifecycleState)}.
  * </p>
  *
- * <h3>State machine</h3>
+ * <h3>State machine (matching spec BR-005)</h3>
  * <pre>
  *   [*] → DRAFT
- *   DRAFT → IN_REVIEW  (submit for review)
- *   DRAFT → DELETED     (soft-delete)
- *   IN_REVIEW → APPROVED  (reviewer approves)
- *   IN_REVIEW → DRAFT     (reviewer requests changes)
- *   IN_REVIEW → DELETED   (soft-delete)
- *   APPROVED → DEPRECATED (deprecate)
- *   APPROVED → ARCHIVED   (archive)
- *   APPROVED → DELETED    (soft-delete)
- *   DEPRECATED → APPROVED (re-activate via supersedes)
- *   DEPRECATED → ARCHIVED
- *   DEPRECATED → DELETED
- *   ARCHIVED → DELETED    (soft-delete)
- *   * → DELETED            (admin soft-delete from any state)
+ *   DRAFT → PENDING   (submit for review)
+ *   DRAFT → DELETED    (soft-delete)
+ *   PENDING → ACTIVE   (reviewer approves)
+ *   PENDING → REJECTED (reviewer rejects)
+ *   PENDING → DRAFT    (reviewer requests changes)
+ *   PENDING → DELETED  (soft-delete)
+ *   ACTIVE → ARCHIVED  (archive)
+ *   ACTIVE → DELETED   (soft-delete)
+ *   REJECTED → DRAFT   (resubmit after rejection)
+ *   REJECTED → DELETED (soft-delete)
+ *   ARCHIVED → DELETED (soft-delete)
+ *   DELETED → terminal (no further transitions)
  * </pre>
  *
  * <p>References: EP-001, FT-001.02, HU-001.02.1, BR-005</p>
@@ -36,13 +38,13 @@ public enum LifecycleState {
     DRAFT,
 
     /** Submitted for human review; awaiting approval or rejection. */
-    IN_REVIEW,
+    PENDING,
 
     /** Approved and published; visible to all authorized consumers. */
-    APPROVED,
+    ACTIVE,
 
-    /** Still valid but no longer recommended; superseded by a newer version. */
-    DEPRECATED,
+    /** Rejected in review; requires iteration by the creator. */
+    REJECTED,
 
     /** Archived for historical reference; out of active circulation. */
     ARCHIVED,
@@ -51,7 +53,32 @@ public enum LifecycleState {
     DELETED;
 
     private static final Set<LifecycleState> SOFT_DELETABLE_FROM =
-            EnumSet.of(DRAFT, IN_REVIEW, APPROVED, DEPRECATED, ARCHIVED);
+            EnumSet.of(DRAFT, PENDING, ACTIVE, REJECTED, ARCHIVED);
+
+    /**
+     * Returns the lowercase JSON representation.
+     */
+    @JsonValue
+    public String jsonValue() {
+        return name().toLowerCase();
+    }
+
+    /**
+     * Factory method for deserialization from JSON string (case-insensitive).
+     */
+    @JsonCreator
+    public static LifecycleState fromJson(String value) {
+        if (value == null) {
+            return null;
+        }
+        for (LifecycleState s : values()) {
+            if (s.name().equalsIgnoreCase(value)) {
+                return s;
+            }
+        }
+        throw new IllegalArgumentException("Unknown LifecycleState: " + value
+                + ". Expected one of: draft, pending, active, rejected, archived, deleted");
+    }
 
     /**
      * Returns the set of states that {@code this} state can legally
@@ -59,12 +86,12 @@ public enum LifecycleState {
      */
     public Set<LifecycleState> allowedTransitions() {
         return switch (this) {
-            case DRAFT       -> EnumSet.of(IN_REVIEW, DELETED);
-            case IN_REVIEW   -> EnumSet.of(APPROVED, DRAFT, DELETED);
-            case APPROVED    -> EnumSet.of(DEPRECATED, ARCHIVED, DELETED);
-            case DEPRECATED  -> EnumSet.of(APPROVED, ARCHIVED, DELETED);
-            case ARCHIVED    -> EnumSet.of(DELETED);
-            case DELETED     -> EnumSet.noneOf(LifecycleState.class); // terminal
+            case DRAFT      -> EnumSet.of(PENDING, DELETED);
+            case PENDING    -> EnumSet.of(ACTIVE, REJECTED, DRAFT, DELETED);
+            case ACTIVE     -> EnumSet.of(ARCHIVED, DELETED);
+            case REJECTED   -> EnumSet.of(DRAFT, DELETED);
+            case ARCHIVED   -> EnumSet.of(DELETED);
+            case DELETED    -> EnumSet.noneOf(LifecycleState.class); // terminal
         };
     }
 
@@ -87,19 +114,19 @@ public enum LifecycleState {
      * in standard consumer search results.
      */
     public boolean isConsumerVisible() {
-        return this == APPROVED;
+        return this == ACTIVE;
     }
 
     /**
      * Returns {@code true} if the given string matches one of the enum constants
-     * (case-sensitive).
+     * (case-insensitive).
      */
     public static boolean isValid(String value) {
         if (value == null) {
             return false;
         }
         for (LifecycleState s : values()) {
-            if (s.name().equals(value)) {
+            if (s.name().equalsIgnoreCase(value)) {
                 return true;
             }
         }

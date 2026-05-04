@@ -65,13 +65,13 @@ class TenantIsolationTest {
 
         var alphaRequest2 = new CreateMemoryRequest(
                 "Alpha Memory 2", "More alpha content.",
-                MemoryKind.KNOWLEDGE, "scope-alpha", null, null, null, null, null);
+                MemoryKind.FACT, "scope-alpha", null, null, null, null, null);
         memoryService.createV2(alphaRequest2, TENANT_ALPHA);
 
         // Tenant Beta creates memories
         var betaRequest = new CreateMemoryRequest(
                 "Beta Memory 1", "Content from beta tenant.",
-                MemoryKind.DOCUMENT, "scope-beta", SensitivityLevel.CONFIDENTIAL,
+                MemoryKind.PROCEDURE, "scope-beta", SensitivityLevel.CONFIDENTIAL,
                 null, null, 0.7, null);
         memoryService.createV2(betaRequest, TENANT_BETA);
 
@@ -138,7 +138,7 @@ class TenantIsolationTest {
         // Tenant Beta tries to use the same scope — should fail
         var betaRequest = new CreateMemoryRequest(
                 "Beta Phoenix Claim", "Trying to claim Phoenix.",
-                MemoryKind.DOCUMENT, "project-phoenix", null, null, null, null, null);
+                MemoryKind.PROCEDURE, "project-phoenix", null, null, null, null, null);
         assertThatThrownBy(() -> memoryService.createV2(betaRequest, TENANT_BETA))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("does not belong to tenant");

@@ -9,8 +9,10 @@ import com.abax.memory.domain.enums.LifecycleState;
 import com.abax.memory.domain.enums.MemoryKind;
 import com.abax.memory.domain.enums.SensitivityLevel;
 import com.abax.memory.domain.model.MemoryFragment;
+import com.abax.memory.domain.service.LlmService;
 import com.abax.memory.domain.service.MemoryService;
 import com.abax.memory.domain.service.SearchService;
+import com.abax.memory.domain.model.ExtractedEntity;
 import com.abax.memory.infrastructure.persistence.DomainProfileEntity;
 import com.abax.memory.infrastructure.persistence.MemoryFragmentEntity;
 import com.abax.memory.infrastructure.persistence.TenantConfigEntity;
@@ -74,6 +76,9 @@ public class MemoryServiceImpl implements MemoryService {
 
     @Inject
     SearchService searchService;
+
+    @Inject
+    LlmService llmService;
 
     // ── Domain-model methods (delegated internally) ─────────────────
 
@@ -160,6 +165,22 @@ public class MemoryServiceImpl implements MemoryService {
         // B3: Audit the creation
         auditService.recordAction(entity.getId(), "CREATE", resolveActorId(),
                 tenantId, Map.of("after", toDiffMap(entity)));
+
+        // EP-001/D: AI enrichment — generate summary and estimate confidence
+        try {
+            if (entity.getSummary() == null || entity.getSummary().isBlank()) {
+                String summary = llmService.generateSummary(entity.getContent(), entity.getKind());
+                entity.setSummary(summary);
+            }
+            if (entity.getConfidence() == null || entity.getConfidence() == 0.5) {
+                float confidence = llmService.estimateConfidence(entity.getContent(), entity.getKind());
+                entity.setConfidence((double) confidence);
+            }
+            entity.persist(); // persist AI-generated fields
+        } catch (Exception e) {
+            LOG.warnv("AI enrichment failed for fragment {0}: {1}", entity.getId(), e.getMessage());
+            // Non-blocking: memory is persisted even if enrichment fails
+        }
 
         // EP-005: Index fragment for semantic search (async in production)
         // MOCK: Synchronous indexing — fast with in-memory stubs.
@@ -272,7 +293,7 @@ public class MemoryServiceImpl implements MemoryService {
             params.put("lifecycleStates", request.getLifecycleStates());
         }
         if (request.getSensitivityMax() != null) {
-            // Sensitivity ordering: PUBLIC < INTERNAL < CONFIDENTIAL < RESTRICTED
+            // Sensitivity ordering: PUBLIC < INTERNAL < CONFIDENTIAL < SECRET
             queryBuilder.append(" and sensitivityLevel <= :sensitivityMax");
             params.put("sensitivityMax", request.getSensitivityMax());
         }
@@ -322,7 +343,7 @@ public class MemoryServiceImpl implements MemoryService {
     // ── EP-006: Review Workflow (B4) ─────────────────────────────────
 
     /**
-     * Requests review for a memory fragment: DRAFT → IN_REVIEW.
+     * Requests review for a memory fragment: DRAFT → PENDING.
      *
      * @param fragmentId UUID of the memory fragment
      * @param tenantId   tenant scope identifier
@@ -337,24 +358,24 @@ public class MemoryServiceImpl implements MemoryService {
         var entity = requireEntityForTenant(fragmentId, tenantId);
         var current = entity.getLifecycleState();
 
-        if (!current.canTransitionTo(LifecycleState.IN_REVIEW)) {
+        if (!current.canTransitionTo(LifecycleState.PENDING)) {
             throw new IllegalArgumentException(
                     "Cannot request review from lifecycle state " + current);
         }
 
-        entity.setLifecycleState(LifecycleState.IN_REVIEW);
+        entity.setLifecycleState(LifecycleState.PENDING);
         entity.persist();
         LOG.infov("Review requested: id={0}, tenant={1}, reviewer={2}", fragmentId, tenantId, reviewerId);
 
         // B3: Audit
         auditService.recordAction(fragmentId, "REVIEW_REQUESTED", reviewerId,
-                tenantId, Map.of("previousState", current.name(), "newState", LifecycleState.IN_REVIEW.name()));
+                tenantId, Map.of("previousState", current.name(), "newState", LifecycleState.PENDING.name()));
 
         return MemoryResponse.from(entity);
     }
 
     /**
-     * Approves a review: IN_REVIEW → APPROVED.
+     * Approves a review: PENDING → ACTIVE.
      *
      * @param fragmentId UUID of the memory fragment
      * @param tenantId   tenant scope identifier
@@ -370,12 +391,12 @@ public class MemoryServiceImpl implements MemoryService {
         var entity = requireEntityForTenant(fragmentId, tenantId);
         var current = entity.getLifecycleState();
 
-        if (!current.canTransitionTo(LifecycleState.APPROVED)) {
+        if (!current.canTransitionTo(LifecycleState.ACTIVE)) {
             throw new IllegalArgumentException(
                     "Cannot approve review from lifecycle state " + current);
         }
 
-        entity.setLifecycleState(LifecycleState.APPROVED);
+        entity.setLifecycleState(LifecycleState.ACTIVE);
         entity.setReviewerId(reviewerId);
         entity.setReviewComment(comment);
         entity.persist();
@@ -385,14 +406,14 @@ public class MemoryServiceImpl implements MemoryService {
         auditService.recordAction(fragmentId, "REVIEWED", reviewerId,
                 tenantId, Map.of(
                         "previousState", current.name(),
-                        "newState", LifecycleState.APPROVED.name(),
+                        "newState", LifecycleState.ACTIVE.name(),
                         "comment", comment != null ? comment : ""));
 
         return MemoryResponse.from(entity);
     }
 
     /**
-     * Rejects a review: IN_REVIEW → DRAFT.
+     * Rejects a review: PENDING → REJECTED.
      *
      * @param fragmentId UUID of the memory fragment
      * @param tenantId   tenant scope identifier
@@ -408,7 +429,7 @@ public class MemoryServiceImpl implements MemoryService {
         var entity = requireEntityForTenant(fragmentId, tenantId);
         var current = entity.getLifecycleState();
 
-        if (!current.canTransitionTo(LifecycleState.DRAFT)) {
+        if (!current.canTransitionTo(LifecycleState.REJECTED)) {
             throw new IllegalArgumentException(
                     "Cannot reject review from lifecycle state " + current);
         }
@@ -417,7 +438,7 @@ public class MemoryServiceImpl implements MemoryService {
             throw new IllegalArgumentException("Comment is required when rejecting a review");
         }
 
-        entity.setLifecycleState(LifecycleState.DRAFT);
+        entity.setLifecycleState(LifecycleState.REJECTED);
         entity.setReviewerId(reviewerId);
         entity.setReviewComment(comment);
         entity.persist();
@@ -427,7 +448,7 @@ public class MemoryServiceImpl implements MemoryService {
         auditService.recordAction(fragmentId, "REVIEWED", reviewerId,
                 tenantId, Map.of(
                         "previousState", current.name(),
-                        "newState", LifecycleState.DRAFT.name(),
+                        "newState", LifecycleState.REJECTED.name(),
                         "decision", "rejected",
                         "comment", comment));
 
@@ -505,7 +526,7 @@ public class MemoryServiceImpl implements MemoryService {
             LOG.warnv("Failed to load profile defaults for tenant {0}: {1}", tenantId, e.getMessage());
         }
         // Fallback to system defaults
-        return new ProfileDefaults(MemoryKind.KNOWLEDGE, SensitivityLevel.INTERNAL, 0.5);
+        return new ProfileDefaults(MemoryKind.FACT, SensitivityLevel.INTERNAL, 0.5);
     }
 
     @SuppressWarnings("unchecked")
@@ -518,7 +539,7 @@ public class MemoryServiceImpl implements MemoryService {
         } catch (Exception e) {
             LOG.debugv("Could not extract default kind from profile config: {0}", e.getMessage());
         }
-        return MemoryKind.KNOWLEDGE;
+        return MemoryKind.FACT;
     }
 
     private SensitivityLevel extractDefaultSensitivity(Map<String, Object> config) {
@@ -618,10 +639,10 @@ public class MemoryServiceImpl implements MemoryService {
      * Maps a lifecycle state transition to the corresponding audit action.
      */
     private String lifecycleStateToAuditAction(LifecycleState from, LifecycleState to) {
-        if (to == LifecycleState.IN_REVIEW && from == LifecycleState.DRAFT) return "REVIEW_REQUESTED";
-        if (to == LifecycleState.APPROVED) return "REVIEWED";
+        if (to == LifecycleState.PENDING && from == LifecycleState.DRAFT) return "REVIEW_REQUESTED";
+        if (to == LifecycleState.ACTIVE) return "REVIEWED";
+        if (to == LifecycleState.REJECTED) return "REVIEW_REJECTED";
         if (to == LifecycleState.DRAFT) return "REVIEW_RETURN";
-        if (to == LifecycleState.DEPRECATED) return "DEPRECATE";
         if (to == LifecycleState.ARCHIVED) return "ARCHIVE";
         if (to == LifecycleState.DELETED) return "SOFT_DELETE";
         return "LIFECYCLE_CHANGED";
@@ -748,5 +769,17 @@ public class MemoryServiceImpl implements MemoryService {
         facets.put("sensitivityLevel", sensitivityCounts);
 
         return facets;
+    }
+
+    // ── EP-001/D: Entity Extraction (LLM-powered) ────────────────────
+
+    @Override
+    public List<ExtractedEntity> extractEntities(String content, String tenantId) {
+        if (content == null || content.isBlank()) {
+            return List.of();
+        }
+        LOG.infov("Entity extraction requested: tenant={0}, content_length={1}", tenantId, content.length());
+        // Use FACT as default kind for extraction context
+        return llmService.extractEntities(content, MemoryKind.FACT);
     }
 }

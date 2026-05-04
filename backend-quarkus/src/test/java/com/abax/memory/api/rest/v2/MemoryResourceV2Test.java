@@ -57,7 +57,7 @@ class MemoryResourceV2Test {
                 .body(Map.of(
                         "title", "Runbook: Database Failover",
                         "content", "## Procedure\n1. Check replication lag.\n2. Promote standby.\n3. Notify team.",
-                        "kind", "KNOWLEDGE",
+                        "kind", "FACT",
                         "sensitivityLevel", "INTERNAL",
                         "sourceType", "manual",
                         "confidence", 0.85
@@ -70,9 +70,9 @@ class MemoryResourceV2Test {
                 .body("id", notNullValue())
                 .body("title", equalTo("Runbook: Database Failover"))
                 .body("content", containsString("Procedure"))
-                .body("kind", equalTo("KNOWLEDGE"))
-                .body("lifecycleState", equalTo("DRAFT"))
-                .body("sensitivityLevel", equalTo("INTERNAL"))
+                .body("kind", equalTo("fact"))
+                .body("lifecycleState", equalTo("draft"))
+                .body("sensitivityLevel", equalTo("internal"))
                 .body("confidence", equalTo(0.85f))
                 .body("isDeleted", equalTo(false))
                 .body("isConsumerVisible", equalTo(false))
@@ -346,7 +346,7 @@ class MemoryResourceV2Test {
                     .body(Map.of(
                             "title", "Memory " + i,
                             "content", "Content for memory " + i,
-                            "kind", "KNOWLEDGE"
+                            "kind", "FACT"
                     ))
                     .when()
                     .post(BASE_PATH)
@@ -401,7 +401,7 @@ class MemoryResourceV2Test {
                 .then()
                 .statusCode(200)
                 .body("items.size()", greaterThan(0))
-                .body("items[0].kind", equalTo("DECISION"));
+                .body("items[0].kind", equalTo("decision"));
     }
 
     @Test

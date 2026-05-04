@@ -5,8 +5,10 @@ import com.abax.memory.api.dto.v2.MemoryResponse;
 import com.abax.memory.api.dto.v2.SearchRequest;
 import com.abax.memory.api.dto.v2.SearchResponse;
 import com.abax.memory.api.dto.v2.UpdateMemoryRequest;
+import com.abax.memory.domain.model.ExtractedEntity;
 import com.abax.memory.domain.model.MemoryFragment;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -152,4 +154,16 @@ public interface MemoryService {
      * @throws IllegalArgumentException if the scope is invalid for the tenant
      */
     void validateScopeBelongsToTenant(String scopeId, String tenantId);
+
+    // ── EP-001: Entity Extraction (LLM-powered) ─────────────────────
+
+    /**
+     * Extracts named entities from raw text using the LLM service.
+     * Does NOT persist anything — only analyzes and returns entities.
+     *
+     * @param content  the text to analyze
+     * @param tenantId tenant scope identifier
+     * @return list of extracted entities (empty if none found)
+     */
+    List<ExtractedEntity> extractEntities(String content, String tenantId);
 }

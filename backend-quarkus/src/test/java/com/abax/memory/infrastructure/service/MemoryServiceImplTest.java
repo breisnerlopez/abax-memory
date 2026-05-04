@@ -97,7 +97,7 @@ class MemoryServiceImplTest {
 
         MemoryResponse response = memoryService.createV2(request, TENANT_A);
 
-        assertThat(response.kind()).isNotNull(); // defaults to KNOWLEDGE
+        assertThat(response.kind()).isNotNull(); // defaults to FACT
         assertThat(response.sensitivityLevel()).isEqualTo(SensitivityLevel.INTERNAL);
         assertThat(response.confidence()).isEqualTo(0.5);
         assertThat(response.lifecycleState()).isEqualTo(LifecycleState.DRAFT);
@@ -153,7 +153,7 @@ class MemoryServiceImplTest {
                 null, // content stays same
                 "New summary",
                 null, // lifecycle stays DRAFT
-                SensitivityLevel.RESTRICTED,
+                SensitivityLevel.SECRET,
                 null
         );
 
@@ -162,7 +162,7 @@ class MemoryServiceImplTest {
         assertThat(updated.title()).isEqualTo("Updated Title");
         assertThat(updated.content()).isEqualTo("Original content."); // unchanged
         assertThat(updated.summary()).isEqualTo("New summary");
-        assertThat(updated.sensitivityLevel()).isEqualTo(SensitivityLevel.RESTRICTED);
+        assertThat(updated.sensitivityLevel()).isEqualTo(SensitivityLevel.SECRET);
         assertThat(updated.lifecycleState()).isEqualTo(LifecycleState.DRAFT); // unchanged
     }
 
@@ -174,17 +174,17 @@ class MemoryServiceImplTest {
         var create = new CreateMemoryRequest("State Test", "Content.", null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(create, TENANT_A);
 
-        // DRAFT → IN_REVIEW is valid
-        var validUpdate = new UpdateMemoryRequest(null, null, null, LifecycleState.IN_REVIEW, null, null);
+        // DRAFT → PENDING is valid
+        var validUpdate = new UpdateMemoryRequest(null, null, null, LifecycleState.PENDING, null, null);
         var updated = memoryService.updateV2(created.id(), validUpdate, TENANT_A);
-        assertThat(updated.lifecycleState()).isEqualTo(LifecycleState.IN_REVIEW);
+        assertThat(updated.lifecycleState()).isEqualTo(LifecycleState.PENDING);
 
-        // IN_REVIEW → APPROVED is valid
-        var approve = new UpdateMemoryRequest(null, null, null, LifecycleState.APPROVED, null, null);
+        // PENDING → ACTIVE is valid
+        var approve = new UpdateMemoryRequest(null, null, null, LifecycleState.ACTIVE, null, null);
         var approved = memoryService.updateV2(created.id(), approve, TENANT_A);
-        assertThat(approved.lifecycleState()).isEqualTo(LifecycleState.APPROVED);
+        assertThat(approved.lifecycleState()).isEqualTo(LifecycleState.ACTIVE);
 
-        // APPROVED → ARCHIVED is valid
+        // ACTIVE → ARCHIVED is valid
         var archive = new UpdateMemoryRequest(null, null, null, LifecycleState.ARCHIVED, null, null);
         var archived = memoryService.updateV2(created.id(), archive, TENANT_A);
         assertThat(archived.lifecycleState()).isEqualTo(LifecycleState.ARCHIVED);
@@ -262,7 +262,7 @@ class MemoryServiceImplTest {
                         MemoryKind.DECISION, null, null, null, null, null, null), TENANT_A);
         memoryService.createV2(
                 new CreateMemoryRequest("Memory Beta", "Content Beta.",
-                        MemoryKind.KNOWLEDGE, null, null, null, null, null, null), TENANT_A);
+                        MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
 
         var request = new SearchRequest("*", null, null, null, null, null, null, 0, 10);
         var result = memoryService.listV2(request, TENANT_A);

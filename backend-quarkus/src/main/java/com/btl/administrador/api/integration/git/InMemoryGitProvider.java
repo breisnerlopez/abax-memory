@@ -4,11 +4,20 @@ import com.btl.administrador.api.domain.MemoryRecord;
 import com.btl.administrador.api.exception.ApiException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
+import org.jboss.logging.Logger;
 
 import java.util.UUID;
 
+// MOCK: Git provider not integrated
+// REPLACE_BEFORE_PROD: Implement real Git persistence (GitHub/GitLab API)
 @ApplicationScoped
 public class InMemoryGitProvider implements GitProvider {
+
+    private static final Logger LOG = Logger.getLogger(InMemoryGitProvider.class);
+
+    public InMemoryGitProvider() {
+        LOG.warn("MOCK ACTIVE: InMemoryGitProvider generates fake commits. REPLACE_BEFORE_PROD with real Git integration.");
+    }
 
     @Override
     public GitPersistResult persistApprovedMemory(MemoryRecord memoryRecord, String markdown) {

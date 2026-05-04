@@ -88,7 +88,7 @@ class DomainProfileTest {
 
     @Test
     @Order(1)
-    @DisplayName("D3.1 — Creating memory without kind applies profile default (ops: INCIDENT)")
+    @DisplayName("D3.1 — Creating memory without kind applies profile default (ops: EVENT)")
     @Transactional
     void createMemory_withoutKind_appliesProfileDefault() {
         // Seed the ops profile
@@ -96,7 +96,7 @@ class DomainProfileTest {
                 "IT Operations profile",
                 """
                 {
-                    "recommendedKinds": ["INCIDENT", "PROCEDURE", "DECISION", "KNOWLEDGE"],
+                    "recommendedKinds": ["EVENT", "PROCEDURE", "DECISION", "FACT"],
                     "defaultSensitivity": "INTERNAL",
                     "defaultConfidence": 0.7
                 }
@@ -112,7 +112,7 @@ class DomainProfileTest {
         MemoryResponse created = memoryService.createV2(request, TENANT_OPS);
 
         // Verify defaults from ops profile
-        assertThat(created.kind()).isEqualTo(MemoryKind.INCIDENT); // first recommended kind
+        assertThat(created.kind()).isEqualTo(MemoryKind.EVENT); // first recommended kind
         assertThat(created.sensitivityLevel()).isEqualTo(SensitivityLevel.INTERNAL);
         assertThat(created.confidence()).isEqualTo(0.7);
     }
@@ -129,7 +129,7 @@ class DomainProfileTest {
                 "AI Agent conversational memory",
                 """
                 {
-                    "recommendedKinds": ["AGENT_MEMORY", "DECISION", "ENTITY", "KNOWLEDGE"],
+                    "recommendedKinds": ["PREFERENCE", "DECISION", "ENTITY", "FACT"],
                     "defaultSensitivity": "INTERNAL",
                     "defaultConfidence": 0.5
                 }
@@ -142,7 +142,7 @@ class DomainProfileTest {
                 null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT_AGENT);
 
-        assertThat(created.kind()).isEqualTo(MemoryKind.AGENT_MEMORY);
+        assertThat(created.kind()).isEqualTo(MemoryKind.PREFERENCE);
         assertThat(created.sensitivityLevel()).isEqualTo(SensitivityLevel.INTERNAL);
         assertThat(created.confidence()).isEqualTo(0.5);
     }
@@ -159,7 +159,7 @@ class DomainProfileTest {
                 "Business profile: CRM / Legal / Finance",
                 """
                 {
-                    "recommendedKinds": ["ENTITY", "DOCUMENT", "DECISION", "CUSTOM", "KNOWLEDGE"],
+                    "recommendedKinds": ["ENTITY", "PROCEDURE", "DECISION", "CUSTOM", "FACT"],
                     "defaultSensitivity": "CONFIDENTIAL",
                     "defaultConfidence": 0.5
                 }
@@ -188,7 +188,7 @@ class DomainProfileTest {
                 "Ops profile for override test",
                 """
                 {
-                    "recommendedKinds": ["INCIDENT", "PROCEDURE"],
+                    "recommendedKinds": ["EVENT", "PROCEDURE"],
                     "defaultSensitivity": "INTERNAL",
                     "defaultConfidence": 0.7
                 }
@@ -198,13 +198,13 @@ class DomainProfileTest {
         // Provide explicit kind, sensitivity, and confidence
         var request = new CreateMemoryRequest(
                 "Explicit Override Test", "Overriding profile defaults.",
-                MemoryKind.DOCUMENT, null, SensitivityLevel.RESTRICTED,
+                MemoryKind.PROCEDURE, null, SensitivityLevel.SECRET,
                 null, null, 0.99, null);
         MemoryResponse created = memoryService.createV2(request, TENANT_OPS);
 
         // Explicit values must be preserved, not overwritten by profile
-        assertThat(created.kind()).isEqualTo(MemoryKind.DOCUMENT);
-        assertThat(created.sensitivityLevel()).isEqualTo(SensitivityLevel.RESTRICTED);
+        assertThat(created.kind()).isEqualTo(MemoryKind.PROCEDURE);
+        assertThat(created.sensitivityLevel()).isEqualTo(SensitivityLevel.SECRET);
         assertThat(created.confidence()).isEqualTo(0.99);
     }
 
@@ -220,7 +220,7 @@ class DomainProfileTest {
                 "Agent profile for switch test",
                 """
                 {
-                    "recommendedKinds": ["AGENT_MEMORY", "DECISION"],
+                    "recommendedKinds": ["PREFERENCE", "DECISION"],
                     "defaultSensitivity": "INTERNAL",
                     "defaultConfidence": 0.5
                 }
@@ -232,7 +232,7 @@ class DomainProfileTest {
                 "Before Switch", "Agent profile memory.",
                 null, null, null, null, null, null, null);
         MemoryResponse before = memoryService.createV2(request1, "tenant-switch");
-        assertThat(before.kind()).isEqualTo(MemoryKind.AGENT_MEMORY);
+        assertThat(before.kind()).isEqualTo(MemoryKind.PREFERENCE);
         assertThat(before.sensitivityLevel()).isEqualTo(SensitivityLevel.INTERNAL);
 
         // Now switch to business profile
@@ -240,7 +240,7 @@ class DomainProfileTest {
                 "Business profile for switch test",
                 """
                 {
-                    "recommendedKinds": ["ENTITY", "DOCUMENT"],
+                    "recommendedKinds": ["ENTITY", "PROCEDURE"],
                     "defaultSensitivity": "CONFIDENTIAL",
                     "defaultConfidence": 0.5
                 }
@@ -269,7 +269,7 @@ class DomainProfileTest {
                 null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, "tenant-no-config");
 
-        assertThat(created.kind()).isEqualTo(MemoryKind.KNOWLEDGE);
+        assertThat(created.kind()).isEqualTo(MemoryKind.FACT);
         assertThat(created.sensitivityLevel()).isEqualTo(SensitivityLevel.INTERNAL);
         assertThat(created.confidence()).isEqualTo(0.5);
     }
@@ -285,17 +285,17 @@ class DomainProfileTest {
         seedProfile("ops-seed",
                 "Ops",
                 """
-                {"recommendedKinds":["INCIDENT","PROCEDURE"],"defaultSensitivity":"INTERNAL","defaultConfidence":0.7}
+                {"recommendedKinds":["EVENT","PROCEDURE"],"defaultSensitivity":"INTERNAL","defaultConfidence":0.7}
                 """);
         seedProfile("agent-seed",
                 "Agent",
                 """
-                {"recommendedKinds":["AGENT_MEMORY","DECISION"],"defaultSensitivity":"INTERNAL","defaultConfidence":0.5}
+                {"recommendedKinds":["PREFERENCE","DECISION"],"defaultSensitivity":"INTERNAL","defaultConfidence":0.5}
                 """);
         seedProfile("business-seed",
                 "Business",
                 """
-                {"recommendedKinds":["ENTITY","DOCUMENT"],"defaultSensitivity":"CONFIDENTIAL","defaultConfidence":0.5}
+                {"recommendedKinds":["ENTITY","PROCEDURE"],"defaultSensitivity":"CONFIDENTIAL","defaultConfidence":0.5}
                 """);
 
         // Query all active profiles

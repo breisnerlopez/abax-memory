@@ -9,6 +9,9 @@ import com.abax.memory.domain.enums.LifecycleState;
 import com.abax.memory.domain.enums.MemoryKind;
 import com.abax.memory.domain.enums.SensitivityLevel;
 import com.abax.memory.domain.model.Relation;
+import com.abax.memory.domain.model.InferredRelation;
+import com.abax.memory.domain.model.MemoryFragment;
+import com.abax.memory.domain.service.LlmService;
 import com.abax.memory.domain.service.RelationService;
 import com.abax.memory.domain.service.SearchService;
 import com.abax.memory.infrastructure.ai.EmbeddingProvider;
@@ -76,6 +79,9 @@ public class SearchServiceImpl implements SearchService {
 
     @Inject
     RelationService relationService;
+
+    @Inject
+    LlmService llmService;
 
     @Inject
     TenantContext tenantContext;
@@ -267,6 +273,35 @@ public class SearchServiceImpl implements SearchService {
         List<MemoryResponse> nodes = nodeMap.values().stream()
                 .map(MemoryResponse::from)
                 .toList();
+
+        // D4: LLM-inferred relations — suggest additional edges between
+        // the center node and other nodes in the graph that the LLM detects.
+        try {
+            var centerDomain = toDomainFragment(center);
+            var candidates = nodeMap.values().stream()
+                    .filter(e -> !e.getId().equals(center.getId()))
+                    .map(this::toDomainFragment)
+                    .collect(Collectors.toList());
+            if (!candidates.isEmpty()) {
+                List<InferredRelation> inferred = llmService.inferRelations(centerDomain, candidates);
+                for (InferredRelation ir : inferred) {
+                    // Add inferred edges that don't duplicate existing ones
+                    boolean isDuplicate = edges.stream().anyMatch(e ->
+                            e.sourceId().equals(ir.sourceId())
+                                    && e.targetId().equals(ir.targetId())
+                                    && e.relationType().equalsIgnoreCase(ir.relationType().name()));
+                    if (!isDuplicate) {
+                        edges.add(new GraphEdge(ir.sourceId(), ir.targetId(),
+                                ir.relationType().name(),
+                                Map.of("inferred", true, "confidence", ir.confidence(),
+                                        "evidence", ir.evidence())));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOG.debugv("LLM relation inference skipped for graph expansion: {0}", e.getMessage());
+            // Non-blocking: graph expansion succeeds even without LLM enrichment
+        }
 
         return new GraphResponse(centerResponse, edges, nodes);
     }
@@ -546,5 +581,21 @@ public class SearchServiceImpl implements SearchService {
      * Internal holder for hybrid search scoring.
      */
     private record ScoredResult(MemoryFragmentEntity entity, double score) {
+    }
+
+    /**
+     * Converts a JPA entity to a domain {@link MemoryFragment} for LLM consumption.
+     */
+    private MemoryFragment toDomainFragment(MemoryFragmentEntity entity) {
+        var fragment = new MemoryFragment();
+        fragment.setId(entity.getId());
+        fragment.setTenantId(entity.getTenantId());
+        fragment.setKind(entity.getKind());
+        fragment.setTitle(entity.getTitle());
+        fragment.setContent(entity.getContent());
+        fragment.setSummary(entity.getSummary());
+        fragment.setLifecycleState(entity.getLifecycleState());
+        fragment.setSensitivityLevel(entity.getSensitivityLevel());
+        return fragment;
     }
 }

@@ -1,6 +1,5 @@
 package com.abax.memory.infrastructure.ai;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -20,7 +19,6 @@ import java.util.List;
  */
 // MOCK: OpenAI API key no disponible en entorno de build
 // REPLACE_BEFORE_PROD: conectar a OpenAI text-embedding-3-large real
-@ApplicationScoped
 public class InMemoryEmbeddingProvider implements EmbeddingProvider {
 
     private static final int MOCK_DIMENSION = 64;

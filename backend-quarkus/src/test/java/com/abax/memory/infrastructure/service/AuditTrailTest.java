@@ -84,7 +84,7 @@ class AuditTrailTest {
     void update_shouldGenerateAuditRecord() {
         var request = new CreateMemoryRequest(
                 "Audit Update Original", "Original content.",
-                MemoryKind.KNOWLEDGE, null, null, null, null, null, null);
+                MemoryKind.FACT, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT);
 
         // Update the memory
@@ -114,7 +114,7 @@ class AuditTrailTest {
     void softDelete_shouldGenerateAuditRecord() {
         var request = new CreateMemoryRequest(
                 "Audit Delete Test", "Will be deleted.",
-                MemoryKind.DOCUMENT, null, null, null, null, null, null);
+                MemoryKind.PROCEDURE, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT);
 
         memoryService.softDeleteV2(created.id(), TENANT);
@@ -156,7 +156,7 @@ class AuditTrailTest {
         assertThat(trail.get(0).getUserId()).isEqualTo("reviewer-1");
         @SuppressWarnings("unchecked")
         var approveDiff = (Map<String, Object>) trail.get(0).getDiff();
-        assertThat(approveDiff).containsEntry("newState", "APPROVED");
+        assertThat(approveDiff).containsEntry("newState", "ACTIVE");
         assertThat(approveDiff).containsEntry("comment", "Verified. Correct.");
 
         // Middle: REVIEW_REQUESTED
@@ -175,7 +175,7 @@ class AuditTrailTest {
     void auditRecords_areImmutable() {
         var request = new CreateMemoryRequest(
                 "Audit Immutable Test", "Immutable content.",
-                MemoryKind.KNOWLEDGE, null, null, null, null, null, null);
+                MemoryKind.FACT, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT);
 
         // Get the audit trail
@@ -209,7 +209,7 @@ class AuditTrailTest {
     void auditTrail_isOrderedByCreatedAtDesc() {
         var request = new CreateMemoryRequest(
                 "Ordered Audit Test", "Order check.",
-                MemoryKind.DOCUMENT, null, null, null, null, null, null);
+                MemoryKind.PROCEDURE, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT);
 
         // Do two updates to create more audit records

@@ -1,5 +1,8 @@
 package com.abax.memory.domain.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * Nine typed, directed relationships between MemoryFragments — v2.0.0.
  * <p>
@@ -12,31 +15,31 @@ package com.abax.memory.domain.enums;
 public enum RelationType {
 
     /** Generic bidirectional connection. */
-    RELATES_TO(Directionality.BIDIRECTIONAL),
+    RELATED_TO(Directionality.BIDIRECTIONAL),
 
     /** A depends on B for its existence or meaning. Directed A → B. */
     DEPENDS_ON(Directionality.DIRECTED_FORWARD),
 
-    /** A is blocked or prevented by B. Directed A → B. */
-    BLOCKED_BY(Directionality.DIRECTED_FORWARD),
+    /** A was caused or triggered by B. Directed A → B. */
+    CAUSED_BY(Directionality.DIRECTED_FORWARD),
 
     /** A resolves, fixes, or answers B. Directed A → B. */
     RESOLVES(Directionality.DIRECTED_FORWARD),
 
-    /** A is a newer version that supersedes B. Directed A → B. */
-    SUPERSEDES(Directionality.DIRECTED_FORWARD),
-
-    /** A references or cites B (weak connection). Directed A → B. */
-    REFERENCES(Directionality.DIRECTED_FORWARD),
-
-    /** A is derived or inferred from B. Directed A → B. */
-    DERIVES_FROM(Directionality.DIRECTED_FORWARD),
-
-    /** A and B contradict each other. Bidirectional. */
+    /** A contradicts or is incompatible with B. Bidirectional. */
     CONTRADICTS(Directionality.BIDIRECTIONAL),
 
     /** A provides evidence, support, or justification for B. Directed A → B. */
-    SUPPORTS(Directionality.DIRECTED_FORWARD);
+    SUPPORTS(Directionality.DIRECTED_FORWARD),
+
+    /** A mentions or references entity B. Directed A → B. */
+    MENTIONS(Directionality.DIRECTED_FORWARD),
+
+    /** A belongs to the group, collection, or category B. Directed A → B. */
+    BELONGS_TO(Directionality.DIRECTED_FORWARD),
+
+    /** A is a newer version that supersedes/replaces B. Directed A → B. */
+    SUPERSEDES(Directionality.DIRECTED_FORWARD);
 
     public enum Directionality {
         /** Edge is meaningful in both directions. */
@@ -56,6 +59,31 @@ public enum RelationType {
     }
 
     /**
+     * Returns the lowercase JSON representation.
+     */
+    @JsonValue
+    public String jsonValue() {
+        return name().toLowerCase();
+    }
+
+    /**
+     * Factory method for deserialization from JSON string (case-insensitive).
+     */
+    @JsonCreator
+    public static RelationType fromJson(String value) {
+        if (value == null) {
+            return null;
+        }
+        for (RelationType r : values()) {
+            if (r.name().equalsIgnoreCase(value)) {
+                return r;
+            }
+        }
+        throw new IllegalArgumentException("Unknown RelationType: " + value
+                + ". Expected one of: related_to, depends_on, caused_by, resolves, contradicts, supports, mentions, belongs_to, supersedes");
+    }
+
+    /**
      * Returns {@code true} when this relation type can be traversed
      * in reverse (target → source).
      */
@@ -65,14 +93,14 @@ public enum RelationType {
 
     /**
      * Returns {@code true} if the given string matches one of the enum constants
-     * (case-sensitive).
+     * (case-insensitive).
      */
     public static boolean isValid(String value) {
         if (value == null) {
             return false;
         }
         for (RelationType r : values()) {
-            if (r.name().equals(value)) {
+            if (r.name().equalsIgnoreCase(value)) {
                 return true;
             }
         }

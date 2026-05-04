@@ -1,5 +1,8 @@
 package com.abax.memory.domain.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * Universal memory classification types — v2.0.0.
  * <p>
@@ -8,44 +11,72 @@ package com.abax.memory.domain.enums;
  * cannot be changed.
  * </p>
  *
- * <p>References: EP-001, FT-001.01, HU-001.01.1</p>
+ * <p>The JSON representation uses lowercase (matching the spec and
+ * frontend). Java code uses standard UPPER_SNAKE_CASE enum names.</p>
+ *
+ * <p>References: EP-001, FT-001.01, HU-001.01.1, BR-010</p>
  */
 public enum MemoryKind {
 
-    /** A formal decision documented with context and rationale. */
+    /** Objective, verifiable fact. */
+    FACT,
+
+    /** Subjective preference of a user or entity. */
+    PREFERENCE,
+
+    /** Something that occurred at a specific point in time. */
+    EVENT,
+
+    /** A documented decision with context and rationale. */
     DECISION,
 
-    /** An operational incident: outage, alert, degradation event. */
-    INCIDENT,
+    /** A pending or completed action item. */
+    TASK,
 
-    /** A named entity: person, organization, system, service, concept. */
-    ENTITY,
+    /** Reusable steps, instructions, or procedures. */
+    PROCEDURE,
 
-    /** General knowledge: fact, definition, reference material. */
-    KNOWLEDGE,
+    /** Free-form knowledge without a predefined structure. */
+    NOTE,
 
-    /** A product feature: capability, behavior, user-facing function. */
-    FEATURE,
+    /** A named person, organization, system, or concept. */
+    ENTITY;
 
-    /** Conversational memory produced by or for an AI agent. */
-    AGENT_MEMORY,
+    /**
+     * Returns the lowercase JSON representation.
+     */
+    @JsonValue
+    public String jsonValue() {
+        return name().toLowerCase();
+    }
 
-    /** A document: policy, runbook, guide, manual. */
-    DOCUMENT,
-
-    /** Custom domain-specific memory type (extensible via profiles). */
-    CUSTOM;
+    /**
+     * Factory method for deserialization from JSON string (case-insensitive).
+     */
+    @JsonCreator
+    public static MemoryKind fromJson(String value) {
+        if (value == null) {
+            return null;
+        }
+        for (MemoryKind k : values()) {
+            if (k.name().equalsIgnoreCase(value)) {
+                return k;
+            }
+        }
+        throw new IllegalArgumentException("Unknown MemoryKind: " + value
+                + ". Expected one of: fact, preference, event, decision, task, procedure, note, entity");
+    }
 
     /**
      * Returns {@code true} if the given string matches one of the enum constants
-     * (case-sensitive).
+     * (case-insensitive).
      */
     public static boolean isValid(String value) {
         if (value == null) {
             return false;
         }
         for (MemoryKind k : values()) {
-            if (k.name().equals(value)) {
+            if (k.name().equalsIgnoreCase(value)) {
                 return true;
             }
         }

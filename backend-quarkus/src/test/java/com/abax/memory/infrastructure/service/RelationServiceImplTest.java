@@ -76,7 +76,7 @@ class RelationServiceImplTest {
         var fragment = createMemory(TENANT_A, "Self Fragment", "Cannot relate to self.");
 
         assertThatThrownBy(() -> relationService.createRelation(
-                fragment.id(), fragment.id(), RelationType.RELATES_TO, TENANT_A))
+                fragment.id(), fragment.id(), RelationType.RELATED_TO, TENANT_A))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("self-relation");
     }
@@ -89,7 +89,7 @@ class RelationServiceImplTest {
         var source = createMemory(TENANT_A, "Valid Source", "Valid source with missing target.");
 
         assertThatThrownBy(() -> relationService.createRelation(
-                source.id(), UUID.randomUUID(), RelationType.REFERENCES, TENANT_A))
+                source.id(), UUID.randomUUID(), RelationType.MENTIONS, TENANT_A))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -101,7 +101,7 @@ class RelationServiceImplTest {
         var target = createMemory(TENANT_A, "Valid Target", "Valid target with missing source.");
 
         assertThatThrownBy(() -> relationService.createRelation(
-                UUID.randomUUID(), target.id(), RelationType.REFERENCES, TENANT_A))
+                UUID.randomUUID(), target.id(), RelationType.MENTIONS, TENANT_A))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -115,7 +115,7 @@ class RelationServiceImplTest {
 
         // Creating from tenant A's perspective but target is tenant B → should fail
         assertThatThrownBy(() -> relationService.createRelation(
-                source.id(), target.id(), RelationType.RELATES_TO, TENANT_A))
+                source.id(), target.id(), RelationType.RELATED_TO, TENANT_A))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -146,7 +146,7 @@ class RelationServiceImplTest {
         var target = createMemory(TENANT_A, "Delete Target", "Target for delete.");
 
         Relation rel = relationService.createRelation(
-                source.id(), target.id(), RelationType.REFERENCES, TENANT_A);
+                source.id(), target.id(), RelationType.MENTIONS, TENANT_A);
 
         relationService.deleteRelation(rel.getId(), TENANT_A);
 
@@ -173,7 +173,7 @@ class RelationServiceImplTest {
         var target = createMemory(TENANT_A, "Cross Delete Target", "Target.");
 
         Relation rel = relationService.createRelation(
-                source.id(), target.id(), RelationType.REFERENCES, TENANT_A);
+                source.id(), target.id(), RelationType.MENTIONS, TENANT_A);
 
         // Tenant B trying to delete tenant A's relation
         assertThatThrownBy(() -> relationService.deleteRelation(rel.getId(), TENANT_B))
@@ -254,7 +254,7 @@ class RelationServiceImplTest {
         var source = createMemory(TENANT_A, "FindBySource Test", "Source.");
         var target = createMemory(TENANT_A, "FindBySource Target", "Target.");
 
-        relationService.createRelation(source.id(), target.id(), RelationType.REFERENCES, TENANT_A);
+        relationService.createRelation(source.id(), target.id(), RelationType.MENTIONS, TENANT_A);
 
         List<Relation> relations = relationService.findBySource(source.id());
 

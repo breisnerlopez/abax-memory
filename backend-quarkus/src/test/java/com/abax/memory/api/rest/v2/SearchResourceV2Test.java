@@ -47,7 +47,7 @@ class SearchResourceV2Test {
         // First create a fragment via the memories endpoint
         String id = createMemory(TENANT_A, "Semantic Search Target",
                 "Content about semantic search testing with vectors.",
-                "KNOWLEDGE", "INTERNAL");
+                "FACT", "INTERNAL");
 
         given()
                 .header("X-Tenant-Id", TENANT_A)
@@ -84,7 +84,7 @@ class SearchResourceV2Test {
     void hybridSearch_returns200() {
         createMemory(TENANT_A, "Hybrid Search Test",
                 "Content for testing hybrid search combining vectors and keywords.",
-                "KNOWLEDGE", "INTERNAL");
+                "FACT", "INTERNAL");
 
         given()
                 .header("X-Tenant-Id", TENANT_A)
@@ -106,7 +106,7 @@ class SearchResourceV2Test {
     void findSimilar_returns200() {
         String id = createMemory(TENANT_A, "Source For Similar",
                 "Source content for finding similar memories in the system.",
-                "KNOWLEDGE", "INTERNAL");
+                "FACT", "INTERNAL");
 
         given()
                 .header("X-Tenant-Id", TENANT_A)
@@ -138,7 +138,7 @@ class SearchResourceV2Test {
         String centerId = createMemory(TENANT_A, "Graph Center Node",
                 "Central node for graph test.", "DECISION", "INTERNAL");
         String childId = createMemory(TENANT_A, "Graph Child Node",
-                "Child node connected to center.", "DOCUMENT", "INTERNAL");
+                "Child node connected to center.", "PROCEDURE", "INTERNAL");
 
         // Create relation between them
         createRelation(TENANT_A, centerId, childId, "SUPPORTS");
@@ -175,9 +175,9 @@ class SearchResourceV2Test {
     @DisplayName("POST /api/v2/relations — returns 201 with created relation")
     void createRelation_returns201() {
         String sourceId = createMemory(TENANT_A, "Relation Source",
-                "Source fragment for relation.", "KNOWLEDGE", "INTERNAL");
+                "Source fragment for relation.", "FACT", "INTERNAL");
         String targetId = createMemory(TENANT_A, "Relation Target",
-                "Target fragment for relation.", "KNOWLEDGE", "INTERNAL");
+                "Target fragment for relation.", "FACT", "INTERNAL");
 
         given()
                 .header("X-Tenant-Id", TENANT_A)
@@ -202,7 +202,7 @@ class SearchResourceV2Test {
     @DisplayName("POST /api/v2/relations — returns 400 for self-relation")
     void createRelation_selfRelation_returns400() {
         String id = createMemory(TENANT_A, "Self-Relation Test",
-                "Cannot relate to itself.", "KNOWLEDGE", "INTERNAL");
+                "Cannot relate to itself.", "FACT", "INTERNAL");
 
         given()
                 .header("X-Tenant-Id", TENANT_A)
@@ -223,7 +223,7 @@ class SearchResourceV2Test {
     @DisplayName("POST /api/v2/relations — returns 404 for non-existent target")
     void createRelation_nonExistentTarget_returns404() {
         String sourceId = createMemory(TENANT_A, "Source For Missing Target",
-                "Source with non-existent target.", "KNOWLEDGE", "INTERNAL");
+                "Source with non-existent target.", "FACT", "INTERNAL");
 
         given()
                 .header("X-Tenant-Id", TENANT_A)
@@ -244,9 +244,9 @@ class SearchResourceV2Test {
     @DisplayName("GET /api/v2/relations/{id} — returns 200 with relations list")
     void getRelations_returns200() {
         String sourceId = createMemory(TENANT_A, "Get Relations Source",
-                "Source for listing relations.", "KNOWLEDGE", "INTERNAL");
+                "Source for listing relations.", "FACT", "INTERNAL");
         String targetId = createMemory(TENANT_A, "Get Relations Target",
-                "Target for listing relations.", "KNOWLEDGE", "INTERNAL");
+                "Target for listing relations.", "FACT", "INTERNAL");
 
         createRelation(TENANT_A, sourceId, targetId, "DEPENDS_ON");
 
@@ -266,9 +266,9 @@ class SearchResourceV2Test {
     @DisplayName("GET /api/v2/relations/{id} — respects direction filter")
     void getRelations_respectsDirection() {
         String sourceId = createMemory(TENANT_A, "Direction Test Source",
-                "Source for direction test.", "KNOWLEDGE", "INTERNAL");
+                "Source for direction test.", "FACT", "INTERNAL");
         String targetId = createMemory(TENANT_A, "Direction Test Target",
-                "Target for direction test.", "KNOWLEDGE", "INTERNAL");
+                "Target for direction test.", "FACT", "INTERNAL");
 
         String relId = createRelation(TENANT_A, sourceId, targetId, "SUPPORTS");
 
@@ -288,9 +288,9 @@ class SearchResourceV2Test {
     @DisplayName("DELETE /api/v2/relations/{id} — returns 204 on successful delete")
     void deleteRelation_returns204() {
         String sourceId = createMemory(TENANT_A, "Delete Relation Source",
-                "Source for delete test.", "KNOWLEDGE", "INTERNAL");
+                "Source for delete test.", "FACT", "INTERNAL");
         String targetId = createMemory(TENANT_A, "Delete Relation Target",
-                "Target for delete test.", "KNOWLEDGE", "INTERNAL");
+                "Target for delete test.", "FACT", "INTERNAL");
 
         String relId = createRelation(TENANT_A, sourceId, targetId, "REFERENCES");
 
@@ -321,7 +321,7 @@ class SearchResourceV2Test {
     @DisplayName("POST /api/v2/admin/reindex — returns 200 with admin role")
     void reindex_withAdminRole_returns200() {
         createMemory(TENANT_A, "Reindex-ready Memory",
-                "Content ready for reindexing.", "KNOWLEDGE", "INTERNAL");
+                "Content ready for reindexing.", "FACT", "INTERNAL");
 
         given()
                 .header("X-Tenant-Id", TENANT_A)
@@ -356,7 +356,7 @@ class SearchResourceV2Test {
     @DisplayName("POST /api/v2/search/semantic — respects tenant isolation")
     void semanticSearch_respectsTenantIsolation() {
         String id = createMemory(TENANT_A, "TenantA-Only Search",
-                "Only visible to tenant A.", "KNOWLEDGE", "INTERNAL");
+                "Only visible to tenant A.", "FACT", "INTERNAL");
 
         // Tenant B searching should not see Tenant A's data
         var items = given()
