@@ -18,6 +18,10 @@ import java.util.UUID;
  * entry points for the REST API v2 layer. Domain-model methods are
  * retained for internal service-to-service calls.
  * </p>
+ *
+ * <p>New in v2.0.0: review workflow, scope validation, and profile-based
+ * defaults are added for EP-002 (Profiles), EP-003 (Scoping), and
+ * EP-006 (Governance).</p>
  */
 public interface MemoryService {
 
@@ -97,4 +101,55 @@ public interface MemoryService {
      * @return paginated search results with facets
      */
     SearchResponse listV2(SearchRequest request, String tenantId);
+
+    // ── EP-006: Review Workflow ──────────────────────────────────────
+
+    /**
+     * Requests a review for a memory fragment (DRAFT → IN_REVIEW).
+     *
+     * @param fragmentId UUID of the memory fragment
+     * @param tenantId   tenant scope identifier
+     * @param reviewerId identifier of the reviewer initiating the request
+     * @return updated MemoryResponse
+     * @throws jakarta.ws.rs.NotFoundException if fragment not found or cross-tenant
+     * @throws IllegalArgumentException if transition is invalid
+     */
+    MemoryResponse requestReview(UUID fragmentId, String tenantId, String reviewerId);
+
+    /**
+     * Approves a review (IN_REVIEW → APPROVED).
+     *
+     * @param fragmentId UUID of the memory fragment
+     * @param tenantId   tenant scope identifier
+     * @param reviewerId identifier of the reviewer
+     * @param comment    review comment
+     * @return updated MemoryResponse
+     * @throws jakarta.ws.rs.NotFoundException if fragment not found or cross-tenant
+     * @throws IllegalArgumentException if transition is invalid
+     */
+    MemoryResponse approveReview(UUID fragmentId, String tenantId, String reviewerId, String comment);
+
+    /**
+     * Rejects a review (IN_REVIEW → DRAFT).
+     *
+     * @param fragmentId UUID of the memory fragment
+     * @param tenantId   tenant scope identifier
+     * @param reviewerId identifier of the reviewer
+     * @param comment    rejection reason (required)
+     * @return updated MemoryResponse
+     * @throws jakarta.ws.rs.NotFoundException if fragment not found or cross-tenant
+     * @throws IllegalArgumentException if transition is invalid or comment missing
+     */
+    MemoryResponse rejectReview(UUID fragmentId, String tenantId, String reviewerId, String comment);
+
+    // ── EP-003: Scope Validation ────────────────────────────────────
+
+    /**
+     * Validates that a given scope identifier belongs to the specified tenant.
+     *
+     * @param scopeId  the scope identifier to validate
+     * @param tenantId tenant scope identifier
+     * @throws IllegalArgumentException if the scope is invalid for the tenant
+     */
+    void validateScopeBelongsToTenant(String scopeId, String tenantId);
 }

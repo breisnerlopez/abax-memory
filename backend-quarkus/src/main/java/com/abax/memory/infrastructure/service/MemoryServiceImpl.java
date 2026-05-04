@@ -10,11 +10,17 @@ import com.abax.memory.domain.enums.MemoryKind;
 import com.abax.memory.domain.enums.SensitivityLevel;
 import com.abax.memory.domain.model.MemoryFragment;
 import com.abax.memory.domain.service.MemoryService;
+import com.abax.memory.infrastructure.persistence.DomainProfileEntity;
 import com.abax.memory.infrastructure.persistence.MemoryFragmentEntity;
+import com.abax.memory.infrastructure.persistence.TenantConfigEntity;
+import com.abax.memory.infrastructure.security.TenantContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import org.jboss.logging.Logger;
@@ -42,12 +48,28 @@ import java.util.UUID;
  * on {@code deletedAt IS NULL}. Administrative endpoints may override
  * this in the future.
  *
- * <p>References: Architecture document §6.3, §7.2, BR-005</p>
+ * <h3>Audit Trail</h3>
+ * Every mutating operation (create, update, soft-delete, review state
+ * change) generates an immutable audit record in {@code audit_records}.
+ *
+ * <h3>Profile-Based Defaults</h3>
+ * When creating memories, if kind, sensitivity, or confidence are not
+ * explicitly provided, defaults are applied from the tenant's assigned
+ * domain profile.
+ *
+ * <p>References: Architecture document §6.3, §7.1, §7.2; EP-002, EP-003, EP-006</p>
  */
 @ApplicationScoped
 public class MemoryServiceImpl implements MemoryService {
 
     private static final Logger LOG = Logger.getLogger(MemoryServiceImpl.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    @Inject
+    AuditServiceImpl auditService;
+
+    @Inject
+    TenantContext tenantContext;
 
     // ── Domain-model methods (delegated internally) ─────────────────
 
@@ -58,6 +80,9 @@ public class MemoryServiceImpl implements MemoryService {
         entity.persist();
         LOG.infov("MemoryFragment created: id={0}, tenant={1}, kind={2}",
                 entity.getId(), entity.getTenantId(), entity.getKind());
+        // B3: Audit
+        auditService.recordAction(entity.getId(), "CREATE", "system",
+                entity.getTenantId(), Map.of("after", toDiffMap(entity)));
         return toDomain(entity);
     }
 
@@ -71,8 +96,12 @@ public class MemoryServiceImpl implements MemoryService {
     @Transactional
     public MemoryFragment update(UUID id, MemoryFragment updates) {
         var entity = requireEntity(id, updates.getTenantId());
+        var before = toDiffMap(entity);
         applyDomainUpdates(entity, updates);
         entity.persist();
+        // B3: Audit
+        auditService.recordAction(entity.getId(), "UPDATE", "system",
+                entity.getTenantId(), Map.of("before", before, "after", toDiffMap(entity)));
         return toDomain(entity);
     }
 
@@ -97,22 +126,36 @@ public class MemoryServiceImpl implements MemoryService {
         entity.setTitle(request.title());
         entity.setContent(request.content());
 
-        // Optional fields with defaults
-        entity.setKind(request.kind() != null ? request.kind() : MemoryKind.KNOWLEDGE);
-        entity.setScopeId(request.scopeId());
+        // C3: Apply profile-based defaults for kind, sensitivity, confidence
+        var profileDefaults = loadProfileDefaults(tenantId);
+        entity.setKind(request.kind() != null ? request.kind() : profileDefaults.defaultKind());
         entity.setSensitivityLevel(
                 request.sensitivityLevel() != null
                         ? request.sensitivityLevel()
-                        : SensitivityLevel.INTERNAL);
+                        : profileDefaults.defaultSensitivity());
+        entity.setConfidence(
+                request.confidence() != null
+                        ? request.confidence()
+                        : profileDefaults.defaultConfidence());
+
+        // Optional fields
+        entity.setScopeId(request.scopeId());
         entity.setSourceType(request.sourceType());
         entity.setSourceRef(request.sourceRef());
-        entity.setConfidence(request.confidence() != null ? request.confidence() : 0.5);
+
+        // A3: Validate scope belongs to tenant
+        if (request.scopeId() != null && !request.scopeId().isBlank()) {
+            validateScopeBelongsToTenant(request.scopeId(), tenantId);
+        }
 
         // @PrePersist will handle id, createdAt, updatedAt, and defaults
-
         entity.persist();
         LOG.infov("MemoryFragment created via API v2: id={0}, tenant={1}, kind={2}, title={3}",
                 entity.getId(), tenantId, entity.getKind(), entity.getTitle());
+
+        // B3: Audit the creation
+        auditService.recordAction(entity.getId(), "CREATE", resolveActorId(),
+                tenantId, Map.of("after", toDiffMap(entity)));
 
         return MemoryResponse.from(entity);
     }
@@ -127,16 +170,19 @@ public class MemoryServiceImpl implements MemoryService {
     @Transactional
     public MemoryResponse updateV2(UUID id, UpdateMemoryRequest request, String tenantId) {
         var entity = requireEntityForTenant(id, tenantId);
+        var before = toDiffMap(entity);
 
         // Validate lifecycle transition if requested
+        boolean lifecycleChanged = false;
+        LifecycleState previousState = entity.getLifecycleState();
         if (request.lifecycleState() != null) {
-            LifecycleState current = entity.getLifecycleState();
             LifecycleState target = request.lifecycleState();
-            if (!current.canTransitionTo(target)) {
+            if (!previousState.canTransitionTo(target)) {
                 throw new IllegalArgumentException(
-                        "Invalid lifecycle transition from " + current + " to " + target);
+                        "Invalid lifecycle transition from " + previousState + " to " + target);
             }
             entity.setLifecycleState(target);
+            lifecycleChanged = true;
         }
 
         // Apply partial updates (only non-null fields)
@@ -159,6 +205,13 @@ public class MemoryServiceImpl implements MemoryService {
         // @PreUpdate will update updatedAt
         entity.persist();
         LOG.infov("MemoryFragment updated via API v2: id={0}, tenant={1}", id, tenantId);
+
+        // B3: Audit the update — use lifecycle-specific action if state changed
+        String action = lifecycleChanged
+                ? lifecycleStateToAuditAction(previousState, entity.getLifecycleState())
+                : "UPDATE";
+        auditService.recordAction(entity.getId(), action, resolveActorId(),
+                tenantId, Map.of("before", before, "after", toDiffMap(entity)));
 
         return MemoryResponse.from(entity);
     }
@@ -183,11 +236,15 @@ public class MemoryServiceImpl implements MemoryService {
         entity.softDelete();
         entity.persist();
         LOG.infov("MemoryFragment soft-deleted via API v2: id={0}, tenant={1}", id, tenantId);
+
+        // B3: Audit the soft-delete
+        auditService.recordAction(entity.getId(), "SOFT_DELETE", resolveActorId(),
+                tenantId, Map.of("previousState", current.name()));
     }
 
     @Override
     public SearchResponse listV2(SearchRequest request, String tenantId) {
-        // Build dynamic query
+        // A5: Build dynamic query with tenant_id filter
         var queryBuilder = new StringBuilder("tenantId = :tenantId and deletedAt IS NULL");
         var params = new LinkedHashMap<String, Object>();
         params.put("tenantId", tenantId);
@@ -219,7 +276,7 @@ public class MemoryServiceImpl implements MemoryService {
             params.put("toDate", request.getToDate());
         }
 
-        // Text search on title and content (simple LIKE, Qdrant search is POST /search)
+        // Text search on title and content
         if (request.getQuery() != null && !request.getQuery().isBlank()
                 && !"*".equals(request.getQuery().trim())) {
             queryBuilder.append(" and (title LIKE :queryText or content LIKE :queryText)");
@@ -248,6 +305,241 @@ public class MemoryServiceImpl implements MemoryService {
 
         return new SearchResponse(items, total, page, size, facets);
     }
+
+    // ── EP-006: Review Workflow (B4) ─────────────────────────────────
+
+    /**
+     * Requests review for a memory fragment: DRAFT → IN_REVIEW.
+     *
+     * @param fragmentId UUID of the memory fragment
+     * @param tenantId   tenant scope identifier
+     * @param reviewerId identifier of the reviewer requesting the review
+     * @return updated MemoryResponse
+     * @throws NotFoundException if fragment not found or cross-tenant
+     * @throws IllegalArgumentException if transition is invalid
+     */
+    @Override
+    @Transactional
+    public MemoryResponse requestReview(UUID fragmentId, String tenantId, String reviewerId) {
+        var entity = requireEntityForTenant(fragmentId, tenantId);
+        var current = entity.getLifecycleState();
+
+        if (!current.canTransitionTo(LifecycleState.IN_REVIEW)) {
+            throw new IllegalArgumentException(
+                    "Cannot request review from lifecycle state " + current);
+        }
+
+        entity.setLifecycleState(LifecycleState.IN_REVIEW);
+        entity.persist();
+        LOG.infov("Review requested: id={0}, tenant={1}, reviewer={2}", fragmentId, tenantId, reviewerId);
+
+        // B3: Audit
+        auditService.recordAction(fragmentId, "REVIEW_REQUESTED", reviewerId,
+                tenantId, Map.of("previousState", current.name(), "newState", LifecycleState.IN_REVIEW.name()));
+
+        return MemoryResponse.from(entity);
+    }
+
+    /**
+     * Approves a review: IN_REVIEW → APPROVED.
+     *
+     * @param fragmentId UUID of the memory fragment
+     * @param tenantId   tenant scope identifier
+     * @param reviewerId identifier of the reviewer
+     * @param comment    review comment
+     * @return updated MemoryResponse
+     * @throws NotFoundException if fragment not found or cross-tenant
+     * @throws IllegalArgumentException if transition is invalid
+     */
+    @Override
+    @Transactional
+    public MemoryResponse approveReview(UUID fragmentId, String tenantId, String reviewerId, String comment) {
+        var entity = requireEntityForTenant(fragmentId, tenantId);
+        var current = entity.getLifecycleState();
+
+        if (!current.canTransitionTo(LifecycleState.APPROVED)) {
+            throw new IllegalArgumentException(
+                    "Cannot approve review from lifecycle state " + current);
+        }
+
+        entity.setLifecycleState(LifecycleState.APPROVED);
+        entity.setReviewerId(reviewerId);
+        entity.setReviewComment(comment);
+        entity.persist();
+        LOG.infov("Review approved: id={0}, tenant={1}, reviewer={2}", fragmentId, tenantId, reviewerId);
+
+        // B3: Audit
+        auditService.recordAction(fragmentId, "REVIEWED", reviewerId,
+                tenantId, Map.of(
+                        "previousState", current.name(),
+                        "newState", LifecycleState.APPROVED.name(),
+                        "comment", comment != null ? comment : ""));
+
+        return MemoryResponse.from(entity);
+    }
+
+    /**
+     * Rejects a review: IN_REVIEW → DRAFT.
+     *
+     * @param fragmentId UUID of the memory fragment
+     * @param tenantId   tenant scope identifier
+     * @param reviewerId identifier of the reviewer
+     * @param comment    rejection reason (required)
+     * @return updated MemoryResponse
+     * @throws NotFoundException if fragment not found or cross-tenant
+     * @throws IllegalArgumentException if transition is invalid or comment missing
+     */
+    @Override
+    @Transactional
+    public MemoryResponse rejectReview(UUID fragmentId, String tenantId, String reviewerId, String comment) {
+        var entity = requireEntityForTenant(fragmentId, tenantId);
+        var current = entity.getLifecycleState();
+
+        if (!current.canTransitionTo(LifecycleState.DRAFT)) {
+            throw new IllegalArgumentException(
+                    "Cannot reject review from lifecycle state " + current);
+        }
+
+        if (comment == null || comment.isBlank()) {
+            throw new IllegalArgumentException("Comment is required when rejecting a review");
+        }
+
+        entity.setLifecycleState(LifecycleState.DRAFT);
+        entity.setReviewerId(reviewerId);
+        entity.setReviewComment(comment);
+        entity.persist();
+        LOG.infov("Review rejected: id={0}, tenant={1}, reviewer={2}", fragmentId, tenantId, reviewerId);
+
+        // B3: Audit
+        auditService.recordAction(fragmentId, "REVIEWED", reviewerId,
+                tenantId, Map.of(
+                        "previousState", current.name(),
+                        "newState", LifecycleState.DRAFT.name(),
+                        "decision", "rejected",
+                        "comment", comment));
+
+        return MemoryResponse.from(entity);
+    }
+
+    // ── EP-003: Scope Validation (A3) ───────────────────────────────
+
+    /**
+     * Validates that a given {@code scopeId} belongs to the specified tenant.
+     *
+     * <p>In the MVP, scope validation ensures that a scope ID is either
+     * new (no existing records for other tenants) or already belongs to
+     * the current tenant. Cross-scope queries between tenants are prevented.</p>
+     *
+     * <p>A {@code secret} sensitivity scope is only visible to {@code memory-admin}
+     * and {@code memory-auditor} roles.</p>
+     *
+     * @param scopeId  the scope identifier to validate
+     * @param tenantId tenant scope identifier
+     * @throws IllegalArgumentException if the scope is invalid for the tenant
+     */
+    @Override
+    public void validateScopeBelongsToTenant(String scopeId, String tenantId) {
+        if (scopeId == null || scopeId.isBlank()) {
+            return; // empty scope is always valid
+        }
+
+        // Check if any memory with this scopeId exists in a different tenant
+        long crossTenantCount = MemoryFragmentEntity.count(
+                "scopeId = :scopeId and tenantId != :tenantId",
+                Map.of("scopeId", scopeId, "tenantId", tenantId));
+
+        if (crossTenantCount > 0) {
+            LOG.warnv("Scope validation failed: scopeId={0} exists in another tenant, requesting_tenant={1}",
+                    scopeId, tenantId);
+            throw new IllegalArgumentException(
+                    "Scope '" + scopeId + "' does not belong to tenant '" + tenantId + "'");
+        }
+    }
+
+    // ── EP-002: Profile-Based Defaults (C3) ──────────────────────────
+
+    /**
+     * Loads default values from the tenant's assigned domain profile.
+     *
+     * <p>Resolution order:
+     * <ol>
+     *   <li>Look up {@code tenant_configs} for the tenant's {@code profile_id}.</li>
+     *   <li>Load the referenced profile from {@code profiles}.</li>
+     *   <li>Parse the JSONB config for {@code defaultSensitivity},
+     *       {@code recommendedKinds} (first element), and {@code defaultConfidence}.</li>
+     *   <li>Fall back to system defaults if no profile is configured.</li>
+     * </ol>
+     * </p>
+     *
+     * @param tenantId tenant scope identifier
+     * @return a record containing resolved defaults
+     */
+    ProfileDefaults loadProfileDefaults(String tenantId) {
+        try {
+            var tenantConfig = TenantConfigEntity.findByTenantId(tenantId);
+            if (tenantConfig != null && tenantConfig.getProfileId() != null) {
+                var profile = (DomainProfileEntity) DomainProfileEntity.findById(tenantConfig.getProfileId());
+                if (profile != null && profile.isActive()) {
+                    var config = MAPPER.readValue(profile.getConfig(), Map.class);
+                    return new ProfileDefaults(
+                            extractDefaultKind(config),
+                            extractDefaultSensitivity(config),
+                            extractDefaultConfidence(config)
+                    );
+                }
+            }
+        } catch (Exception e) {
+            LOG.warnv("Failed to load profile defaults for tenant {0}: {1}", tenantId, e.getMessage());
+        }
+        // Fallback to system defaults
+        return new ProfileDefaults(MemoryKind.KNOWLEDGE, SensitivityLevel.INTERNAL, 0.5);
+    }
+
+    @SuppressWarnings("unchecked")
+    private MemoryKind extractDefaultKind(Map<String, Object> config) {
+        try {
+            var kinds = (List<String>) config.get("recommendedKinds");
+            if (kinds != null && !kinds.isEmpty()) {
+                return MemoryKind.valueOf(kinds.get(0));
+            }
+        } catch (Exception e) {
+            LOG.debugv("Could not extract default kind from profile config: {0}", e.getMessage());
+        }
+        return MemoryKind.KNOWLEDGE;
+    }
+
+    private SensitivityLevel extractDefaultSensitivity(Map<String, Object> config) {
+        try {
+            var sensitivity = (String) config.get("defaultSensitivity");
+            if (sensitivity != null) {
+                return SensitivityLevel.valueOf(sensitivity);
+            }
+        } catch (Exception e) {
+            LOG.debugv("Could not extract default sensitivity from profile config: {0}", e.getMessage());
+        }
+        return SensitivityLevel.INTERNAL;
+    }
+
+    private double extractDefaultConfidence(Map<String, Object> config) {
+        try {
+            var confidence = config.get("defaultConfidence");
+            if (confidence instanceof Number num) {
+                return num.doubleValue();
+            }
+        } catch (Exception e) {
+            LOG.debugv("Could not extract default confidence from profile config: {0}", e.getMessage());
+        }
+        return 0.5;
+    }
+
+    /**
+     * Value object holding resolved profile defaults for memory creation.
+     */
+    public record ProfileDefaults(
+            MemoryKind defaultKind,
+            SensitivityLevel defaultSensitivity,
+            double defaultConfidence
+    ) {}
 
     // ── Private helpers ─────────────────────────────────────────────
 
@@ -295,6 +587,46 @@ public class MemoryServiceImpl implements MemoryService {
      */
     private MemoryFragmentEntity requireEntity(UUID id, String tenantId) {
         return requireEntityForTenant(id, tenantId);
+    }
+
+    /**
+     * Resolves the current actor ID from the tenant context.
+     * In the MVP, this is the tenant ID itself (header-based mock).
+     */
+    // MOCK: Uses tenant ID as actor — no OIDC user identity available.
+    // REPLACE_BEFORE_PROD with JWT preferred_username or sub claim.
+    private String resolveActorId() {
+        return tenantContext.getCurrentTenantId();
+    }
+
+    // ── Audit action mapping ─────────────────────────────────────────
+
+    /**
+     * Maps a lifecycle state transition to the corresponding audit action.
+     */
+    private String lifecycleStateToAuditAction(LifecycleState from, LifecycleState to) {
+        if (to == LifecycleState.IN_REVIEW && from == LifecycleState.DRAFT) return "REVIEW_REQUESTED";
+        if (to == LifecycleState.APPROVED) return "REVIEWED";
+        if (to == LifecycleState.DRAFT) return "REVIEW_RETURN";
+        if (to == LifecycleState.DEPRECATED) return "DEPRECATE";
+        if (to == LifecycleState.ARCHIVED) return "ARCHIVE";
+        if (to == LifecycleState.DELETED) return "SOFT_DELETE";
+        return "LIFECYCLE_CHANGED";
+    }
+
+    /**
+     * Creates a simplified diff map for audit trail from an entity.
+     */
+    private Map<String, Object> toDiffMap(MemoryFragmentEntity entity) {
+        var diff = new LinkedHashMap<String, Object>();
+        diff.put("id", entity.getId().toString());
+        diff.put("title", entity.getTitle());
+        diff.put("kind", entity.getKind().name());
+        diff.put("lifecycleState", entity.getLifecycleState().name());
+        diff.put("sensitivityLevel", entity.getSensitivityLevel().name());
+        diff.put("confidence", entity.getConfidence());
+        diff.put("scopeId", entity.getScopeId());
+        return diff;
     }
 
     // ── Entity ↔ Domain mapping ─────────────────────────────────────
