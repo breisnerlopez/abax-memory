@@ -1,6 +1,5 @@
 package com.abax.memory.infrastructure.security;
 
-import io.quarkus.oidc.runtime.OidcConfig;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -10,7 +9,6 @@ import jakarta.ws.rs.ext.Provider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
-import java.util.Optional;
 
 /**
  * Jakarta REST request filter that intercepts every request to

@@ -143,13 +143,21 @@ public class TenantContext {
                 }
             }
 
-            // Fallback: try to get claims from the principal directly via reflection
-            // This handles Quarkus OIDC internal principal types safely
+            // With quarkus-oidc alone, the principal implements JsonWebToken natively.
+            // This path covers cases where the CDI-injected jwtInstance is not resolvable
+            // but the SecurityIdentity principal carries the JWT claims directly.
             var principal = identity.getPrincipal();
-            if (principal != null) {
-                String fromPrincipal = extractClaimFromPrincipal(principal);
-                if (fromPrincipal != null) {
-                    return fromPrincipal;
+            if (principal instanceof JsonWebToken jwt) {
+                for (String claimName : TENANT_CLAIM_NAMES) {
+                    Object claimValue = jwt.getClaim(claimName);
+                    if (claimValue instanceof String s && !s.isBlank()) {
+                        return s;
+                    }
+                }
+                String sub = jwt.getSubject();
+                if (sub != null && !sub.isBlank()) {
+                    LOG.debugv("Using JWT 'sub' claim as tenant_id (from principal): {0}", sub);
+                    return sub;
                 }
             }
 
@@ -159,37 +167,6 @@ public class TenantContext {
             LOG.debugv("JWT tenant resolution failed: {0} — falling back to header", e.getMessage());
             return null;
         }
-    }
-
-    /**
-     * Safely extracts a tenant claim from a Principal object using reflection
-     * to avoid compile-time dependencies on internal Quarkus OIDC classes.
-     */
-    private String extractClaimFromPrincipal(java.security.Principal principal) {
-        try {
-            // Try getClaim(String) method via reflection (works for both
-            // SmallRye DefaultJWTCallerPrincipal and Quarkus OidcJwtCallerPrincipal)
-            var getClaimMethod = principal.getClass().getMethod("getClaim", String.class);
-            for (String claimName : TENANT_CLAIM_NAMES) {
-                Object claimValue = getClaimMethod.invoke(principal, claimName);
-                if (claimValue instanceof String s && !s.isBlank()) {
-                    return s;
-                }
-            }
-            // Fallback: try 'sub'
-            Object subClaim = getClaimMethod.invoke(principal, "sub");
-            if (subClaim instanceof String s && !s.isBlank()) {
-                LOG.debugv("Using JWT 'sub' claim as tenant_id (via reflection): {0}", s);
-                return s;
-            }
-        } catch (NoSuchMethodException e) {
-            LOG.debugv("Principal class {0} does not have getClaim(String) method",
-                    principal.getClass().getName());
-        } catch (Exception e) {
-            LOG.debugv("Failed to extract claim from principal {0}: {1}",
-                    principal.getClass().getName(), e.getMessage());
-        }
-        return null;
     }
 
     /**
