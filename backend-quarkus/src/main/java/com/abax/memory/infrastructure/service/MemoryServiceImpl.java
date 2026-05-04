@@ -10,6 +10,7 @@ import com.abax.memory.domain.enums.MemoryKind;
 import com.abax.memory.domain.enums.SensitivityLevel;
 import com.abax.memory.domain.model.MemoryFragment;
 import com.abax.memory.domain.service.MemoryService;
+import com.abax.memory.domain.service.SearchService;
 import com.abax.memory.infrastructure.persistence.DomainProfileEntity;
 import com.abax.memory.infrastructure.persistence.MemoryFragmentEntity;
 import com.abax.memory.infrastructure.persistence.TenantConfigEntity;
@@ -70,6 +71,9 @@ public class MemoryServiceImpl implements MemoryService {
 
     @Inject
     TenantContext tenantContext;
+
+    @Inject
+    SearchService searchService;
 
     // ── Domain-model methods (delegated internally) ─────────────────
 
@@ -156,6 +160,15 @@ public class MemoryServiceImpl implements MemoryService {
         // B3: Audit the creation
         auditService.recordAction(entity.getId(), "CREATE", resolveActorId(),
                 tenantId, Map.of("after", toDiffMap(entity)));
+
+        // EP-005: Index fragment for semantic search (async in production)
+        // MOCK: Synchronous indexing — fast with in-memory stubs.
+        // REPLACE_BEFORE_PROD: use reactive/async indexing to avoid blocking.
+        try {
+            searchService.indexFragment(entity.getId(), tenantId);
+        } catch (Exception e) {
+            LOG.warnv("Failed to index fragment {0}: {1}", entity.getId(), e.getMessage());
+        }
 
         return MemoryResponse.from(entity);
     }

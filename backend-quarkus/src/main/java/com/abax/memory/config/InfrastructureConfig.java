@@ -1,24 +1,21 @@
 package com.abax.memory.config;
 
-import com.abax.memory.infrastructure.ai.EmbeddingProvider;
-import com.abax.memory.infrastructure.ai.InMemoryEmbeddingProvider;
-import com.abax.memory.infrastructure.qdrant.InMemoryQdrantClient;
-import com.abax.memory.infrastructure.qdrant.QdrantClient;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.inject.Singleton;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /**
- * CDI producers for infrastructure dependencies — v2.0.0.
+ * Configuration holder for infrastructure dependencies — v2.0.0.
  *
- * <p>Currently wires in-memory stubs for both Qdrant and OpenAI
- * embedding because the real services are not available in this
- * build environment. Both stubs carry the {@code // MOCK: ... // REPLACE_BEFORE_PROD}
- * marker as required by the project's anti-mock policy.</p>
+ * <p>Bean resolution for {@code QdrantClient} and {@code EmbeddingProvider}
+ * is handled directly via the {@code @ApplicationScoped} annotation on
+ * the in-memory stub classes ({@code InMemoryQdrantClient},
+ * {@code InMemoryEmbeddingProvider}).</p>
  *
- * <p>When credentials/services become available, replace these
- * producers with real adapter implementations.</p>
+ * <p>When real services become available, the new adapter classes
+ * should also use {@code @ApplicationScoped} (or appropriate scope)
+ * to be picked up by CDI.</p>
+ *
+ * <p>Config properties are retained for use by future real adapters.</p>
  */
 @ApplicationScoped
 public class InfrastructureConfig {
@@ -59,34 +56,4 @@ public class InfrastructureConfig {
 
     @ConfigProperty(name = "abax.v2.openai.timeout-seconds", defaultValue = "90")
     int openaiTimeoutSeconds;
-
-    /**
-     * Produces a {@link QdrantClient} bean.
-     * <p>
-     * Currently uses {@link InMemoryQdrantClient} — replace with
-     * real REST/gRPC client before production deployment.
-     * </p>
-     */
-    @Produces
-    @Singleton
-    public QdrantClient qdrantClient() {
-        // MOCK: Qdrant no disponible en entorno de build
-        // REPLACE_BEFORE_PROD: return new QdrantRestClient(qdrantHost, qdrantPort, ...)
-        return new InMemoryQdrantClient();
-    }
-
-    /**
-     * Produces an {@link EmbeddingProvider} bean.
-     * <p>
-     * Currently uses {@link InMemoryEmbeddingProvider} — replace with
-     * OpenAI adapter before production deployment.
-     * </p>
-     */
-    @Produces
-    @Singleton
-    public EmbeddingProvider embeddingProvider() {
-        // MOCK: OpenAI API key no disponible en entorno de build
-        // REPLACE_BEFORE_PROD: return new OpenAiEmbeddingProvider(openaiApiKey, openaiEmbeddingModel, ...)
-        return new InMemoryEmbeddingProvider();
-    }
 }
