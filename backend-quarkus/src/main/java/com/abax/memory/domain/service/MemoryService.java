@@ -166,4 +166,14 @@ public interface MemoryService {
      * @return list of extracted entities (empty if none found)
      */
     List<ExtractedEntity> extractEntities(String content, String tenantId);
+
+
+    // ── EP-005: Entity Listing ─────────────────────────────────────
+
+    /**
+     * Lists unique extracted entities for the given tenant.
+     * Entities are extracted on-the-fly from fragment content
+     * and deduplicated by canonical name.
+     */
+    List<ExtractedEntity> listEntities(String typeFilter, String scopeId, String tenantId);
 }

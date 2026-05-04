@@ -40,6 +40,9 @@ public class SearchRequest {
     @QueryParam("scope_id")
     private List<String> scopeIds;
 
+    @QueryParam("namespace")
+    private String namespace;
+
     @QueryParam("from_date")
     private Instant fromDate;
 
@@ -73,6 +76,9 @@ public class SearchRequest {
 
     public List<String> getScopeIds() { return scopeIds; }
     public void setScopeIds(List<String> scopeIds) { this.scopeIds = scopeIds; }
+
+    public String getNamespace() { return namespace; }
+    public void setNamespace(String namespace) { this.namespace = namespace; }
 
     public Instant getFromDate() { return fromDate; }
     public void setFromDate(Instant fromDate) { this.fromDate = fromDate; }

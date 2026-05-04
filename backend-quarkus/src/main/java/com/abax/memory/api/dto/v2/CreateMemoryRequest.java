@@ -38,6 +38,8 @@ public record CreateMemoryRequest(
 
         Double confidence,
 
-        Map<String, Object> metadata
+        Map<String, Object> metadata,
+
+        String namespace
 ) {
 }

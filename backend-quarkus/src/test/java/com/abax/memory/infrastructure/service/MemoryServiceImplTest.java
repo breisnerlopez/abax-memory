@@ -63,7 +63,7 @@ class MemoryServiceImplTest {
                 "ref-001",
                 0.92,
                 null
-        );
+        , null);
 
         MemoryResponse response = memoryService.createV2(request, TENANT_A);
 
@@ -93,7 +93,7 @@ class MemoryServiceImplTest {
                 "Minimal Memory",
                 "Just content.",
                 null, null, null, null, null, null, null
-        );
+        , null);
 
         MemoryResponse response = memoryService.createV2(request, TENANT_A);
 
@@ -108,7 +108,7 @@ class MemoryServiceImplTest {
     @DisplayName("getByIdV2 — returns response for existing resource")
     @Transactional
     void getByIdV2_shouldReturnExistingResource() {
-        var request = new CreateMemoryRequest("Findable", "Content.", null, null, null, null, null, null, null);
+        var request = new CreateMemoryRequest("Findable", "Content.", null, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT_A);
 
         MemoryResponse found = memoryService.getByIdV2(created.id(), TENANT_A);
@@ -132,7 +132,7 @@ class MemoryServiceImplTest {
     @DisplayName("getByIdV2 — throws 404 for cross-tenant access")
     @Transactional
     void getByIdV2_crossTenant_shouldThrow404() {
-        var request = new CreateMemoryRequest("TenantA Private", "Secret.", null, null, null, null, null, null, null);
+        var request = new CreateMemoryRequest("TenantA Private", "Secret.", null, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT_A);
 
         assertThatThrownBy(() -> memoryService.getByIdV2(created.id(), TENANT_B))
@@ -145,7 +145,7 @@ class MemoryServiceImplTest {
     @DisplayName("updateV2 — applies partial updates correctly")
     @Transactional
     void updateV2_shouldApplyPartialUpdates() {
-        var create = new CreateMemoryRequest("Original", "Original content.", null, null, null, null, null, null, null);
+        var create = new CreateMemoryRequest("Original", "Original content.", null, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(create, TENANT_A);
 
         var update = new UpdateMemoryRequest(
@@ -171,7 +171,7 @@ class MemoryServiceImplTest {
     @DisplayName("updateV2 — validates lifecycle transitions")
     @Transactional
     void updateV2_validatesLifecycleTransitions() {
-        var create = new CreateMemoryRequest("State Test", "Content.", null, null, null, null, null, null, null);
+        var create = new CreateMemoryRequest("State Test", "Content.", null, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(create, TENANT_A);
 
         // DRAFT → PENDING is valid
@@ -201,7 +201,7 @@ class MemoryServiceImplTest {
     @DisplayName("updateV2 — throws 404 for cross-tenant update")
     @Transactional
     void updateV2_crossTenant_shouldThrow404() {
-        var create = new CreateMemoryRequest("TenantA Update Target", "Content.", null, null, null, null, null, null, null);
+        var create = new CreateMemoryRequest("TenantA Update Target", "Content.", null, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(create, TENANT_A);
 
         var update = new UpdateMemoryRequest("Hacked Title", null, null, null, null, null);
@@ -215,7 +215,7 @@ class MemoryServiceImplTest {
     @DisplayName("softDeleteV2 — marks entity as deleted and returns 404 on subsequent get")
     @Transactional
     void softDeleteV2_shouldMarkDeletedAndHideFromQueries() {
-        var create = new CreateMemoryRequest("Disposable", "Content.", null, null, null, null, null, null, null);
+        var create = new CreateMemoryRequest("Disposable", "Content.", null, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(create, TENANT_A);
 
         // Soft-delete
@@ -231,7 +231,7 @@ class MemoryServiceImplTest {
     @DisplayName("softDeleteV2 — idempotent on already deleted")
     @Transactional
     void softDeleteV2_idempotent_shouldNotThrow() {
-        var create = new CreateMemoryRequest("Idempotent", "Content.", null, null, null, null, null, null, null);
+        var create = new CreateMemoryRequest("Idempotent", "Content.", null, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(create, TENANT_A);
 
         memoryService.softDeleteV2(created.id(), TENANT_A);
@@ -244,7 +244,7 @@ class MemoryServiceImplTest {
     @DisplayName("softDeleteV2 — throws 404 for cross-tenant delete")
     @Transactional
     void softDeleteV2_crossTenant_shouldThrow404() {
-        var create = new CreateMemoryRequest("Delete Target", "Content.", null, null, null, null, null, null, null);
+        var create = new CreateMemoryRequest("Delete Target", "Content.", null, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(create, TENANT_A);
 
         assertThatThrownBy(() -> memoryService.softDeleteV2(created.id(), TENANT_B))
@@ -259,10 +259,10 @@ class MemoryServiceImplTest {
         // Create a few memories
         memoryService.createV2(
                 new CreateMemoryRequest("Memory Alpha", "Content Alpha.",
-                        MemoryKind.DECISION, null, null, null, null, null, null), TENANT_A);
+                        MemoryKind.DECISION, null, null, null, null, null, null, null), TENANT_A);
         memoryService.createV2(
                 new CreateMemoryRequest("Memory Beta", "Content Beta.",
-                        MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                        MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
 
         var request = new SearchRequest("*", null, null, null, null, null, null, 0, 10);
         var result = memoryService.listV2(request, TENANT_A);
@@ -279,7 +279,7 @@ class MemoryServiceImplTest {
     @DisplayName("listV2 — excludes soft-deleted records")
     @Transactional
     void listV2_shouldExcludeSoftDeletedRecords() {
-        var create = new CreateMemoryRequest("To Delete List", "Will be deleted.", null, null, null, null, null, null, null);
+        var create = new CreateMemoryRequest("To Delete List", "Will be deleted.", null, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(create, TENANT_A);
 
         memoryService.softDeleteV2(created.id(), TENANT_A);
@@ -296,7 +296,7 @@ class MemoryServiceImplTest {
     @Transactional
     void listV2_shouldRespectTenantIsolation() {
         memoryService.createV2(
-                new CreateMemoryRequest("TenantA Entry", "Content.", null, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("TenantA Entry", "Content.", null, null, null, null, null, null, null, null), TENANT_A);
 
         var request = new SearchRequest("TenantA Entry", null, null, null, null, null, null, 0, 10);
         var result = memoryService.listV2(request, TENANT_B);

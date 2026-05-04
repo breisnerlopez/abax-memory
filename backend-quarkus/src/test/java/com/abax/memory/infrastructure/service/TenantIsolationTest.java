@@ -60,19 +60,19 @@ class TenantIsolationTest {
         var alphaRequest = new CreateMemoryRequest(
                 "Alpha Memory 1", "Content from alpha tenant.",
                 MemoryKind.DECISION, "scope-alpha", SensitivityLevel.INTERNAL,
-                null, null, 0.9, null);
+                null, null, 0.9, null, null);
         memoryService.createV2(alphaRequest, TENANT_ALPHA);
 
         var alphaRequest2 = new CreateMemoryRequest(
                 "Alpha Memory 2", "More alpha content.",
-                MemoryKind.FACT, "scope-alpha", null, null, null, null, null);
+                MemoryKind.FACT, "scope-alpha", null, null, null, null, null, null);
         memoryService.createV2(alphaRequest2, TENANT_ALPHA);
 
         // Tenant Beta creates memories
         var betaRequest = new CreateMemoryRequest(
                 "Beta Memory 1", "Content from beta tenant.",
                 MemoryKind.PROCEDURE, "scope-beta", SensitivityLevel.CONFIDENTIAL,
-                null, null, 0.7, null);
+                null, null, 0.7, null, null);
         memoryService.createV2(betaRequest, TENANT_BETA);
 
         // Tenant Beta searches — should only see Beta's data
@@ -103,7 +103,7 @@ class TenantIsolationTest {
         var request = new CreateMemoryRequest(
                 "Private Alpha Memory", "Secret alpha content.",
                 MemoryKind.ENTITY, null, SensitivityLevel.CONFIDENTIAL,
-                null, null, null, null);
+                null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT_ALPHA);
 
         // Tenant Beta tries to access it — should get 404
@@ -132,13 +132,13 @@ class TenantIsolationTest {
         // Tenant Alpha uses scope "project-phoenix"
         var alphaRequest = new CreateMemoryRequest(
                 "Phoenix Project Memo", "Project details for Phoenix.",
-                MemoryKind.DECISION, "project-phoenix", null, null, null, null, null);
+                MemoryKind.DECISION, "project-phoenix", null, null, null, null, null, null);
         memoryService.createV2(alphaRequest, TENANT_ALPHA);
 
         // Tenant Beta tries to use the same scope — should fail
         var betaRequest = new CreateMemoryRequest(
                 "Beta Phoenix Claim", "Trying to claim Phoenix.",
-                MemoryKind.PROCEDURE, "project-phoenix", null, null, null, null, null);
+                MemoryKind.PROCEDURE, "project-phoenix", null, null, null, null, null, null);
         assertThatThrownBy(() -> memoryService.createV2(betaRequest, TENANT_BETA))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("does not belong to tenant");
@@ -168,7 +168,7 @@ class TenantIsolationTest {
         // Tenant Alpha creates memory and submits for review
         var request = new CreateMemoryRequest(
                 "Alpha Review Target", "Needs review.",
-                MemoryKind.DECISION, null, null, null, null, null, null);
+                MemoryKind.DECISION, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT_ALPHA);
 
         // Submit for review as Alpha

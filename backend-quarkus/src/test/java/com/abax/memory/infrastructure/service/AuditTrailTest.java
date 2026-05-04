@@ -60,7 +60,7 @@ class AuditTrailTest {
         var request = new CreateMemoryRequest(
                 "Audit Create Test", "Content for audit verification.",
                 MemoryKind.DECISION, "scope-audit", SensitivityLevel.INTERNAL,
-                null, null, 0.8, null);
+                null, null, 0.8, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT);
 
         // Verify audit trail
@@ -84,7 +84,7 @@ class AuditTrailTest {
     void update_shouldGenerateAuditRecord() {
         var request = new CreateMemoryRequest(
                 "Audit Update Original", "Original content.",
-                MemoryKind.FACT, null, null, null, null, null, null);
+                MemoryKind.FACT, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT);
 
         // Update the memory
@@ -114,7 +114,7 @@ class AuditTrailTest {
     void softDelete_shouldGenerateAuditRecord() {
         var request = new CreateMemoryRequest(
                 "Audit Delete Test", "Will be deleted.",
-                MemoryKind.PROCEDURE, null, null, null, null, null, null);
+                MemoryKind.PROCEDURE, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT);
 
         memoryService.softDeleteV2(created.id(), TENANT);
@@ -138,7 +138,7 @@ class AuditTrailTest {
         var request = new CreateMemoryRequest(
                 "Audit Review Test", "Needs review workflow.",
                 MemoryKind.DECISION, null, SensitivityLevel.INTERNAL,
-                null, null, 0.9, null);
+                null, null, 0.9, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT);
 
         // Submit for review
@@ -175,7 +175,7 @@ class AuditTrailTest {
     void auditRecords_areImmutable() {
         var request = new CreateMemoryRequest(
                 "Audit Immutable Test", "Immutable content.",
-                MemoryKind.FACT, null, null, null, null, null, null);
+                MemoryKind.FACT, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT);
 
         // Get the audit trail
@@ -209,7 +209,7 @@ class AuditTrailTest {
     void auditTrail_isOrderedByCreatedAtDesc() {
         var request = new CreateMemoryRequest(
                 "Ordered Audit Test", "Order check.",
-                MemoryKind.PROCEDURE, null, null, null, null, null, null);
+                MemoryKind.PROCEDURE, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT);
 
         // Do two updates to create more audit records

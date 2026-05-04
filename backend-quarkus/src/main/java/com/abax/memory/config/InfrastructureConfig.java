@@ -1,11 +1,15 @@
 package com.abax.memory.config;
 
+import com.abax.memory.domain.service.LlmService;
 import com.abax.memory.infrastructure.ai.EmbeddingProvider;
 import com.abax.memory.infrastructure.ai.InMemoryEmbeddingProvider;
+import com.abax.memory.infrastructure.ai.MockLlmService;
 import com.abax.memory.infrastructure.ai.OpenAIEmbeddingProvider;
+import com.abax.memory.infrastructure.ai.OpenAiLlmService;
 import com.abax.memory.infrastructure.qdrant.InMemoryQdrantClient;
 import com.abax.memory.infrastructure.qdrant.QdrantClient;
 import com.abax.memory.infrastructure.qdrant.QdrantEmbeddingClient;
+import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -161,5 +165,47 @@ public class InfrastructureConfig {
         LOG.warn("OPENAI_API_KEY not set or EmbeddingModel unavailable — "
                 + "using InMemoryEmbeddingProvider (REPLACE_BEFORE_PROD)");
         return new InMemoryEmbeddingProvider();
+    }
+
+    // ── LLM Service configuration ────────────────────────────────
+
+    @ConfigProperty(name = "abax.v2.llm.mock", defaultValue = "false")
+    boolean llmMock;
+
+    /**
+     * Produces the {@link LlmService} bean.
+     * <p>
+     * Resolution strategy:
+     * <ol>
+     *   <li>If {@code abax.v2.llm.mock=true}, returns {@link MockLlmService}
+     *       with deterministic test responses (for unit/integration tests).</li>
+     *   <li>Otherwise, tries to resolve {@link ChatLanguageModel} from CDI
+     *       and creates a real {@link OpenAiLlmService}.</li>
+     * </ol>
+     * </p>
+     */
+    @Produces
+    @Singleton
+    public LlmService llmService() {
+        if (llmMock) {
+            LOG.info("abax.v2.llm.mock=true — using MockLlmService (test mode)");
+            return new MockLlmService();
+        }
+
+        // Try to resolve ChatLanguageModel from CDI
+        try {
+            var chatModel = jakarta.enterprise.inject.spi.CDI.current()
+                    .select(ChatLanguageModel.class).get();
+            if (chatModel != null) {
+                LOG.info("OpenAiLlmService ACTIVE — using LangChain4j ChatLanguageModel");
+                return new OpenAiLlmService(chatModel);
+            }
+        } catch (Exception e) {
+            LOG.warnv("Cannot resolve ChatLanguageModel via CDI: {0}", e.getMessage());
+        }
+
+        LOG.error("No ChatLanguageModel available and abax.v2.llm.mock=false — "
+                + "LLM service will be unavailable.");
+        return new MockLlmService();
     }
 }

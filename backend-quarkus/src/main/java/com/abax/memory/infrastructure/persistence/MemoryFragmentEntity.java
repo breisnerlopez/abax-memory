@@ -42,6 +42,9 @@ public class MemoryFragmentEntity extends PanacheEntityBase {
     @Column(name = "scope_id", length = 255)
     private String scopeId;
 
+    @Column(name = "namespace", length = 512)
+    private String namespace;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "kind", nullable = false, length = 30)
     private MemoryKind kind;
@@ -144,6 +147,9 @@ public class MemoryFragmentEntity extends PanacheEntityBase {
 
     public String getScopeId() { return scopeId; }
     public void setScopeId(String scopeId) { this.scopeId = scopeId; }
+
+    public String getNamespace() { return namespace; }
+    public void setNamespace(String namespace) { this.namespace = namespace; }
 
     public MemoryKind getKind() { return kind; }
     public void setKind(MemoryKind kind) { this.kind = kind; }

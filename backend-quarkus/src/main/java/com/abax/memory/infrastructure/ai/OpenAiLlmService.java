@@ -7,7 +7,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.model.chat.ChatLanguageModel;
-import jakarta.enterprise.context.ApplicationScoped;
 import org.jboss.logging.Logger;
 
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ import java.util.stream.Collectors;
  *
  * <p>References: FT-001.04, FT-005.05, HU-005.08.1</p>
  */
-@ApplicationScoped
+// @ApplicationScoped — managed by InfrastructureConfig.llmService() producer
 public class OpenAiLlmService implements LlmService {
 
     private static final Logger LOG = Logger.getLogger(OpenAiLlmService.class);

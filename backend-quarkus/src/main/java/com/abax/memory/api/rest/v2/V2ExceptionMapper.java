@@ -28,7 +28,7 @@ import java.util.List;
  * <p>References: Architecture document §7.3, BR-009</p>
  */
 @Provider
-@Priority(Priorities.USER)
+@Priority(Priorities.USER - 100) // higher precedence than v1 mapper
 public class V2ExceptionMapper implements ExceptionMapper<Exception> {
 
     private static final Logger LOG = Logger.getLogger(V2ExceptionMapper.class);

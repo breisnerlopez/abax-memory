@@ -5,12 +5,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.security.AuthenticationFailedException;
 import io.quarkus.security.ForbiddenException;
 import io.quarkus.security.UnauthorizedException;
+import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.persistence.PersistenceException;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.NotAllowedException;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.NotSupportedException;
+import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
@@ -24,6 +26,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Provider
+@Priority(Priorities.USER) // lower priority than v2 mapper (v2 wins for API v2 paths)
 public class ApiExceptionMapper implements ExceptionMapper<Exception> {
 
     private static final Logger LOG = Logger.getLogger(ApiExceptionMapper.class);

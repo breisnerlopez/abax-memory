@@ -108,7 +108,7 @@ class DomainProfileTest {
         // Create memory without kind, sensitivity, confidence
         var request = new CreateMemoryRequest(
                 "Ops Default Test", "Testing profile defaults.",
-                null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT_OPS);
 
         // Verify defaults from ops profile
@@ -139,7 +139,7 @@ class DomainProfileTest {
 
         var request = new CreateMemoryRequest(
                 "Agent Default Test", "Testing agent profile defaults.",
-                null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT_AGENT);
 
         assertThat(created.kind()).isEqualTo(MemoryKind.PREFERENCE);
@@ -169,7 +169,7 @@ class DomainProfileTest {
 
         var request = new CreateMemoryRequest(
                 "Business Default Test", "Testing business profile defaults.",
-                null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT_BUSINESS);
 
         assertThat(created.kind()).isEqualTo(MemoryKind.ENTITY);
@@ -199,7 +199,7 @@ class DomainProfileTest {
         var request = new CreateMemoryRequest(
                 "Explicit Override Test", "Overriding profile defaults.",
                 MemoryKind.PROCEDURE, null, SensitivityLevel.SECRET,
-                null, null, 0.99, null);
+                null, null, 0.99, null, null);
         MemoryResponse created = memoryService.createV2(request, TENANT_OPS);
 
         // Explicit values must be preserved, not overwritten by profile
@@ -230,7 +230,7 @@ class DomainProfileTest {
         // Create with agent profile
         var request1 = new CreateMemoryRequest(
                 "Before Switch", "Agent profile memory.",
-                null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null);
         MemoryResponse before = memoryService.createV2(request1, "tenant-switch");
         assertThat(before.kind()).isEqualTo(MemoryKind.PREFERENCE);
         assertThat(before.sensitivityLevel()).isEqualTo(SensitivityLevel.INTERNAL);
@@ -250,7 +250,7 @@ class DomainProfileTest {
         // Create with business profile defaults
         var request2 = new CreateMemoryRequest(
                 "After Switch", "Business profile memory.",
-                null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null);
         MemoryResponse after = memoryService.createV2(request2, "tenant-switch");
 
         assertThat(after.kind()).isEqualTo(MemoryKind.ENTITY); // changed from AGENT_MEMORY
@@ -266,7 +266,7 @@ class DomainProfileTest {
     void tenantWithoutProfile_usesSystemDefaults() {
         var request = new CreateMemoryRequest(
                 "No Profile Test", "No tenant config set up.",
-                null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null);
         MemoryResponse created = memoryService.createV2(request, "tenant-no-config");
 
         assertThat(created.kind()).isEqualTo(MemoryKind.FACT);

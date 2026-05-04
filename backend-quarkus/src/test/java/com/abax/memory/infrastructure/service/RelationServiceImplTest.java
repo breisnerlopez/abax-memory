@@ -282,7 +282,7 @@ class RelationServiceImplTest {
 
     private MemoryResponse createMemory(String tenantId, String title, String content) {
         return memoryService.createV2(
-                new CreateMemoryRequest(title, content, null, null, null, null, null, null, null),
+                new CreateMemoryRequest(title, content, null, null, null, null, null, null, null, null),
                 tenantId);
     }
 }

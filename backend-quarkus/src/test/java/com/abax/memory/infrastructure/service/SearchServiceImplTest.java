@@ -64,11 +64,11 @@ class SearchServiceImplTest {
     void semanticSearch_shouldReturnResults() {
         // Create several fragments
         var m1 = memoryService.createV2(
-                new CreateMemoryRequest("Fault tolerance patterns", "Circuit breaker and retry patterns for resilient systems.", MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Fault tolerance patterns", "Circuit breaker and retry patterns for resilient systems.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
         var m2 = memoryService.createV2(
-                new CreateMemoryRequest("Load balancing algorithms", "Round-robin, least connections, and weighted distributions.", MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Load balancing algorithms", "Round-robin, least connections, and weighted distributions.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
         var m3 = memoryService.createV2(
-                new CreateMemoryRequest("Incident response plan", "Step-by-step guide for handling production incidents.", MemoryKind.DECISION, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Incident response plan", "Step-by-step guide for handling production incidents.", MemoryKind.DECISION, null, null, null, null, null, null, null), TENANT_A);
 
         // Index them
         searchService.indexFragment(m1.id(), TENANT_A);
@@ -90,9 +90,9 @@ class SearchServiceImplTest {
     @Transactional
     void semanticSearch_shouldRespectKindFilter() {
         var m1 = memoryService.createV2(
-                new CreateMemoryRequest("Decision about deployment", "We decided to use blue-green deployments.", MemoryKind.DECISION, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Decision about deployment", "We decided to use blue-green deployments.", MemoryKind.DECISION, null, null, null, null, null, null, null), TENANT_A);
         var m2 = memoryService.createV2(
-                new CreateMemoryRequest("Knowledge about deployment", "Blue-green deployment reduces downtime.", MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Knowledge about deployment", "Blue-green deployment reduces downtime.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
 
         searchService.indexFragment(m1.id(), TENANT_A);
         searchService.indexFragment(m2.id(), TENANT_A);
@@ -110,7 +110,7 @@ class SearchServiceImplTest {
     @Transactional
     void semanticSearch_shouldRespectTenantIsolation() {
         var m1 = memoryService.createV2(
-                new CreateMemoryRequest("Tenant A secret", "Confidential data for tenant A.", MemoryKind.FACT, null, SensitivityLevel.CONFIDENTIAL, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Tenant A secret", "Confidential data for tenant A.", MemoryKind.FACT, null, SensitivityLevel.CONFIDENTIAL, null, null, null, null, null), TENANT_A);
 
         searchService.indexFragment(m1.id(), TENANT_A);
 
@@ -129,9 +129,9 @@ class SearchServiceImplTest {
     @Transactional
     void hybridSearch_shouldReturnCombinedResults() {
         var m1 = memoryService.createV2(
-                new CreateMemoryRequest("Database migration guide", "How to safely migrate PostgreSQL databases with zero downtime.", MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Database migration guide", "How to safely migrate PostgreSQL databases with zero downtime.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
         var m2 = memoryService.createV2(
-                new CreateMemoryRequest("API rate limiting", "Implement rate limiting using token bucket algorithm.", MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("API rate limiting", "Implement rate limiting using token bucket algorithm.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
 
         searchService.indexFragment(m1.id(), TENANT_A);
         searchService.indexFragment(m2.id(), TENANT_A);
@@ -154,9 +154,9 @@ class SearchServiceImplTest {
         // Use identical content to guarantee similarity with deterministic hash-based mock
         String sameContent = "Optimize database queries with proper indexing and vacuum strategies for PostgreSQL.";
         var m1 = memoryService.createV2(
-                new CreateMemoryRequest("PostgreSQL performance tuning", sameContent, MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("PostgreSQL performance tuning", sameContent, MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
         var m2 = memoryService.createV2(
-                new CreateMemoryRequest("Database optimization tips", sameContent, MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Database optimization tips", sameContent, MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
 
         searchService.indexFragment(m1.id(), TENANT_A);
         searchService.indexFragment(m2.id(), TENANT_A);
@@ -175,7 +175,7 @@ class SearchServiceImplTest {
     @Transactional
     void findSimilar_shouldWorkWithOnTheFlyEmbedding() {
         var m1 = memoryService.createV2(
-                new CreateMemoryRequest("Orphan fragment", "Unique content that should not match anything else in the index.", MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Orphan fragment", "Unique content that should not match anything else in the index.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
         // Deliberately not indexing this fragment — on-the-fly embedding should handle it
 
         List<MemoryResponse> similar = searchService.findSimilar(m1.id(), TENANT_A, 10);
@@ -192,11 +192,11 @@ class SearchServiceImplTest {
     @Transactional
     void expandGraph_shouldReturnCenterAndRelatedNodes() {
         var center = memoryService.createV2(
-                new CreateMemoryRequest("Central Decision", "The main architectural decision.", MemoryKind.DECISION, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Central Decision", "The main architectural decision.", MemoryKind.DECISION, null, null, null, null, null, null, null), TENANT_A);
         var child1 = memoryService.createV2(
-                new CreateMemoryRequest("Supporting Evidence A", "Evidence supporting the central decision.", MemoryKind.PROCEDURE, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Supporting Evidence A", "Evidence supporting the central decision.", MemoryKind.PROCEDURE, null, null, null, null, null, null, null), TENANT_A);
         var child2 = memoryService.createV2(
-                new CreateMemoryRequest("Supporting Evidence B", "More evidence.", MemoryKind.PROCEDURE, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Supporting Evidence B", "More evidence.", MemoryKind.PROCEDURE, null, null, null, null, null, null, null), TENANT_A);
 
         // Create relations: center → child1, center → child2
         relationService.createRelation(center.id(), child1.id(), RelationType.SUPPORTS, TENANT_A);
@@ -216,11 +216,11 @@ class SearchServiceImplTest {
     @Transactional
     void expandGraph_shouldRespectDepthLimit() {
         var level0 = memoryService.createV2(
-                new CreateMemoryRequest("Root Level 0", "Root node.", MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Root Level 0", "Root node.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
         var level1 = memoryService.createV2(
-                new CreateMemoryRequest("Node Level 1", "Child of root.", MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Node Level 1", "Child of root.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
         var level2 = memoryService.createV2(
-                new CreateMemoryRequest("Node Level 2", "Child of level 1.", MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Node Level 2", "Child of level 1.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
 
         relationService.createRelation(level0.id(), level1.id(), RelationType.RELATED_TO, TENANT_A);
         relationService.createRelation(level1.id(), level2.id(), RelationType.RELATED_TO, TENANT_A);
@@ -241,9 +241,9 @@ class SearchServiceImplTest {
     @Transactional
     void expandGraph_shouldRespectTenantIsolation() {
         var centerA = memoryService.createV2(
-                new CreateMemoryRequest("Tenant A Node", "Belongs to tenant A.", MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Tenant A Node", "Belongs to tenant A.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
         var childB = memoryService.createV2(
-                new CreateMemoryRequest("Tenant B Node", "Belongs to tenant B.", MemoryKind.FACT, null, null, null, null, null, null), TENANT_B);
+                new CreateMemoryRequest("Tenant B Node", "Belongs to tenant B.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_B);
 
         // Create relation cross-tenant (validated at relation creation time)
         try {
@@ -265,7 +265,7 @@ class SearchServiceImplTest {
     @Transactional
     void indexFragment_shouldSucceed() {
         var fragment = memoryService.createV2(
-                new CreateMemoryRequest("Indexable Memory", "Content for indexing test.", MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Indexable Memory", "Content for indexing test.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
 
         assertThatNoException()
                 .isThrownBy(() -> searchService.indexFragment(fragment.id(), TENANT_A));
@@ -277,9 +277,9 @@ class SearchServiceImplTest {
     @Transactional
     void reindexAll_shouldCountIndexedFragments() {
         var f1 = memoryService.createV2(
-                new CreateMemoryRequest("Reindex Test 1", "Content one.", MemoryKind.FACT, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Reindex Test 1", "Content one.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
         var f2 = memoryService.createV2(
-                new CreateMemoryRequest("Reindex Test 2", "Content two.", MemoryKind.DECISION, null, null, null, null, null, null), TENANT_A);
+                new CreateMemoryRequest("Reindex Test 2", "Content two.", MemoryKind.DECISION, null, null, null, null, null, null, null), TENANT_A);
 
         int indexed = searchService.reindexAll(TENANT_A);
         assertThat(indexed).isGreaterThanOrEqualTo(2);

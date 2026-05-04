@@ -185,7 +185,7 @@ class SearchResourceV2Test {
                 .body(Map.of(
                         "sourceId", sourceId,
                         "targetId", targetId,
-                        "relationType", "REFERENCES"
+                        "relationType", "RELATED_TO"
                 ))
                 .when()
                 .post("/api/v2/relations")
@@ -194,7 +194,7 @@ class SearchResourceV2Test {
                 .body("id", notNullValue())
                 .body("sourceId", equalTo(sourceId))
                 .body("targetId", equalTo(targetId))
-                .body("relationType", equalTo("REFERENCES"));
+                .body("relationType", equalTo("RELATED_TO"));
     }
 
     @Test
@@ -210,7 +210,7 @@ class SearchResourceV2Test {
                 .body(Map.of(
                         "sourceId", id,
                         "targetId", id,
-                        "relationType", "RELATES_TO"
+                        "relationType", "RELATED_TO"
                 ))
                 .when()
                 .post("/api/v2/relations")
@@ -231,7 +231,7 @@ class SearchResourceV2Test {
                 .body(Map.of(
                         "sourceId", sourceId,
                         "targetId", UUID.randomUUID().toString(),
-                        "relationType", "REFERENCES"
+                        "relationType", "RELATED_TO"
                 ))
                 .when()
                 .post("/api/v2/relations")
@@ -292,7 +292,7 @@ class SearchResourceV2Test {
         String targetId = createMemory(TENANT_A, "Delete Relation Target",
                 "Target for delete test.", "FACT", "INTERNAL");
 
-        String relId = createRelation(TENANT_A, sourceId, targetId, "REFERENCES");
+        String relId = createRelation(TENANT_A, sourceId, targetId, "RELATED_TO");
 
         given()
                 .header("X-Tenant-Id", TENANT_A)

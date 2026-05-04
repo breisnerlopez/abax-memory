@@ -81,4 +81,14 @@ public final class SearchFilterBuilder {
         if (scopeId != null && !scopeId.isBlank()) payload.put("scope_id", scopeId);
         return payload;
     }
+
+    /** Variant with namespace support. */
+    public static Map<String, Object> buildUpsertPayload(
+            String memoryId, String tenantId, String kind, String lifecycleState,
+            String sensitivityLevel, String scopeId, String namespace) {
+        Map<String, Object> payload = buildUpsertPayload(memoryId, tenantId, kind,
+                lifecycleState, sensitivityLevel, scopeId);
+        if (namespace != null && !namespace.isBlank()) payload.put("namespace", namespace);
+        return payload;
+    }
 }

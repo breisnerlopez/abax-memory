@@ -183,7 +183,7 @@ class MemoryResourceV2Test {
                 .body(Map.of(
                         "title", "Updated Title",
                         "summary", "New summary after review.",
-                        "lifecycleState", "IN_REVIEW"
+                        "lifecycleState", "PENDING"
                 ))
                 .when()
                 .put(BASE_PATH + "/" + id)
@@ -192,7 +192,7 @@ class MemoryResourceV2Test {
                 .body("id", equalTo(id))
                 .body("title", equalTo("Updated Title"))
                 .body("summary", equalTo("New summary after review."))
-                .body("lifecycleState", equalTo("IN_REVIEW"))
+                .body("lifecycleState", equalTo("pending"))
                 .body("content", equalTo("Original content for update test."));
     }
 
@@ -200,7 +200,7 @@ class MemoryResourceV2Test {
     @Order(6)
     @DisplayName("PUT /api/v2/memories/{id} — rejects invalid lifecycle transition")
     void updateMemory_invalidTransition_returns400() {
-        // Create and move to IN_REVIEW then try invalid transition
+        // Create and move to PENDING then try invalid transition
         String id = given()
                 .header("X-Tenant-Id", TENANT_A)
                 .contentType(ContentType.JSON)
@@ -215,17 +215,17 @@ class MemoryResourceV2Test {
                 .extract()
                 .path("id");
 
-        // Move DRAFT → IN_REVIEW (valid)
+        // Move DRAFT → PENDING (valid)
         given()
                 .header("X-Tenant-Id", TENANT_A)
                 .contentType(ContentType.JSON)
-                .body(Map.of("lifecycleState", "IN_REVIEW"))
+                .body(Map.of("lifecycleState", "PENDING"))
                 .when()
                 .put(BASE_PATH + "/" + id)
                 .then()
                 .statusCode(200);
 
-        // Try IN_REVIEW → ARCHIVED (invalid: IN_REVIEW → ARCHIVED is not allowed)
+        // Try PENDING → ARCHIVED (invalid: PENDING → ARCHIVED is not allowed)
         given()
                 .header("X-Tenant-Id", TENANT_A)
                 .contentType(ContentType.JSON)

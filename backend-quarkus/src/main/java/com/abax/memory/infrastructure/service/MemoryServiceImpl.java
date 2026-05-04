@@ -151,6 +151,7 @@ public class MemoryServiceImpl implements MemoryService {
         entity.setScopeId(request.scopeId());
         entity.setSourceType(request.sourceType());
         entity.setSourceRef(request.sourceRef());
+        entity.setNamespace(request.namespace());
 
         // A3: Validate scope belongs to tenant
         if (request.scopeId() != null && !request.scopeId().isBlank()) {
@@ -308,6 +309,19 @@ public class MemoryServiceImpl implements MemoryService {
         if (request.getToDate() != null) {
             queryBuilder.append(" and createdAt <= :toDate");
             params.put("toDate", request.getToDate());
+        }
+
+        // Namespace filter
+        if (request.getNamespace() != null && !request.getNamespace().isBlank()) {
+            String ns = request.getNamespace().trim();
+            if (ns.endsWith(":")) {
+                queryBuilder.append(" and (namespace = :nsExact or namespace LIKE :nsPrefix)");
+                params.put("nsExact", ns.substring(0, ns.length() - 1));
+                params.put("nsPrefix", ns + "%");
+            } else {
+                queryBuilder.append(" and namespace = :nsExact");
+                params.put("nsExact", ns);
+            }
         }
 
         // Text search on title and content
@@ -779,7 +793,38 @@ public class MemoryServiceImpl implements MemoryService {
             return List.of();
         }
         LOG.infov("Entity extraction requested: tenant={0}, content_length={1}", tenantId, content.length());
-        // Use FACT as default kind for extraction context
         return llmService.extractEntities(content, MemoryKind.FACT);
+    }
+
+    // ── EP-005: Entity Listing ────────────────────────────────────────
+
+    @Override
+    public List<ExtractedEntity> listEntities(String typeFilter, String scopeId, String tenantId) {
+        LOG.infov("Entity listing requested: tenant={0}, type={1}, scopeId={2}", tenantId, typeFilter, scopeId);
+        var queryBuilder = new StringBuilder("tenantId = :tenantId and deletedAt IS NULL");
+        var params = new LinkedHashMap<String, Object>();
+        params.put("tenantId", tenantId);
+        if (scopeId != null && !scopeId.isBlank()) {
+            queryBuilder.append(" and scopeId = :scopeId");
+            params.put("scopeId", scopeId);
+        }
+        var entities = MemoryFragmentEntity.find(queryBuilder.toString(),
+                        Sort.by("createdAt").descending(), params)
+                .page(Page.of(0, 20))
+                .list();
+        if (entities.isEmpty()) return List.of();
+        Map<String, ExtractedEntity> uniqueEntities = new LinkedHashMap<>();
+        for (var entity : entities) {
+            var fe = (MemoryFragmentEntity) entity;
+            try {
+                for (var e : llmService.extractEntities(fe.getContent(), fe.getKind())) {
+                    String key = e.name().toLowerCase().trim();
+                    if (typeFilter != null && !typeFilter.isBlank() && !typeFilter.equalsIgnoreCase(e.type())) continue;
+                    var existing = uniqueEntities.get(key);
+                    if (existing == null || e.confidence() > existing.confidence()) uniqueEntities.put(key, e);
+                }
+            } catch (Exception ex) { LOG.debugv("Entity extraction failed: {0}", ex.getMessage()); }
+        }
+        return List.copyOf(uniqueEntities.values());
     }
 }
