@@ -52,7 +52,7 @@ public class PostgresProcessingJobRepository implements ProcessingJobRepository 
         @SuppressWarnings("unchecked")
         List<String> ids = entityManager.createNativeQuery(
                         "SELECT id FROM processing_jobs WHERE status = 'PENDING' "
-                                + "AND (next_attempt_at IS NULL OR next_attempt_at <= ?1) "
+                                + "AND (next_retry_at IS NULL OR next_retry_at <= ?1) "
                                 + "ORDER BY created_at FOR UPDATE SKIP LOCKED")
                 .setParameter(1, now)
                 .setMaxResults(batchSize)

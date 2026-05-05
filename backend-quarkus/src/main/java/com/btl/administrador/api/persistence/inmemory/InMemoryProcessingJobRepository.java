@@ -49,7 +49,7 @@ public class InMemoryProcessingJobRepository implements ProcessingJobRepository 
             if (claimed.size() >= batchSize) {
                 break;
             }
-            boolean due = job.nextAttemptAt == null || !job.nextAttemptAt.isAfter(now);
+            boolean due = job.nextRetryAt == null || !job.nextRetryAt.isAfter(now);
             if (job.status == ProcessingJobStatus.PENDING && due) {
                 job.status = ProcessingJobStatus.IN_PROGRESS;
                 job.lockedBy = workerId;

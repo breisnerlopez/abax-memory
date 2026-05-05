@@ -64,7 +64,7 @@ class ProcessingWorkerServiceTest {
                 .satisfies(job -> {
                     assertThat(job.retryCount).isEqualTo(1);
                     assertThat(job.lastError).isEqualTo("forced-index-error");
-                    assertThat(job.nextAttemptAt).isNotNull();
+                    assertThat(job.nextRetryAt).isNotNull();
                 });
 
         support.processingWorkerService.processPendingJobs();
@@ -77,7 +77,7 @@ class ProcessingWorkerServiceTest {
                 .satisfies(job -> {
                     assertThat(job.retryCount).isEqualTo(3);
                     assertThat(job.lastError).isEqualTo("forced-index-error");
-                    assertThat(job.nextAttemptAt).isNull();
+                    assertThat(job.nextRetryAt).isNull();
                 });
         assertThat(support.auditService.findByEntityId(created.id()))
                 .extracting(event -> event.action())

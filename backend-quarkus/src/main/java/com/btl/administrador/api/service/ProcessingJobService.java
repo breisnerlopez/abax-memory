@@ -43,7 +43,7 @@ public class ProcessingJobService {
         job.status = ProcessingJobStatus.COMPLETED;
         job.lockedBy = null;
         job.lockedAt = null;
-        job.nextAttemptAt = null;
+        job.nextRetryAt = null;
         job.lastError = null;
         job.updatedAt = OffsetDateTime.now();
         processingJobRepository.save(job);
@@ -56,10 +56,10 @@ public class ProcessingJobService {
         job.lockedAt = null;
         if (job.retryCount >= maxRetries) {
             job.status = ProcessingJobStatus.FAILED;
-            job.nextAttemptAt = null;
+            job.nextRetryAt = null;
         } else {
             job.status = ProcessingJobStatus.PENDING;
-            job.nextAttemptAt = OffsetDateTime.now().plus(retryDelay);
+            job.nextRetryAt = OffsetDateTime.now().plus(retryDelay);
         }
         job.updatedAt = OffsetDateTime.now();
         processingJobRepository.save(job);

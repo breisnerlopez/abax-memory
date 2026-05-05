@@ -41,7 +41,7 @@ class ProcessingJobServiceTest {
         assertThat(job.lastError).isEqualTo("index-timeout");
         assertThat(job.lockedBy).isNull();
         assertThat(job.lockedAt).isNull();
-        assertThat(job.nextAttemptAt).isNotNull();
+        assertThat(job.nextRetryAt).isNotNull();
 
         var reclaimedJobs = support.processingJobService.claimPendingJobs("worker-test-001", 10);
 
@@ -51,7 +51,7 @@ class ProcessingJobServiceTest {
         assertThat(job.status).isEqualTo(ProcessingJobStatus.COMPLETED);
         assertThat(job.lockedBy).isNull();
         assertThat(job.lockedAt).isNull();
-        assertThat(job.nextAttemptAt).isNull();
+        assertThat(job.nextRetryAt).isNull();
         assertThat(job.lastError).isNull();
         assertThat(support.processingJobRepository.findByStatus(ProcessingJobStatus.COMPLETED)).singleElement()
                 .isSameAs(job);
