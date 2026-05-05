@@ -33,6 +33,14 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- Fixes #12: quarkus-langchain4j-openai version managed by quarkiverse BOM -->
+            <dependency>
+                <groupId>io.quarkiverse.langchain4j</groupId>
+                <artifactId>quarkus-langchain4j-bom</artifactId>
+                <version>0.24.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -85,6 +93,13 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-open-ai</artifactId>
+        </dependency>
+        <!-- Quarkus LangChain4j OpenAI Extension — wires OpenAI as CDI beans
+             reading quarkus.langchain4j.openai.* properties.
+             Fixes #12: without this, ChatLanguageModel is not resolvable. -->
+        <dependency>
+            <groupId>io.quarkiverse.langchain4j</groupId>
+            <artifactId>quarkus-langchain4j-openai</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
