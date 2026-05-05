@@ -1,6 +1,15 @@
 # Changelog — Abax-Memory
 
 
+## [2.0.9] — 2026-05-05
+
+### Fixed
+- Rendimiento: unifiedSearch con expandGraph=true reducido de ~9s a ~400ms. Eliminadas N+1 queries con batch fetch, BFS consolidado multi-seed. Reducción del 95% en queries SQL.
+
+### Docker
+- ghcr.io/breisnerlopez/abax-memory:v2.0.9
+- ghcr.io/breisnerlopez/abax-memory:latest
+
 ## [2.0.8] — 2026-05-05
 
 ### Fixed

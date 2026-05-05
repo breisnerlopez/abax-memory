@@ -26,8 +26,11 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -677,5 +680,155 @@ class SearchServiceImplTest {
                     .as("Issue #18: hybrid search results must be sorted by score descending")
                     .isGreaterThanOrEqualTo(next);
         }
+    }
+
+    // ── Performance: Batch Graph Expansion Tests ─────────────────────
+
+    @Test
+    @Order(21)
+    @DisplayName("expandGraph — handles dense graph without N+1 amplification")
+    @Transactional
+    void expandGraph_shouldHandleDenseGraphEfficiently() {
+        // Create a hub-and-spoke graph: one center connected to 10 leaf nodes
+        var hub = memoryService.createV2(
+                new CreateMemoryRequest("Central Architecture Decision",
+                        "The main architectural decision for the project strategy.",
+                        MemoryKind.DECISION, null, null, null, null, null, null, null), TENANT_A);
+        searchService.indexFragment(hub.id(), TENANT_A);
+
+        List<UUID> leafIds = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            var leaf = memoryService.createV2(
+                    new CreateMemoryRequest("Supporting Evidence #" + i,
+                            "Evidence supporting the central decision — document #" + i + ".",
+                            MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+            searchService.indexFragment(leaf.id(), TENANT_A);
+            leafIds.add(leaf.id());
+            relationService.createRelation(hub.id(), leaf.id(), RelationType.SUPPORTS, TENANT_A);
+        }
+
+        // Expand the graph — should retrieve hub + all 10 leaves in batch queries
+        GraphResponse graph = searchService.expandGraph(hub.id(), 1, TENANT_A);
+
+        // Assertions
+        assertThat(graph.centerNode()).isNotNull();
+        assertThat(graph.centerNode().id()).isEqualTo(hub.id());
+        assertThat(graph.nodes()).hasSize(11); // hub + 10 leaves
+        assertThat(graph.relations()).hasSize(10);
+
+        // Verify all leaf nodes are present (Fix: batch loading should not miss any)
+        for (UUID leafId : leafIds) {
+            assertThat(graph.nodes())
+                    .as("Leaf node %s must be present after batch expansion", leafId)
+                    .anyMatch(n -> n.id().equals(leafId));
+        }
+
+        // Verify no duplicates in nodes
+        List<UUID> nodeIds = graph.nodes().stream().map(MemoryResponse::id).toList();
+        assertThat(nodeIds).doesNotHaveDuplicates();
+    }
+
+    @Test
+    @Order(22)
+    @DisplayName("unifiedSearch — consolidated multi-seed expansion works without error when seeds match")
+    @Transactional
+    void unifiedSearch_consolidatedExpansion_shouldWorkWithoutError() {
+        // Create seed nodes with tightly matching content to ensure hybrid search finds them
+        var seed1 = memoryService.createV2(
+                new CreateMemoryRequest("Microservices patterns design architecture",
+                        "Design patterns for microservices architectures including service discovery circuit breakers resilience patterns.",
+                        MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+        var seed2 = memoryService.createV2(
+                new CreateMemoryRequest("Microservices architecture event Kafka patterns",
+                        "Event-driven architecture patterns with Apache Kafka and event sourcing for microservices distributed systems.",
+                        MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+
+        var leaf1 = memoryService.createV2(
+                new CreateMemoryRequest("Service Discovery Consul Eureka microservices",
+                        "Consul and Eureka service discovery patterns for resilient microservices.",
+                        MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+        var leaf2 = memoryService.createV2(
+                new CreateMemoryRequest("Circuit Breaker Resilience4j Hystrix microservices",
+                        "Hystrix and Resilience4j circuit breaker implementation for fault-tolerant microservices.",
+                        MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+
+        // Create relations: seed1 → leaf1, seed2 → leaf2
+        relationService.createRelation(seed1.id(), leaf1.id(), RelationType.SUPPORTS, TENANT_A);
+        relationService.createRelation(seed2.id(), leaf2.id(), RelationType.SUPPORTS, TENANT_A);
+
+        // Index all
+        for (var frag : List.of(seed1, seed2, leaf1, leaf2)) {
+            searchService.indexFragment(frag.id(), TENANT_A);
+        }
+
+        // Unified search with graph expansion
+        UnifiedSearchRequest request = new UnifiedSearchRequest(
+                "microservices patterns architecture", null, null, null, null,
+                0, 20, true, 2, 5);
+        UnifiedSearchResponse response = searchService.unifiedSearch(request, TENANT_A);
+
+        // Should always return a valid response
+        assertThat(response).isNotNull();
+        assertThat(response.isGraphExpanded()).isTrue();
+        assertThat(response.getItems()).isNotNull();
+        assertThat(response.getTotal()).isGreaterThanOrEqualTo(0);
+
+        // No duplicate IDs regardless of graph expansion results
+        List<UUID> itemIdList = response.getItems().stream()
+                .map(sm -> sm.getMemory().id())
+                .toList();
+        assertThat(itemIdList).doesNotHaveDuplicates();
+
+        // Results sorted by score descending
+        for (int i = 0; i < response.getItems().size() - 1; i++) {
+            assertThat(response.getItems().get(i).getScore())
+                    .isGreaterThanOrEqualTo(response.getItems().get(i + 1).getScore());
+        }
+    }
+
+    @Test
+    @Order(23)
+    @DisplayName("expandGraph — BFS with depth 2 traverses two-hop neighbors via batch")
+    @Transactional
+    void expandGraph_depth2_shouldReachTwoHopNeighbors() {
+        var root = memoryService.createV2(
+                new CreateMemoryRequest("Root Strategy", "Top-level strategy document.", MemoryKind.DECISION, null, null, null, null, null, null, null), TENANT_A);
+
+        // Create chain: root → a → b, root → c → d
+        var a = memoryService.createV2(
+                new CreateMemoryRequest("Tactic A", "Tactical plan A.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+        var b = memoryService.createV2(
+                new CreateMemoryRequest("Detail B", "Detail for tactic A.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+        var c = memoryService.createV2(
+                new CreateMemoryRequest("Tactic C", "Tactical plan C.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+        var d = memoryService.createV2(
+                new CreateMemoryRequest("Detail D", "Detail for tactic C.", MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+
+        relationService.createRelation(root.id(), a.id(), RelationType.RELATED_TO, TENANT_A);
+        relationService.createRelation(a.id(), b.id(), RelationType.RELATED_TO, TENANT_A);
+        relationService.createRelation(root.id(), c.id(), RelationType.RELATED_TO, TENANT_A);
+        relationService.createRelation(c.id(), d.id(), RelationType.RELATED_TO, TENANT_A);
+
+        searchService.indexFragment(root.id(), TENANT_A);
+        searchService.indexFragment(a.id(), TENANT_A);
+        searchService.indexFragment(b.id(), TENANT_A);
+        searchService.indexFragment(c.id(), TENANT_A);
+        searchService.indexFragment(d.id(), TENANT_A);
+
+        // Depth 2: should reach root, a, b, c, d (5 nodes)
+        GraphResponse graph = searchService.expandGraph(root.id(), 2, TENANT_A);
+
+        assertThat(graph.nodes()).hasSize(5);
+        // 4 distinct edges: root→a, a→b, root→c, c→d (no duplicates for BIDIRECTIONAL types)
+        assertThat(graph.relations()).hasSize(4);
+
+        Set<UUID> nodeIds = graph.nodes().stream().map(MemoryResponse::id).collect(Collectors.toSet());
+        assertThat(nodeIds).contains(root.id(), a.id(), b.id(), c.id(), d.id());
+
+        // Verify no duplicate edges
+        List<String> edgeKeys = graph.relations().stream()
+                .map(e -> e.sourceId() + "|" + e.targetId() + "|" + e.relationType())
+                .toList();
+        assertThat(edgeKeys).doesNotHaveDuplicates();
     }
 }
