@@ -11,7 +11,6 @@ import com.abax.memory.api.dto.v2.UnifiedSearchResponse;
 import com.abax.memory.domain.enums.LifecycleState;
 import com.abax.memory.domain.enums.MemoryKind;
 import com.abax.memory.domain.enums.SensitivityLevel;
-import com.abax.memory.domain.model.Relation;
 import com.abax.memory.domain.model.InferredRelation;
 import com.abax.memory.domain.model.MemoryFragment;
 import com.abax.memory.domain.service.LlmService;
@@ -21,8 +20,6 @@ import com.abax.memory.infrastructure.ai.EmbeddingProvider;
 import com.abax.memory.infrastructure.persistence.MemoryFragmentEntity;
 import com.abax.memory.infrastructure.qdrant.QdrantClient;
 import com.abax.memory.infrastructure.security.TenantContext;
-import io.quarkus.panache.common.Page;
-import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -34,8 +31,10 @@ import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -233,32 +232,40 @@ public class SearchServiceImpl implements SearchService {
             unified.add(new ScoredMemory(scoredItem, "vector"));
         }
 
-        // Step 3: expand graph from top-K results
+        // Step 3: expand graph from top-K results — consolidated multi-seed BFS
+        // Fix 1: Single batch expansion instead of expandGraph() per seed.
+        // This eliminates redundant traversal of shared graph regions and
+        // reduces queries from O(topK × nodes × 2) to O(nodes × 2).
         if (request.isExpandGraph() && !vectorResults.items().isEmpty()) {
             int topK = Math.max(1, Math.min(request.getGraphTopK(), vectorResults.items().size()));
             List<MemoryResponse> topKResults = vectorResults.items().subList(0, topK);
 
-            for (MemoryResponse entry : topKResults) {
-                try {
-                    GraphResponse graph = expandGraph(entry.id(), request.getGraphDepth(), tenantId);
-                    if (graph.nodes() != null) {
-                        for (MemoryResponse node : graph.nodes()) {
-                            if (!seenIds.contains(node.id())) {
-                                seenIds.add(node.id());
-                                // Graph score: 70% of the connecting seed's score
-                                double seedScore = entry.score() != null ? entry.score() : 0.7;
-                                double graphScore = seedScore * 0.7;
-                                MemoryResponse scoredNode = withScore(node, graphScore);
-                                unified.add(new ScoredMemory(scoredNode, "graph"));
-                                graphContributions++;
-                            }
-                        }
+            // Collect all seed IDs and pre-compute seed scores for weighted graph scoring
+            Set<UUID> seedIds = topKResults.stream()
+                    .map(MemoryResponse::id)
+                    .collect(Collectors.toSet());
+            Map<UUID, Double> seedScores = topKResults.stream()
+                    .collect(Collectors.toMap(MemoryResponse::id, r -> r.score() != null ? r.score() : 0.7));
+
+            try {
+                // Single consolidated BFS from all seeds simultaneously
+                GraphExpansionResult expanded = expandGraphConsolidated(
+                        seedIds, seedScores, request.getGraphDepth(), tenantId);
+
+                for (var entry : expanded.nodes().entrySet()) {
+                    UUID nodeId = entry.getKey();
+                    if (!seenIds.contains(nodeId)) {
+                        seenIds.add(nodeId);
+                        double graphScore = entry.getValue(); // pre-computed graph score
+                        MemoryResponse scoredNode = withScore(
+                                MemoryResponse.from(expanded.entityMap().get(nodeId)), graphScore);
+                        unified.add(new ScoredMemory(scoredNode, "graph"));
+                        graphContributions++;
                     }
-                } catch (Exception e) {
-                    LOG.debugv("Graph expansion failed for seed {0}: {1}",
-                            entry.id(), e.getMessage());
-                    // Non-blocking: graph expansion errors don't fail the search
                 }
+            } catch (Exception e) {
+                LOG.debugv("Graph expansion failed for unified search: {0}", e.getMessage());
+                // Non-blocking: graph expansion errors don't fail the search
             }
         }
 
@@ -301,19 +308,25 @@ public class SearchServiceImpl implements SearchService {
         List<QdrantClient.ScoredHit> hits = qdrantClient.search(
                 QDRANT_COLLECTION, sourceVector, filters, effectiveLimit + 1);
 
-        // 4. Map to responses, exclude source — Issue #18: propagate Qdrant score
+        // 4. Batch-load all matched entities (Fix 2: single query instead of N+1)
+        List<String> hitPointIds = hits.stream()
+                .filter(hit -> !hit.pointId().equals(fragmentId.toString()))
+                .map(QdrantClient.ScoredHit::pointId)
+                .toList();
+        Map<String, MemoryFragmentEntity> entityMap = loadEntitiesByIds(hitPointIds, tenantId);
+
+        // 5. Build results preserving Qdrant score order — Issue #18
         return hits.stream()
                 .filter(hit -> !hit.pointId().equals(fragmentId.toString()))
-                .limit(effectiveLimit)
                 .map(hit -> {
-                    MemoryFragmentEntity entity = MemoryFragmentEntity.<MemoryFragmentEntity>findById(
-                            UUID.fromString(hit.pointId()));
-                    if (entity != null && !entity.isDeleted()) {
+                    MemoryFragmentEntity entity = entityMap.get(hit.pointId());
+                    if (entity != null) {
                         return withScore(MemoryResponse.from(entity), (double) hit.score());
                     }
                     return null;
                 })
                 .filter(java.util.Objects::nonNull)
+                .limit(effectiveLimit)
                 .toList();
     }
 
@@ -327,9 +340,10 @@ public class SearchServiceImpl implements SearchService {
         MemoryFragmentEntity center = requireEntityForTenant(fragmentId, tenantId);
         MemoryResponse centerResponse = MemoryResponse.from(center);
 
-        // BFS traversal
-        Set<UUID> visited = new HashSet<>();
+        // BFS traversal — batch-optimized: one query per BFS level instead of N+1 per node
+        Set<UUID> visited = new LinkedHashSet<>();  // preserves insertion order for output
         List<GraphEdge> edges = new ArrayList<>();
+        Set<String> edgeKeys = new HashSet<>();  // deduplication: "sourceId|targetId|type"
         Map<UUID, MemoryFragmentEntity> nodeMap = new LinkedHashMap<>();
         nodeMap.put(center.getId(), center);
 
@@ -338,40 +352,77 @@ public class SearchServiceImpl implements SearchService {
         visited.add(center.getId());
 
         for (int level = 0; level < effectiveDepth && !queue.isEmpty(); level++) {
+            // Collect all node IDs in this BFS level
+            Set<UUID> levelNodeIds = new LinkedHashSet<>(queue);
+
+            // Fix 5: Batch-fetch ALL relations for this level in ONE query
+            // instead of N*2 queries (findBySource + findByTarget per node)
+            List<com.abax.memory.infrastructure.persistence.RelationEntity> allLevelRelations =
+                    findRelationsForNodeIds(levelNodeIds, tenantId);
+
+            // Index relations by source and target for O(1) lookup per node
+            Map<UUID, List<com.abax.memory.infrastructure.persistence.RelationEntity>> bySource = new HashMap<>();
+            Map<UUID, List<com.abax.memory.infrastructure.persistence.RelationEntity>> byTarget = new HashMap<>();
+            for (var rel : allLevelRelations) {
+                bySource.computeIfAbsent(rel.getSourceId(), k -> new ArrayList<>()).add(rel);
+                byTarget.computeIfAbsent(rel.getTargetId(), k -> new ArrayList<>()).add(rel);
+            }
+
+            // Discover new neighbor IDs at this level
+            Set<UUID> newNeighborIds = new LinkedHashSet<>();
+
+            // Process each node in this level using pre-fetched relations
             int levelSize = queue.size();
             for (int i = 0; i < levelSize; i++) {
                 UUID currentId = queue.poll();
                 if (currentId == null) continue;
 
-                // Get outgoing relations (source = currentId)
-                List<Relation> outgoing = relationService.findBySource(currentId);
-                for (Relation rel : outgoing) {
-                    addEdgeAndEnqueue(rel, rel.getSourceId(), rel.getTargetId(),
-                            visited, queue, edges, nodeMap, tenantId);
+                // Outgoing relations (currentId = source)
+                List<com.abax.memory.infrastructure.persistence.RelationEntity> outgoing =
+                        bySource.getOrDefault(currentId, List.of());
+                for (var rel : outgoing) {
+                    addEdgeAndEnqueueBatch(rel, rel.getSourceId(), rel.getTargetId(),
+                            visited, queue, edges, edgeKeys, newNeighborIds);
                 }
 
-                // Get incoming relations and follow reverse if bidirectional
-                List<Relation> incoming = relationService.findByTarget(currentId);
-                for (Relation rel : incoming) {
-                    if (rel.getType().isTraversableReverse()) {
-                        addEdgeAndEnqueue(rel, rel.getSourceId(), rel.getTargetId(),
-                                visited, queue, edges, nodeMap, tenantId);
+                // Incoming relations (currentId = target)
+                List<com.abax.memory.infrastructure.persistence.RelationEntity> incoming =
+                        byTarget.getOrDefault(currentId, List.of());
+                for (var rel : incoming) {
+                    if (rel.getRelationType().isTraversableReverse()) {
+                        addEdgeAndEnqueueBatch(rel, rel.getSourceId(), rel.getTargetId(),
+                                visited, queue, edges, edgeKeys, newNeighborIds);
                     } else {
-                        // Still include the edge but don't traverse
-                        edges.add(new GraphEdge(rel.getSourceId(), rel.getTargetId(),
-                                rel.getType().name(), Map.of()));
-                        // Load node if not already loaded
-                        if (!nodeMap.containsKey(rel.getSourceId())) {
-                            loadIntoNodeMap(rel.getSourceId(), nodeMap, tenantId);
+                        // Non-traversable incoming: show edge and entity, but don't traverse
+                        String edgeKey = rel.getSourceId() + "|" + rel.getTargetId() + "|" + rel.getRelationType().name();
+                        if (edgeKeys.add(edgeKey)) {
+                            edges.add(new GraphEdge(rel.getSourceId(), rel.getTargetId(),
+                                    rel.getRelationType().name(), Map.of()));
+                        }
+                        if (!visited.contains(rel.getSourceId())) {
+                            visited.add(rel.getSourceId());
+                            newNeighborIds.add(rel.getSourceId());
                         }
                     }
                 }
             }
+
+            // Fix 2: Batch-load ALL new neighbor entities in ONE query
+            // instead of N individual findById calls
+            if (!newNeighborIds.isEmpty()) {
+                Map<UUID, MemoryFragmentEntity> batchLoaded = loadEntitiesBatch(newNeighborIds, tenantId);
+                nodeMap.putAll(batchLoaded);
+            }
         }
 
-        List<MemoryResponse> nodes = nodeMap.values().stream()
-                .map(MemoryResponse::from)
-                .toList();
+        // Build nodes list preserving BFS insertion order (center first)
+        List<MemoryResponse> nodes = new ArrayList<>();
+        for (UUID nodeId : visited) {
+            MemoryFragmentEntity entity = nodeMap.get(nodeId);
+            if (entity != null) {
+                nodes.add(MemoryResponse.from(entity));
+            }
+        }
 
         // D4: LLM-inferred relations — suggest additional edges between
         // the center node and other nodes in the graph that the LLM detects.
@@ -405,29 +456,31 @@ public class SearchServiceImpl implements SearchService {
         return new GraphResponse(centerResponse, edges, nodes);
     }
 
-    private void addEdgeAndEnqueue(Relation rel, UUID sourceId, UUID targetId,
-                                    Set<UUID> visited, Deque<UUID> queue,
-                                    List<GraphEdge> edges,
-                                    Map<UUID, MemoryFragmentEntity> nodeMap,
-                                    String tenantId) {
-        edges.add(new GraphEdge(sourceId, targetId, rel.getType().name(), Map.of()));
-        // Load target node if not visited
+    /**
+     * Registers a discovered edge and neighbor in batch-collecting mode.
+     * Instead of directly calling findById, the new node ID is collected
+     * for batch loading at the end of the BFS level.
+     * Deduplicates edges using a composite key to prevent duplicates
+     * when bidirectional relations are traversed from both sides.
+     */
+    private void addEdgeAndEnqueueBatch(
+            com.abax.memory.infrastructure.persistence.RelationEntity rel,
+            UUID sourceId, UUID targetId,
+            Set<UUID> visited, Deque<UUID> queue,
+            List<GraphEdge> edges, Set<String> edgeKeys, Set<UUID> newNeighborIds) {
+        String edgeKey = sourceId + "|" + targetId + "|" + rel.getRelationType().name();
+        if (edgeKeys.add(edgeKey)) {
+            edges.add(new GraphEdge(sourceId, targetId, rel.getRelationType().name(), Map.of()));
+        }
+        // Enqueue target for next BFS level
         if (visited.add(targetId)) {
             queue.add(targetId);
-            loadIntoNodeMap(targetId, nodeMap, tenantId);
+            newNeighborIds.add(targetId);
         }
-        // Ensure source node is loaded
-        if (!nodeMap.containsKey(sourceId)) {
-            loadIntoNodeMap(sourceId, nodeMap, tenantId);
-        }
-    }
-
-    private void loadIntoNodeMap(UUID nodeId, Map<UUID, MemoryFragmentEntity> nodeMap, String tenantId) {
-        if (nodeMap.containsKey(nodeId)) return;
-        MemoryFragmentEntity entity = MemoryFragmentEntity.findById(nodeId);
-        if (entity != null && !entity.isDeleted()
-                && tenantId.equals(entity.getTenantId())) {
-            nodeMap.put(nodeId, entity);
+        // Ensure source entity is loaded for display
+        if (!visited.contains(sourceId)) {
+            visited.add(sourceId);
+            newNeighborIds.add(sourceId);
         }
     }
 
@@ -512,24 +565,67 @@ public class SearchServiceImpl implements SearchService {
     // ── Private Helpers ──────────────────────────────────────────────
 
     /**
-     * Loads memory fragment entities by their IDs, filtered by tenant.
+     * Loads memory fragment entities by their IDs using a single batch query.
+     * Replaces the previous N+1 findById-per-ID pattern.
      */
     private Map<String, MemoryFragmentEntity> loadEntitiesByIds(List<String> ids, String tenantId) {
         if (ids.isEmpty()) return Map.of();
-        Map<String, MemoryFragmentEntity> result = new LinkedHashMap<>();
+
+        // Parse all UUIDs first, filter out invalid ones
+        Set<UUID> validUuids = new LinkedHashSet<>();
         for (String idStr : ids) {
             try {
-                UUID uuid = UUID.fromString(idStr);
-                MemoryFragmentEntity entity = MemoryFragmentEntity.findById(uuid);
-                if (entity != null && !entity.isDeleted()
-                        && tenantId.equals(entity.getTenantId())) {
-                    result.put(idStr, entity);
-                }
+                validUuids.add(UUID.fromString(idStr));
             } catch (IllegalArgumentException e) {
                 LOG.debugv("Invalid UUID in Qdrant point ID: {0}", idStr);
             }
         }
+        if (validUuids.isEmpty()) return Map.of();
+
+        // Batch query: single SQL round-trip for all IDs (Fix 2)
+        Map<UUID, MemoryFragmentEntity> entityMap = loadEntitiesBatch(validUuids, tenantId);
+
+        // Map back to original string IDs preserving insertion order
+        Map<String, MemoryFragmentEntity> result = new LinkedHashMap<>();
+        for (String idStr : ids) {
+            try {
+                UUID uuid = UUID.fromString(idStr);
+                MemoryFragmentEntity entity = entityMap.get(uuid);
+                if (entity != null) {
+                    result.put(idStr, entity);
+                }
+            } catch (IllegalArgumentException e) {
+                // already logged above
+            }
+        }
         return result;
+    }
+
+    /**
+     * Batch-loads memory fragment entities by a set of UUIDs.
+     * Single query: {@code SELECT ... WHERE id IN (?1)}.
+     */
+    private Map<UUID, MemoryFragmentEntity> loadEntitiesBatch(Set<UUID> ids, String tenantId) {
+        if (ids.isEmpty()) return Map.of();
+        Map<UUID, MemoryFragmentEntity> result = new LinkedHashMap<>();
+        List<MemoryFragmentEntity> entities = MemoryFragmentEntity.find(
+                "id IN ?1 AND tenantId = ?2 AND deletedAt IS NULL", ids, tenantId).list();
+        for (MemoryFragmentEntity entity : entities) {
+            result.put(entity.getId(), entity);
+        }
+        return result;
+    }
+
+    /**
+     * Batch-loads all relations for a set of node IDs.
+     * Single query: {@code SELECT ... WHERE (sourceId IN ?1 OR targetId IN ?1) AND tenantId = ?2}.
+     * Replaces the N+1 findBySource/findByTarget pattern (Fix 5).
+     */
+    private List<com.abax.memory.infrastructure.persistence.RelationEntity> findRelationsForNodeIds(
+            Set<UUID> nodeIds, String tenantId) {
+        if (nodeIds.isEmpty()) return List.of();
+        return com.abax.memory.infrastructure.persistence.RelationEntity.find(
+                "(sourceId IN ?1 OR targetId IN ?1) AND tenantId = ?2", nodeIds, tenantId).list();
     }
 
     /**
@@ -721,5 +817,132 @@ public class SearchServiceImpl implements SearchService {
         fragment.setLifecycleState(entity.getLifecycleState());
         fragment.setSensitivityLevel(entity.getSensitivityLevel());
         return fragment;
+    }
+
+    // ── Consolidated Multi-Seed Graph Expansion (Fix 1, Fix 3) ─────
+
+    /**
+     * Performs a single consolidated BFS from multiple seed nodes, batch-loading
+     * entities and relations at each depth level. Eliminates the redundant
+     * per-seed graph expansion that caused O(topK × N) query amplification.
+     *
+     * <p>Each discovered graph node receives a score weighted by the maximum
+     * seed score among all seeds that can reach it, multiplied by 0.7
+     * (graph decay factor).</p>
+     *
+     * @param seeds      set of seed UUIDs to start BFS from
+     * @param seedScores pre-computed vector scores for each seed
+     * @param depth      max BFS depth
+     * @param tenantId   tenant isolation scope
+     * @return consolidated graph expansion result
+     */
+    private GraphExpansionResult expandGraphConsolidated(
+            Set<UUID> seeds, Map<UUID, Double> seedScores, int depth, String tenantId) {
+        int effectiveDepth = Math.max(1, Math.min(MAX_GRAPH_DEPTH, depth > 0 ? depth : 2));
+
+        Set<UUID> visited = new LinkedHashSet<>();
+        Map<UUID, MemoryFragmentEntity> entityMap = new LinkedHashMap<>();
+        Map<UUID, Double> nodeScores = new LinkedHashMap<>(); // best seed score per node
+
+        Deque<UUID> queue = new ArrayDeque<>();
+        // Graph decay factor: connected nodes get 70% of the best connecting seed's score
+        final double GRAPH_DECAY = 0.7;
+
+        // Initialize BFS with all seeds
+        for (UUID seedId : seeds) {
+            if (visited.add(seedId)) {
+                queue.add(seedId);
+                nodeScores.put(seedId, seedScores.getOrDefault(seedId, 0.7));
+            }
+        }
+
+        // Batch-load seed entities
+        Map<UUID, MemoryFragmentEntity> seedEntities = loadEntitiesBatch(
+                new LinkedHashSet<>(seeds), tenantId);
+        entityMap.putAll(seedEntities);
+
+        for (int level = 0; level < effectiveDepth && !queue.isEmpty(); level++) {
+            Set<UUID> levelNodeIds = new LinkedHashSet<>(queue);
+
+            // Batch-fetch ALL relations for this level (1 query)
+            List<com.abax.memory.infrastructure.persistence.RelationEntity> allLevelRelations =
+                    findRelationsForNodeIds(levelNodeIds, tenantId);
+
+            // Index by source and target
+            Map<UUID, List<com.abax.memory.infrastructure.persistence.RelationEntity>> bySource = new HashMap<>();
+            Map<UUID, List<com.abax.memory.infrastructure.persistence.RelationEntity>> byTarget = new HashMap<>();
+            for (var rel : allLevelRelations) {
+                bySource.computeIfAbsent(rel.getSourceId(), k -> new ArrayList<>()).add(rel);
+                byTarget.computeIfAbsent(rel.getTargetId(), k -> new ArrayList<>()).add(rel);
+            }
+
+            Set<UUID> newNeighborIds = new LinkedHashSet<>();
+
+            int levelSize = queue.size();
+            for (int i = 0; i < levelSize; i++) {
+                UUID currentId = queue.poll();
+                if (currentId == null) continue;
+
+                double currentScore = nodeScores.getOrDefault(currentId, 0.5);
+
+                // Outgoing: current → neighbor
+                for (var rel : bySource.getOrDefault(currentId, List.of())) {
+                    UUID neighborId = rel.getTargetId();
+                    if (visited.add(neighborId)) {
+                        queue.add(neighborId);
+                        newNeighborIds.add(neighborId);
+                        nodeScores.put(neighborId, currentScore * GRAPH_DECAY);
+                    }
+                }
+
+                // Incoming (reverse-traversable): neighbor → current
+                for (var rel : byTarget.getOrDefault(currentId, List.of())) {
+                    if (rel.getRelationType().isTraversableReverse()) {
+                        UUID neighborId = rel.getSourceId();
+                        if (visited.add(neighborId)) {
+                            queue.add(neighborId);
+                            newNeighborIds.add(neighborId);
+                            nodeScores.put(neighborId, currentScore * GRAPH_DECAY);
+                        }
+                    } else {
+                        // Non-traversable incoming: load entity but don't traverse
+                        UUID sourceId = rel.getSourceId();
+                        if (!visited.contains(sourceId)) {
+                            visited.add(sourceId);
+                            newNeighborIds.add(sourceId);
+                            nodeScores.put(sourceId, currentScore * GRAPH_DECAY);
+                        }
+                    }
+                }
+            }
+
+            // Batch-load all newly discovered entities at this level (1 query)
+            if (!newNeighborIds.isEmpty()) {
+                Map<UUID, MemoryFragmentEntity> batchLoaded = loadEntitiesBatch(newNeighborIds, tenantId);
+                entityMap.putAll(batchLoaded);
+            }
+        }
+
+        // Build result: all visited nodes (excluding seeds already in vector results)
+        // with their pre-computed graph scores
+        Map<UUID, Double> graphNodes = new LinkedHashMap<>();
+        for (UUID nodeId : visited) {
+            if (!seeds.contains(nodeId) && entityMap.containsKey(nodeId)) {
+                graphNodes.put(nodeId, nodeScores.getOrDefault(nodeId, 0.5));
+            }
+        }
+
+        return new GraphExpansionResult(graphNodes, entityMap);
+    }
+
+    /**
+     * Internal holder for consolidated graph expansion results.
+     * {@code nodes} maps graph-discovered node IDs to their computed scores,
+     * and {@code entityMap} holds the loaded JPA entities (already filtered by tenant).
+     */
+    private record GraphExpansionResult(
+            Map<UUID, Double> nodes,
+            Map<UUID, MemoryFragmentEntity> entityMap
+    ) {
     }
 }
