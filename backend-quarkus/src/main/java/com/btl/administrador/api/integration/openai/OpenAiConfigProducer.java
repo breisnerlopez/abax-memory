@@ -13,15 +13,23 @@ import org.jboss.logging.Logger;
 import java.time.Duration;
 
 /**
- * Manual CDI producers for ChatLanguageModel and EmbeddingModel.
+ * CDI producers for ChatLanguageModel and EmbeddingModel — v1 baseline.
  *
- * <p><strong>DEPRECATED since quarkus-langchain4j-openai extension was added (fix #12).</strong>
- * The extension now auto-produces these beans from {@code quarkus.langchain4j.openai.*}
- * config properties. These manual producers are kept as fallback for when the extension
- * is not present on the classpath.</p>
+ * <p>These producers create the primary CDI beans for {@link ChatLanguageModel}
+ * and {@link EmbeddingModel}. The {@code quarkus-langchain4j-openai} extension
+ * (added in fix #12) produces default beans via {@code SyntheticBeanBuildItem},
+ * which have lower priority — our {@code @Produces} beans take precedence,
+ * avoiding ambiguity.</p>
  *
- * <p>Producers are conditional: they only activate when the quarkus-langchain4j-openai
- * extension is NOT detected. This avoids CDI ambiguity at deployment.</p>
+ * <p><strong>Fix #13 (revised):</strong> Previously the {@code @Produces}
+ * annotations were removed in fix #12 under the assumption that the extension
+ * would auto-produce these beans for direct {@code @Inject} usage.  The
+ * extension only creates beans when an AI Service ({@code @RegisterAiService})
+ * or a direct injection point is detected at build time — and since v2 uses
+ * an abstraction layer ({@link com.abax.memory.domain.service.LlmService}),
+ * no such injection point existed, leaving {@code ChatLanguageModel}
+ * unresolvable.  We now re-enable these {@code @Produces} to make the beans
+ * available for direct CDI injection throughout the application.</p>
  */
 @ApplicationScoped
 public class OpenAiConfigProducer {
@@ -40,11 +48,8 @@ public class OpenAiConfigProducer {
     @ConfigProperty(name = "quarkus.langchain4j.openai.timeout", defaultValue = "90s")
     Duration timeout;
 
-    // ⚠️ @Produces removed in fix #12 — the quarkus-langchain4j-openai extension
-    // now auto-produces EmbeddingModel from quarkus.langchain4j.openai.* config.
-    // This method is retained as a utility for environments without the extension.
-    // @Produces
-    // @Singleton
+    @Produces
+    @Singleton
     public EmbeddingModel embeddingModel() {
         LOG.infov("Creating OpenAI EmbeddingModel: model={0}", embeddingModelName);
         return OpenAiEmbeddingModel.builder()
@@ -56,11 +61,8 @@ public class OpenAiConfigProducer {
                 .build();
     }
 
-    // ⚠️ @Produces removed in fix #12 — the quarkus-langchain4j-openai extension
-    // now auto-produces ChatLanguageModel from quarkus.langchain4j.openai.* config.
-    // This method is retained as a utility for environments without the extension.
-    // @Produces
-    // @Singleton
+    @Produces
+    @Singleton
     public ChatLanguageModel chatLanguageModel() {
         LOG.infov("Creating OpenAI ChatLanguageModel: model={0}", chatModelName);
         return OpenAiChatModel.builder()
