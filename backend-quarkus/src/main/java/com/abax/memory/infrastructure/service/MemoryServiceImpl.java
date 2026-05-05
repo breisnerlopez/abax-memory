@@ -241,6 +241,16 @@ public class MemoryServiceImpl implements MemoryService {
         entity.persist();
         LOG.infov("MemoryFragment updated via API v2: id={0}, tenant={1}", id, tenantId);
 
+        // Issue #16: If transitioning to ACTIVE, index for semantic search.
+        if (lifecycleChanged && entity.getLifecycleState() == LifecycleState.ACTIVE) {
+            try {
+                searchService.indexFragment(entity.getId(), tenantId);
+            } catch (Exception e) {
+                LOG.warnv("Failed to index fragment {0} after lifecycle transition: {1}",
+                        entity.getId(), e.getMessage());
+            }
+        }
+
         // B3: Audit the update — use lifecycle-specific action if state changed
         String action = lifecycleChanged
                 ? lifecycleStateToAuditAction(previousState, entity.getLifecycleState())
@@ -429,6 +439,16 @@ public class MemoryServiceImpl implements MemoryService {
         entity.setReviewComment(comment);
         entity.persist();
         LOG.infov("Review approved: id={0}, tenant={1}, reviewer={2}", fragmentId, tenantId, reviewerId);
+
+        // Issue #16: Index the fragment for semantic search now that it is
+        // consumer-visible. Follows the same synchronous indexing pattern
+        // used in createV2(). The async ProcessingJob-based pipeline will
+        // be added when the v2 worker infrastructure is in place.
+        try {
+            searchService.indexFragment(fragmentId, tenantId);
+        } catch (Exception e) {
+            LOG.warnv("Failed to index fragment {0} after approval: {1}", fragmentId, e.getMessage());
+        }
 
         // B3: Audit
         auditService.recordAction(fragmentId, "REVIEWED", reviewerId,
