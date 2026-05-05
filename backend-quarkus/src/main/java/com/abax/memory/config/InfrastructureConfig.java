@@ -11,12 +11,14 @@ import com.abax.memory.infrastructure.qdrant.QdrantClient;
 import com.abax.memory.infrastructure.qdrant.QdrantEmbeddingClient;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.openai.OpenAiChatModel;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
+import java.time.Duration;
 import java.util.Optional;
 
 /**
@@ -172,6 +174,15 @@ public class InfrastructureConfig {
     @ConfigProperty(name = "abax.v2.llm.mock", defaultValue = "false")
     boolean llmMock;
 
+    @ConfigProperty(name = "quarkus.langchain4j.openai.api-key")
+    Optional<String> llmApiKey;
+
+    @ConfigProperty(name = "quarkus.langchain4j.openai.chat-model.model-name", defaultValue = "gpt-4o-mini")
+    String llmChatModelName;
+
+    @ConfigProperty(name = "quarkus.langchain4j.openai.timeout", defaultValue = "90s")
+    Duration llmTimeout;
+
     /**
      * Produces the {@link LlmService} bean.
      * <p>
@@ -179,8 +190,11 @@ public class InfrastructureConfig {
      * <ol>
      *   <li>If {@code abax.v2.llm.mock=true}, returns {@link MockLlmService}
      *       with deterministic test responses (for unit/integration tests).</li>
-     *   <li>Otherwise, tries to resolve {@link ChatLanguageModel} from CDI
+     *   <li>Otherwise, builds {@link ChatLanguageModel} directly with
+     *       {@link OpenAiChatModel#builder()} (no CDI dependency, fixes #13)
      *       and creates a real {@link OpenAiLlmService}.</li>
+     *   <li>If no API key is available, falls back to {@link MockLlmService}
+     *       with a {@code REPLACE_BEFORE_PROD} warning.</li>
      * </ol>
      * </p>
      */
@@ -192,20 +206,37 @@ public class InfrastructureConfig {
             return new MockLlmService();
         }
 
-        // Try to resolve ChatLanguageModel from CDI
-        try {
-            var chatModel = jakarta.enterprise.inject.spi.CDI.current()
-                    .select(ChatLanguageModel.class).get();
-            if (chatModel != null) {
-                LOG.info("OpenAiLlmService ACTIVE — using LangChain4j ChatLanguageModel");
-                return new OpenAiLlmService(chatModel);
-            }
-        } catch (Exception e) {
-            LOG.warnv("Cannot resolve ChatLanguageModel via CDI: {0}", e.getMessage());
+        // Resolve effective API key (checks both langchain4j and v2 config)
+        String effectiveKey = llmApiKey
+                .filter(k -> !k.isBlank() && !k.startsWith("test-key-") && !k.startsWith("dummy-"))
+                .orElseGet(() -> openaiApiKey
+                        .filter(k -> !k.isBlank() && !k.startsWith("test-key-") && !k.startsWith("dummy-"))
+                        .orElse(null));
+
+        if (effectiveKey == null) {
+            LOG.warn("No valid OpenAI API key configured — "
+                    + "using MockLlmService (REPLACE_BEFORE_PROD). "
+                    + "Set quarkus.langchain4j.openai.api-key or abax.v2.openai.api-key.");
+            return new MockLlmService();
         }
 
-        LOG.error("No ChatLanguageModel available and abax.v2.llm.mock=false — "
-                + "LLM service will be unavailable.");
-        return new MockLlmService();
+        // Build ChatLanguageModel directly — no CDI resolution (fixes #13)
+        try {
+            ChatLanguageModel chatModel = OpenAiChatModel.builder()
+                    .apiKey(effectiveKey)
+                    .modelName(llmChatModelName)
+                    .temperature(0.0)
+                    .timeout(llmTimeout)
+                    .logRequests(false)
+                    .logResponses(false)
+                    .build();
+
+            LOG.infov("OpenAiLlmService ACTIVE — model={0}, timeout={1}", llmChatModelName, llmTimeout);
+            return new OpenAiLlmService(chatModel);
+        } catch (Exception e) {
+            LOG.errorv(e, "Failed to build OpenAiChatModel — "
+                    + "falling back to MockLlmService (REPLACE_BEFORE_PROD)");
+            return new MockLlmService();
+        }
     }
 }
