@@ -265,6 +265,60 @@ OpenAPI spec: `http://localhost:8080/q/openapi`
 
 ---
 
+## 📖 Guía de Uso
+
+### Modos de Uso Rápido
+
+| Modo | Endpoint | Una línea |
+|---|---|---|
+| **Búsqueda unificada** ⭐ | `POST /api/v2/search` | Vector + keyword + grafo en una sola respuesta. `expandGraph: true` recomendado. |
+| **Búsqueda semántica** | `POST /api/v2/search/semantic` | Similitud vectorial pura sobre Qdrant (3072 dims). Ideal para "encuentra documentos parecidos a este". |
+| **Búsqueda híbrida** | `POST /api/v2/search/hybrid` | Vector + full-text PostgreSQL. Para queries con IDs, códigos de error o términos exactos. |
+| **Exploración de grafo** | `GET /api/v2/graph/{id}?depth=2` | Navega relaciones BFS desde una memoria. Descubre conexiones estructurales. |
+| **CRUD de memorias** | `POST/GET/PUT/DELETE /api/v2/memories` | Gestión completa con ciclo de vida (DRAFT → PENDING → ACTIVE), revisión y auditoría. |
+
+### Ejemplo Rápido — IT Ops: Incidente + Causa Raíz
+
+```bash
+BASE="http://localhost:8080/api/v2"
+
+# 1. Crear incidente
+curl -s -X POST "$BASE/memories" \
+  -H "Content-Type: application/json" -H "X-Tenant-Id: tenant-alpha" \
+  -d '{"title":"Database pool exhaustion","content":"Pool exhausted at 14:32 UTC. 503 errors on /checkout.","kind":"EVENT","sensitivityLevel":"INTERNAL","confidence":0.95}'
+
+# 2. Crear decisión
+curl -s -X POST "$BASE/memories" \
+  -H "Content-Type: application/json" -H "X-Tenant-Id: tenant-alpha" \
+  -d '{"title":"Increase pool to 200 connections","content":"Decision: increase HikariCP maximumPoolSize from 100 to 200.","kind":"DECISION","sensitivityLevel":"INTERNAL","confidence":0.90}'
+
+# 3. Relacionarlos
+curl -s -X POST "$BASE/relations" \
+  -H "Content-Type: application/json" -H "X-Tenant-Id: tenant-alpha" \
+  -d '{"sourceId":"$DECISION_ID","targetId":"$INCIDENT_ID","relationType":"CAUSED_BY"}'
+
+# 4. Buscar con grafo
+curl -s -X POST "$BASE/search" \
+  -H "Content-Type: application/json" -H "X-Tenant-Id: tenant-alpha" \
+  -d '{"query":"database connection problems","expandGraph":true,"graphDepth":2,"graphTopK":5}' | jq '.'
+```
+
+### Las 3 Recomendaciones Más Importantes
+
+| # | Recomendación | Por qué |
+|---|---|---|
+| 1 | **`expandGraph: true` siempre** | +17pp uplift en recall. El grafo recupera lo que el vector no alcanza. |
+| 2 | **Relaciona toda memoria nueva** | El grafo es el diferenciador. Sin relaciones, Abax-Memory es solo un vector store. |
+| 3 | **Aprueba antes de buscar** | Solo memorias `ACTIVE` son visibles. Usa `PUT /review` con `APPROVE` para indexar. |
+
+### Guía Completa
+
+Casos de ejemplo detallados (IT Ops, Legal, CRM, Agente IA, Multi-dominio), anti-patrones, perfiles de dominio y flujo completo en:
+
+📄 **[docs/guia-uso.md](docs/guia-uso.md)**
+
+---
+
 ## Autenticación — Keycloak OIDC
 
 El backend requiere autenticación vía **OIDC con Keycloak** para endpoints de negocio. En el MVP actual, la autenticación se simula mediante headers `X-Tenant-Id` y `X-Role`. La migración a validación JWT real está en roadmap para producción (`REPLACE_BEFORE_PROD`).
@@ -413,6 +467,7 @@ Software propietario. Todos los derechos reservados. Consulte los términos de l
 - **Anti-mock**: 3 capas de revisión (40 marcas detectadas, 0 mocks en producción).
 - **Benchmarks**: 7 benchmarks independientes (6/7 aprobados).
 - **Releases**: 5 patches post-MVP (v2.0.3 → v2.0.7).
+- **Documentación**: Guía de Uso completa con 5 casos de ejemplo curl, recomendaciones, anti-patrones y perfiles de dominio ([docs/guia-uso.md](docs/guia-uso.md)).
 
 ### Qué se mantiene de v1.0.0
 
