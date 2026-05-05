@@ -1,5 +1,14 @@
 # Changelog — Abax-Memory
 
+## [2.0.5] — 2026-05-05
+
+### Fixed
+- #15: Añadida acción SUBMIT al enum ReviewAction. El ciclo DRAFT→PENDING ahora funciona correctamente. 140 tests pasan.
+
+### Docker
+- ghcr.io/breisnerlopez/abax-memory:v2.0.5
+- ghcr.io/breisnerlopez/abax-memory:latest
+
 ## [2.0.4] — 2026-05-05
 
 ### Fixed
