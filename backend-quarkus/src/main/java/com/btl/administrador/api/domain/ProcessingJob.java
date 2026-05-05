@@ -43,8 +43,8 @@ public class ProcessingJob {
     @Column(name = "locked_at")
     public OffsetDateTime lockedAt;
 
-    @Column(name = "next_attempt_at")
-    public OffsetDateTime nextAttemptAt;
+    @Column(name = "next_retry_at")
+    public OffsetDateTime nextRetryAt;
 
     @Column(name = "created_at", nullable = false)
     public OffsetDateTime createdAt;
