@@ -1,5 +1,31 @@
 # Changelog — Abax-Memory
 
+## [2.0.4] — 2026-05-05
+
+### Fixed
+- #13: ChatLanguageModel ahora se inyecta correctamente vía CDI (Instance<T>). El productor v1 (OpenAiConfigProducer) produce los beans; InfrastructureConfig los consume con lazy injection. Sin builders manuales.
+- #14: Verificado que QdrantEmbeddingClient lee correctamente ABAX_V2_QDRANT_HOST. No hardcodea localhost. Tests añadidos como evidencia.
+
+### Changed
+- InfrastructureConfig: eliminada construcción manual de ChatLanguageModel. Uso de CDI declarativo con Instance<ChatLanguageModel> e Instance<EmbeddingModel>.
+
+### Docker
+- ghcr.io/breisnerlopez/abax-memory:v2.0.4
+- ghcr.io/breisnerlopez/abax-memory:latest
+
+## [2.0.3] — 2026-05-05
+
+### Fixed
+- #12: Agregada extensión quarkus-langchain4j-openai. OpenAI ahora se cablea correctamente en producción. Ya no cae silenciosamente en MockLlmService.
+- #11: Corregido mismatch de columna next_attempt_at → next_retry_at en ProcessingJob.
+
+### Changed
+- Imagen base: UBI8/JDK → UBI9/JRE (menor superficie de ataque).
+
+### Docker
+- ghcr.io/breisnerlopez/abax-memory:v2.0.3
+- ghcr.io/breisnerlopez/abax-memory:latest
+
 ## v1.0.0 — MVP (2026-05-02)
 
 ### 🚀 Release Inicial — MVP funcional con IA real

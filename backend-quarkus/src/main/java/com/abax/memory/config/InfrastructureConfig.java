@@ -12,11 +12,14 @@ import com.abax.memory.infrastructure.qdrant.QdrantEmbeddingClient;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
+import java.time.Duration;
 import java.util.Optional;
 
 /**
@@ -113,53 +116,48 @@ public class InfrastructureConfig {
     }
 
     /**
-     * Produces the {@link EmbeddingProvider} bean.
+     * Produces the {@link EmbeddingProvider} bean — fix #13 (revised).
      * <p>
      * Resolution strategy:
      * <ol>
-     *   <li>If {@code OPENAI_API_KEY} is set (either via
-     *       {@code quarkus.langchain4j.openai.api-key} or the
-     *       btl module's producer), creates a real
+     *   <li>If a valid {@code OPENAI_API_KEY} is set AND the
+     *       {@link EmbeddingModel} CDI bean (from v1's
+     *       {@code OpenAiConfigProducer}) is resolvable, creates a real
      *       {@link OpenAIEmbeddingProvider}.</li>
      *   <li>Otherwise, creates a fallback {@link InMemoryEmbeddingProvider}
      *       with a {@code REPLACE_BEFORE_PROD} warning.</li>
      * </ol>
      * </p>
+     *
+     * <p>The {@link Instance}{@code <EmbeddingModel>} parameter enables
+     * lazy CDI resolution — the bean is only retrieved when all other
+     * preconditions pass, avoiding deployment failures when no API key
+     * is configured.</p>
      */
     @Produces
     @Singleton
     public EmbeddingProvider embeddingProvider(
-            @ConfigProperty(name = "quarkus.langchain4j.openai.api-key") Optional<String> langchainApiKey) {
+            @ConfigProperty(name = "quarkus.langchain4j.openai.api-key") Optional<String> langchainApiKey,
+            Instance<EmbeddingModel> embeddingModelInstance) {
 
-        // Check for API key from multiple sources
+        // Resolve the effective API key from multiple config sources
         String effectiveKey = langchainApiKey.orElseGet(() -> openaiApiKey.orElse(null));
 
-        if (effectiveKey != null && !effectiveKey.isBlank()
+        boolean hasValidKey = effectiveKey != null && !effectiveKey.isBlank()
                 && !effectiveKey.startsWith("test-key-")
-                && !effectiveKey.startsWith("dummy-")) {
-            // We need the langchain4j EmbeddingModel bean from the btl module
-            // Since we cannot directly inject it here (circular dep risk),
-            // we use the lazy approach: try to resolve it or fall back.
-            // The actual injection happens via the constructor of OpenAIEmbeddingProvider
-            // which is CDI-managed when EmbeddingModel is available.
-            LOG.infov("OPENAI_API_KEY detected — will attempt to use OpenAIEmbeddingProvider");
-            // Delegate to CDI: if EmbeddingModel is on the classpath, create real provider.
-            // If not, fall through to in-memory.
+                && !effectiveKey.startsWith("dummy-");
+
+        if (hasValidKey && embeddingModelInstance.isResolvable()) {
+            EmbeddingModel embeddingModel = embeddingModelInstance.get();
+            LOG.info("OpenAIEmbeddingProvider ACTIVE — using text-embedding-3-large (3072-dim)");
+            return new OpenAIEmbeddingProvider(embeddingModel);
         }
 
-        // Check if langchain4j EmbeddingModel CDI bean is available
-        try {
-            // Try to resolve via CDI programmatic lookup
-            var embeddingModel = jakarta.enterprise.inject.spi.CDI.current()
-                    .select(EmbeddingModel.class).get();
-            if (embeddingModel != null && effectiveKey != null && !effectiveKey.isBlank()
-                    && !effectiveKey.startsWith("test-key-")
-                    && !effectiveKey.startsWith("dummy-")) {
-                LOG.info("OpenAIEmbeddingProvider ACTIVE — using text-embedding-3-large (3072-dim)");
-                return new OpenAIEmbeddingProvider(embeddingModel);
-            }
-        } catch (Exception e) {
-            LOG.debugv("EmbeddingModel CDI bean not available: {0}", e.getMessage());
+        if (!hasValidKey) {
+            LOG.debug("No valid OpenAI API key configured for embeddings");
+        }
+        if (!embeddingModelInstance.isResolvable()) {
+            LOG.debug("EmbeddingModel CDI bean not yet available (OpenAiConfigProducer may not have activated)");
         }
 
         LOG.warn("OPENAI_API_KEY not set or EmbeddingModel unavailable — "
@@ -172,40 +170,70 @@ public class InfrastructureConfig {
     @ConfigProperty(name = "abax.v2.llm.mock", defaultValue = "false")
     boolean llmMock;
 
+    @ConfigProperty(name = "quarkus.langchain4j.openai.api-key")
+    Optional<String> llmApiKey;
+
+    @ConfigProperty(name = "quarkus.langchain4j.openai.chat-model.model-name", defaultValue = "gpt-4o-mini")
+    String llmChatModelName;
+
+    @ConfigProperty(name = "quarkus.langchain4j.openai.timeout", defaultValue = "90s")
+    Duration llmTimeout;
+
     /**
-     * Produces the {@link LlmService} bean.
+     * Produces the {@link LlmService} bean — fix #13 (revised).
      * <p>
      * Resolution strategy:
      * <ol>
      *   <li>If {@code abax.v2.llm.mock=true}, returns {@link MockLlmService}
      *       with deterministic test responses (for unit/integration tests).</li>
-     *   <li>Otherwise, tries to resolve {@link ChatLanguageModel} from CDI
-     *       and creates a real {@link OpenAiLlmService}.</li>
+     *   <li>Otherwise, resolves {@link ChatLanguageModel} via CDI
+     *       (produced by v1's {@code OpenAiConfigProducer} or the
+     *       {@code quarkus-langchain4j-openai} extension) and creates a
+     *       real {@link OpenAiLlmService}.</li>
+     *   <li>If no API key is available or the CDI bean is not resolvable,
+     *       falls back to {@link MockLlmService} with a
+     *       {@code REPLACE_BEFORE_PROD} warning.</li>
      * </ol>
      * </p>
+     *
+     * <p>The {@link Instance}{@code <ChatLanguageModel>} parameter enables
+     * lazy CDI resolution — the bean is only retrieved when all other
+     * preconditions pass, avoiding deployment failures when no API key
+     * is configured.</p>
      */
     @Produces
     @Singleton
-    public LlmService llmService() {
+    public LlmService llmService(Instance<ChatLanguageModel> chatModelInstance) {
         if (llmMock) {
             LOG.info("abax.v2.llm.mock=true — using MockLlmService (test mode)");
             return new MockLlmService();
         }
 
-        // Try to resolve ChatLanguageModel from CDI
-        try {
-            var chatModel = jakarta.enterprise.inject.spi.CDI.current()
-                    .select(ChatLanguageModel.class).get();
-            if (chatModel != null) {
-                LOG.info("OpenAiLlmService ACTIVE — using LangChain4j ChatLanguageModel");
-                return new OpenAiLlmService(chatModel);
-            }
-        } catch (Exception e) {
-            LOG.warnv("Cannot resolve ChatLanguageModel via CDI: {0}", e.getMessage());
+        // Resolve effective API key (checks both langchain4j and v2 config)
+        String effectiveKey = llmApiKey
+                .filter(k -> !k.isBlank() && !k.startsWith("test-key-") && !k.startsWith("dummy-"))
+                .orElseGet(() -> openaiApiKey
+                        .filter(k -> !k.isBlank() && !k.startsWith("test-key-") && !k.startsWith("dummy-"))
+                        .orElse(null));
+
+        if (effectiveKey == null) {
+            LOG.warn("No valid OpenAI API key configured — "
+                    + "using MockLlmService (REPLACE_BEFORE_PROD). "
+                    + "Set quarkus.langchain4j.openai.api-key or abax.v2.openai.api-key.");
+            return new MockLlmService();
         }
 
-        LOG.error("No ChatLanguageModel available and abax.v2.llm.mock=false — "
-                + "LLM service will be unavailable.");
+        // Resolve ChatLanguageModel via CDI (produced by OpenAiConfigProducer,
+        // with quarkus-langchain4j-openai synthetic beans as fallback)
+        if (chatModelInstance.isResolvable()) {
+            ChatLanguageModel chatModel = chatModelInstance.get();
+            LOG.infov("OpenAiLlmService ACTIVE — model={0}, timeout={1}", llmChatModelName, llmTimeout);
+            return new OpenAiLlmService(chatModel);
+        }
+
+        LOG.error("ChatLanguageModel CDI bean not resolvable despite having a valid API key — "
+                + "Verify that OpenAiConfigProducer is on the classpath. "
+                + "Falling back to MockLlmService (REPLACE_BEFORE_PROD)");
         return new MockLlmService();
     }
 }
