@@ -1,5 +1,14 @@
 # Changelog — Abax-Memory
 
+## [2.0.6] — 2026-05-05
+
+### Fixed
+- #16: approveReview() ahora dispara indexFragment(). Las memorias aprobadas (ACTIVE) se indexan automáticamente con OpenAI embeddings en Qdrant. Son inmediatamente buscables.
+
+### Docker
+- ghcr.io/breisnerlopez/abax-memory:v2.0.6
+- ghcr.io/breisnerlopez/abax-memory:latest
+
 ## [2.0.5] — 2026-05-05
 
 ### Fixed
