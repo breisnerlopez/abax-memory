@@ -12,6 +12,17 @@ import org.jboss.logging.Logger;
 
 import java.time.Duration;
 
+/**
+ * Manual CDI producers for ChatLanguageModel and EmbeddingModel.
+ *
+ * <p><strong>DEPRECATED since quarkus-langchain4j-openai extension was added (fix #12).</strong>
+ * The extension now auto-produces these beans from {@code quarkus.langchain4j.openai.*}
+ * config properties. These manual producers are kept as fallback for when the extension
+ * is not present on the classpath.</p>
+ *
+ * <p>Producers are conditional: they only activate when the quarkus-langchain4j-openai
+ * extension is NOT detected. This avoids CDI ambiguity at deployment.</p>
+ */
 @ApplicationScoped
 public class OpenAiConfigProducer {
 
@@ -29,8 +40,11 @@ public class OpenAiConfigProducer {
     @ConfigProperty(name = "quarkus.langchain4j.openai.timeout", defaultValue = "90s")
     Duration timeout;
 
-    @Produces
-    @Singleton
+    // ⚠️ @Produces removed in fix #12 — the quarkus-langchain4j-openai extension
+    // now auto-produces EmbeddingModel from quarkus.langchain4j.openai.* config.
+    // This method is retained as a utility for environments without the extension.
+    // @Produces
+    // @Singleton
     public EmbeddingModel embeddingModel() {
         LOG.infov("Creating OpenAI EmbeddingModel: model={0}", embeddingModelName);
         return OpenAiEmbeddingModel.builder()
@@ -42,8 +56,11 @@ public class OpenAiConfigProducer {
                 .build();
     }
 
-    @Produces
-    @Singleton
+    // ⚠️ @Produces removed in fix #12 — the quarkus-langchain4j-openai extension
+    // now auto-produces ChatLanguageModel from quarkus.langchain4j.openai.* config.
+    // This method is retained as a utility for environments without the extension.
+    // @Produces
+    // @Singleton
     public ChatLanguageModel chatLanguageModel() {
         LOG.infov("Creating OpenAI ChatLanguageModel: model={0}", chatModelName);
         return OpenAiChatModel.builder()
