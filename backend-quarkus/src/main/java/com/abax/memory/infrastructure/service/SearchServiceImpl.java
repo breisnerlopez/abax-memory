@@ -121,7 +121,8 @@ public class SearchServiceImpl implements SearchService {
         for (QdrantClient.ScoredHit hit : hits) {
             MemoryFragmentEntity entity = entityMap.get(hit.pointId());
             if (entity != null && passesPostFilter(entity, request)) {
-                allResults.add(MemoryResponse.from(entity));
+                // Issue #18: propagate Qdrant relevance score to API response
+                allResults.add(withScore(MemoryResponse.from(entity), (double) hit.score()));
             }
         }
 
@@ -178,7 +179,7 @@ public class SearchServiceImpl implements SearchService {
         // 5. Limit to topK after re-ranking
         List<MemoryResponse> allResults = scored.stream()
                 .limit(topK)
-                .map(sr -> MemoryResponse.from(sr.entity))
+                .map(sr -> withScore(MemoryResponse.from(sr.entity), sr.score))
                 .toList();
 
         // 6. Paginate
@@ -300,13 +301,19 @@ public class SearchServiceImpl implements SearchService {
         List<QdrantClient.ScoredHit> hits = qdrantClient.search(
                 QDRANT_COLLECTION, sourceVector, filters, effectiveLimit + 1);
 
-        // 4. Map to responses, exclude source
+        // 4. Map to responses, exclude source — Issue #18: propagate Qdrant score
         return hits.stream()
                 .filter(hit -> !hit.pointId().equals(fragmentId.toString()))
                 .limit(effectiveLimit)
-                .map(hit -> MemoryFragmentEntity.<MemoryFragmentEntity>findById(UUID.fromString(hit.pointId())))
-                .filter(entity -> entity != null && !entity.isDeleted())
-                .map(MemoryResponse::from)
+                .map(hit -> {
+                    MemoryFragmentEntity entity = MemoryFragmentEntity.<MemoryFragmentEntity>findById(
+                            UUID.fromString(hit.pointId()));
+                    if (entity != null && !entity.isDeleted()) {
+                        return withScore(MemoryResponse.from(entity), (double) hit.score());
+                    }
+                    return null;
+                })
+                .filter(java.util.Objects::nonNull)
                 .toList();
     }
 

@@ -85,6 +85,13 @@ class SearchServiceImplTest {
         assertThat(response.items()).isNotEmpty();
         assertThat(response.total()).isGreaterThanOrEqualTo(1);
         assertThat(response.facets()).containsKeys("kind", "lifecycleState", "sensitivityLevel");
+
+        // Issue #18: verify Qdrant relevance score is propagated to API response
+        assertThat(response.items())
+                .as("Every semantic search result must have a non-null relevance score (Issue #18)")
+                .allMatch(r -> r.score() != null);
+        assertThat(response.items())
+                .allMatch(r -> r.score() >= -1.0 && r.score() <= 1.0);
     }
 
     @Test
@@ -145,6 +152,13 @@ class SearchServiceImplTest {
         assertThat(response.items()).isNotEmpty();
         // The database migration title should rank higher
         assertThat(response.items().get(0).title()).contains("Database");
+
+        // Issue #18: verify hybrid score is propagated to API response
+        assertThat(response.items())
+                .as("Every hybrid search result must have a non-null relevance score (Issue #18)")
+                .allMatch(r -> r.score() != null);
+        assertThat(response.items())
+                .allMatch(r -> r.score() >= -1.0 && r.score() <= 1.0);
     }
 
     // ── Find Similar Tests ───────────────────────────────────────────
@@ -170,6 +184,11 @@ class SearchServiceImplTest {
         assertThat(similar).isNotEmpty();
         // Should not include the source fragment itself
         assertThat(similar).noneMatch(r -> r.id().equals(m1.id()));
+
+        // Issue #18: verify Qdrant score is propagated to findSimilar results
+        assertThat(similar)
+                .as("Every findSimilar result must have a non-null relevance score (Issue #18)")
+                .allMatch(r -> r.score() != null);
     }
 
     @Test
@@ -577,5 +596,86 @@ class SearchServiceImplTest {
 
         assertThat(vectorCount).isGreaterThanOrEqualTo(1);
         assertThat(response.getGraphContributions()).isEqualTo(graphCount);
+    }
+
+    // ── Issue #18 Tests ───────────────────────────────────────────────
+
+    @Test
+    @Order(19)
+    @DisplayName("ISSUE-18: semanticSearch results must have scores propagated from Qdrant")
+    @Transactional
+    void issue18_semanticSearch_scoresArePropagated() {
+        var m1 = memoryService.createV2(
+                new CreateMemoryRequest("Neural network optimization",
+                        "Techniques for optimizing deep neural networks: pruning, quantization, and knowledge distillation.",
+                        MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+        var m2 = memoryService.createV2(
+                new CreateMemoryRequest("Distributed training strategies",
+                        "Data parallelism, model parallelism, and pipeline parallelism for large-scale neural network training.",
+                        MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+        var m3 = memoryService.createV2(
+                new CreateMemoryRequest("Gradient descent variants",
+                        "SGD, Adam, RMSprop, and Adagrad optimizers explained with convergence analysis.",
+                        MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+
+        searchService.indexFragment(m1.id(), TENANT_A);
+        searchService.indexFragment(m2.id(), TENANT_A);
+        searchService.indexFragment(m3.id(), TENANT_A);
+
+        // Query that should match m1 most closely
+        var request = new SemanticSearchRequest("neural network optimization pruning quantization",
+                null, null, null, null, null, null, 0, 20, 10);
+        SearchResponse response = searchService.semanticSearch(request, TENANT_A);
+
+        assertThat(response.items()).isNotEmpty();
+        // All results must have non-null scores
+        assertThat(response.items())
+                .as("Issue #18: Qdrant scores must be propagated to every result")
+                .allMatch(r -> r.score() != null && r.score() > 0.0);
+
+        // Results should be sorted by relevance score descending
+        for (int i = 0; i < response.items().size() - 1; i++) {
+            Double current = response.items().get(i).score();
+            Double next = response.items().get(i + 1).score();
+            assertThat(current)
+                    .as("Issue #18: results must be sorted by score descending")
+                    .isGreaterThanOrEqualTo(next);
+        }
+    }
+
+    @Test
+    @Order(20)
+    @DisplayName("ISSUE-18: hybridSearch results must have scores propagated")
+    @Transactional
+    void issue18_hybridSearch_scoresArePropagated() {
+        var m1 = memoryService.createV2(
+                new CreateMemoryRequest("Kubernetes pod scheduling algorithms",
+                        "Detailed analysis of Kubernetes scheduler: predicates, priorities, and custom scheduling policies.",
+                        MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+        var m2 = memoryService.createV2(
+                new CreateMemoryRequest("Container orchestration with Kubernetes",
+                        "Kubernetes architecture, control plane components, and etcd cluster management.",
+                        MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
+
+        searchService.indexFragment(m1.id(), TENANT_A);
+        searchService.indexFragment(m2.id(), TENANT_A);
+
+        var request = new SemanticSearchRequest("kubernetes scheduling", null, null, null, null, null, null, 0, 20, 10);
+        SearchResponse response = searchService.hybridSearch(request, TENANT_A);
+
+        assertThat(response.items()).isNotEmpty();
+        // All results must have non-null hybrid scores
+        assertThat(response.items())
+                .as("Issue #18: hybrid scores must be propagated to every result")
+                .allMatch(r -> r.score() != null && r.score() > 0.0);
+
+        // Results should be sorted by hybrid score descending
+        for (int i = 0; i < response.items().size() - 1; i++) {
+            Double current = response.items().get(i).score();
+            Double next = response.items().get(i + 1).score();
+            assertThat(current)
+                    .as("Issue #18: hybrid search results must be sorted by score descending")
+                    .isGreaterThanOrEqualTo(next);
+        }
     }
 }
