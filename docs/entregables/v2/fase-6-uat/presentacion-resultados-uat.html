@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abax-Memory v2.0.0 — Resultados UAT</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #FFFFFF;
+    color: #1a1a2e;
+    line-height: 1.5;
+  }
+  h1, h2, h3 { font-weight: 800; line-height: 1.1; }
+  .slide {
+    min-height: 100vh;
+    padding: 8vh 10vw;
+    display: grid;
+    align-content: start;
+    gap: 1.5rem;
+    page-break-after: always;
+    border-bottom: 1px solid #d8d8e0;
+  }
+  .slide:last-child { border-bottom: none; }
+  .slide-eyebrow {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0066cc;
+  }
+  .slide h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
+  .slide h2 { font-size: clamp(2rem, 4vw, 3rem); }
+  .slide h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); color: #4a4a5e; font-weight: 600; }
+  .slide p, .slide li { font-size: clamp(1rem, 1.5vw, 1.125rem); max-width: 70ch; }
+  ul, ol { padding-left: 1.5rem; display: grid; gap: 0.75rem; }
+  ul li::marker, ol li::marker { color: #0066cc; }
+  table { border-collapse: collapse; width: 100%; max-width: 60rem; }
+  th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid #d8d8e0; }
+  th { font-weight: 700; color: #e94560; }
+  .kpi {
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: 900;
+    line-height: 1;
+    color: #e94560;
+    letter-spacing: -0.03em;
+  }
+  .kpi-label { font-size: 1rem; color: #4a4a5e; text-transform: uppercase; letter-spacing: 0.05em; }
+  .cta {
+    background: #0066cc;
+    color: #FFFFFF;
+    padding: 3rem 4rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .cta-question { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; }
+  .card {
+    background: #F5F5F7;
+    padding: 2rem;
+    border-radius: 4px;
+    border: 1px solid #d8d8e0;
+    max-width: 42rem;
+  }
+  .verdict-fail { color: #e94560; font-weight: 800; }
+  .verdict-pass { color: #00aa55; font-weight: 700; }
+  .verdict-partial { color: #cc8800; font-weight: 700; }
+  .verdict-blocked { color: #e94560; font-weight: 700; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  @media print {
+    .slide { min-height: auto; padding: 4vh 6vw; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Portada -->
+<section class="slide">
+  <span class="slide-eyebrow">Fase 6 — User Acceptance Testing</span>
+  <h1>Abax-Memory v2.0.0<br>Resultados UAT</h1>
+  <h3>Validación de 10 escenarios de negocio contra el backend desplegado</h3>
+  <p style="margin-top: 2rem; color: #4a4a5e;">
+    business-analyst · 2026-05-04 · Comité Directivo · Clasificación: Interna
+  </p>
+</section>
+
+<!-- SLIDE 2: Agenda -->
+<section class="slide">
+  <span class="slide-eyebrow">Agenda</span>
+  <h2>Qué cubre esta presentación</h2>
+  <ul>
+    <li>Contexto: qué validamos, cómo y por qué</li>
+    <li>Resultados: los 10 escenarios UAT</li>
+    <li>Features críticas: semáforo de aceptación</li>
+    <li>Gaps: diferencias entre el plan y el código real</li>
+    <li>Veredicto y plan de acción</li>
+  </ul>
+</section>
+
+<!-- SLIDE 3: Contexto -->
+<section class="slide">
+  <span class="slide-eyebrow">Contexto</span>
+  <h2>¿Qué se validó en UAT?</h2>
+  <p>10 escenarios de negocio trazables a <strong>69 historias de usuario</strong>, <strong>13 criterios de éxito</strong> y <strong>6 features críticas</strong> bloqueantes para aceptación.</p>
+  <div class="card">
+    <p><strong>Ambiente:</strong> <code>localhost:8080</code> — Quarkus 3.15.3, PostgreSQL 16, Qdrant v1.17.1, Keycloak 26.1</p>
+    <p style="margin-top: 0.75rem;"><strong>Método:</strong> Análisis estático de 50+ archivos Java + verificación de salud del backend + trazabilidad plan vs implementación real</p>
+  </div>
+</section>
+
+<!-- SLIDE 4: KPIs -->
+<section class="slide">
+  <span class="slide-eyebrow">Resultados globales</span>
+  <div class="grid-2">
+    <div>
+      <div class="kpi">4<span style="font-size:2rem">/10</span></div>
+      <p class="kpi-label">Escenarios PASS (40%)</p>
+    </div>
+    <div>
+      <div class="kpi">4<span style="font-size:2rem">/10</span></div>
+      <p class="kpi-label">Escenarios BLOCKED (40%)</p>
+    </div>
+  </div>
+  <p style="margin-top: 1rem;"><strong>Meta requerida:</strong> ≥ 90% (9/10) aprobados</p>
+  <p style="color: #e94560; font-weight: 700;">Resultado: 40% — Meta NO alcanzada</p>
+</section>
+
+<!-- SLIDE 5: Tabla de escenarios -->
+<section class="slide">
+  <span class="slide-eyebrow">Resultados por escenario</span>
+  <h2>Los 10 escenarios UAT</h2>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Descripción</th><th>Veredicto</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>UAT-S01</td><td>CRUD de decisión de infraestructura</td><td><span class="verdict-pass">✅ PASS</span></td></tr>
+      <tr><td>UAT-S02</td><td>Búsqueda de incidente pasado</td><td><span class="verdict-partial">⚠️ PARTIAL</span></td></tr>
+      <tr><td>UAT-S03</td><td>Configurar perfil de dominio</td><td><span class="verdict-blocked">🔴 BLOCKED</span></td></tr>
+      <tr><td>UAT-S04</td><td>Relacionar fragmentos y navegar grafo</td><td><span class="verdict-pass">✅ PASS</span></td></tr>
+      <tr><td>UAT-S05</td><td>Ciclo de revisión DRAFT→ACTIVE</td><td><span class="verdict-blocked">🔴 BLOCKED</span></td></tr>
+      <tr><td>UAT-S06</td><td>Trazabilidad de cambios (audit)</td><td><span class="verdict-blocked">🔴 BLOCKED</span></td></tr>
+      <tr><td>UAT-S07</td><td>Aislamiento multi-tenant</td><td><span class="verdict-pass">✅ PASS</span></td></tr>
+      <tr><td>UAT-S08</td><td>Extraer entidades de texto</td><td><span class="verdict-blocked">🔴 BLOCKED</span></td></tr>
+      <tr><td>UAT-S09</td><td>Rate limiting (30+ req → 429)</td><td><span class="verdict-pass">✅ PASS</span></td></tr>
+      <tr><td>UAT-S10</td><td>Latencia &lt; 500ms (p95)</td><td>⬜ NOT VERIFIABLE</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SLIDE 6: Features críticas -->
+<section class="slide">
+  <span class="slide-eyebrow">Features Críticas</span>
+  <h2>Semáforo de aceptación</h2>
+  <table>
+    <thead>
+      <tr><th>FC</th><th>Feature</th><th>Estado</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>FC-01</td><td>Búsqueda semántica funcional</td><td><span class="verdict-partial">⚠️ PARCIAL</span></td></tr>
+      <tr><td>FC-02</td><td>Aislamiento multi-tenant</td><td><span class="verdict-pass">✅ PASS</span></td></tr>
+      <tr><td>FC-03</td><td>Ciclo de vida con revisión humana</td><td><span class="verdict-blocked">🔴 BLOCKED</span></td></tr>
+      <tr><td>FC-04</td><td>CRUD de memorias con 8 kinds</td><td><span class="verdict-pass">✅ PASS</span></td></tr>
+      <tr><td>FC-05</td><td>English-Only en identificadores</td><td><span class="verdict-partial">⚠️ PARCIAL</span></td></tr>
+      <tr><td>FC-06</td><td>Trazabilidad de operaciones</td><td><span class="verdict-blocked">🔴 BLOCKED</span></td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 1rem;"><strong>Condición:</strong> 6/6 FC deben aprobar.</p>
+  <p style="color: #e94560; font-weight: 700;">Realidad: 2/6 PASS (33%). No se cumple.</p>
+</section>
+
+<!-- SLIDE 7: Gaps -->
+<section class="slide">
+  <span class="slide-eyebrow">Gaps críticos</span>
+  <h2>5 endpoints REST v2 no implementados</h2>
+  <p>La lógica de servicio existe, pero <strong>no está expuesta en la API</strong>:</p>
+  <div class="card">
+    <ol>
+      <li><code>POST /api/v2/memories/{id}/review</code> — Revisión humana</li>
+      <li><code>GET /api/v2/audit/memories/{id}</code> — Auditoría</li>
+      <li><code>POST /api/v2/memories/extract</code> — Extracción de entidades</li>
+      <li><code>GET /api/v2/entities/{name}</code> — Consulta de entidades</li>
+      <li>Endpoints CRUD de perfiles de dominio</li>
+    </ol>
+  </div>
+  <p style="margin-top: 1rem;"><strong>Impacto:</strong> 4 escenarios bloqueados (40%) · 3 features críticas afectadas</p>
+</section>
+
+<!-- SLIDE 8: Criterios de Éxito -->
+<section class="slide">
+  <span class="slide-eyebrow">Criterios de Éxito</span>
+  <h2>7 criterios verificables en UAT</h2>
+  <table>
+    <thead>
+      <tr><th>CE</th><th>Meta</th><th>Resultado</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>CE-04 Latencia</td><td>&lt; 500ms</td><td>⬜ Pendiente</td></tr>
+      <tr><td>CE-06 Cobertura kinds</td><td>8/8</td><td><span class="verdict-pass">✅ PASS</span></td></tr>
+      <tr><td>CE-07 Aislamiento</td><td>100%</td><td><span class="verdict-pass">✅ PASS</span></td></tr>
+      <tr><td>CE-08 Visibilidad x estado</td><td>100%</td><td><span class="verdict-pass">✅ PASS</span></td></tr>
+      <tr><td>CE-09 Trazabilidad</td><td>100%</td><td><span class="verdict-blocked">🔴 Sin endpoint</span></td></tr>
+      <tr><td>CE-010 English-Only</td><td>100%</td><td><span class="verdict-partial">⚠️ Legacy viola</span></td></tr>
+      <tr><td>CE-011 9 tipos relación</td><td>9/9</td><td><span class="verdict-pass">✅ PASS</span></td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 1rem;">Meta: ≥ 80% CE verificables → <span style="color: #e94560; font-weight: 700;">Resultado: 37.5% — No cumple</span></p>
+</section>
+
+<!-- SLIDE 9: Veredicto -->
+<section class="slide">
+  <span class="slide-eyebrow">Veredicto</span>
+  <h2 class="verdict-fail">❌ NO APROBADO para despliegue a producción</h2>
+  <p style="font-size: 1.25rem; margin-top: 1.5rem;"><strong>Causa raíz:</strong> 5 endpoints REST v2 no implementados bloquean 4 de 10 escenarios UAT y 3 de 6 features críticas.</p>
+  <div class="card" style="margin-top: 1.5rem;">
+    <p><strong>Condiciones no cumplidas:</strong></p>
+    <ul>
+      <li>≥ 9/10 escenarios aprobados → Solo 4/10</li>
+      <li>6/6 FC operativas → Solo 2/6</li>
+      <li>CE-09 trazabilidad 100% → Sin endpoint de auditoría</li>
+      <li>CE-010 English-Only 100% → API legacy en español</li>
+    </ul>
+  </div>
+</section>
+
+<!-- SLIDE 10: Plan de Acción -->
+<section class="slide">
+  <span class="slide-eyebrow">Plan de Acción</span>
+  <h2>Tres fases para destrabar UAT</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3 style="color: #e94560;">Fase 1 — Correcciones</h3>
+      <p style="color: #4a4a5e;">3–5 días</p>
+      <ul>
+        <li>Endpoint de revisión</li>
+        <li>Endpoint de auditoría</li>
+        <li>Endpoint de extracción</li>
+        <li>Endpoint de entidades</li>
+        <li>Endpoints de perfiles</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color: #cc8800;">Fase 2 — Homologación</h3>
+      <p style="color: #4a4a5e;">1–2 días</p>
+      <ul>
+        <li>Alias de endpoint búsqueda</li>
+        <li>Scores en SearchResponse</li>
+        <li>Deprecar endpoints legacy</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card" style="margin-top: 1rem;">
+    <h3 style="color: #0066cc;">Fase 3 — Re-UAT</h3>
+    <p style="color: #4a4a5e;">2 días</p>
+    <p>Re-ejecutar 10 escenarios + firma de acta de aceptación.</p>
+  </div>
+</section>
+
+<!-- SLIDE 11: Decisión -->
+<section class="slide">
+  <span class="slide-eyebrow">Decisión Solicitada</span>
+  <h2>¿Autorizan el plan de acción correctivo para re-ejecutar UAT?</h2>
+  <div class="cta" style="margin-top: 2rem;">
+    <p class="cta-question">Sí — Ejecutar el plan · Ajustar alcance · Detener</p>
+  </div>
+  <p style="margin-top: 2rem; color: #4a4a5e;">Re-agendar UAT para completar en 7–10 días hábiles tras las correcciones.</p>
+</section>
+
+<!-- SLIDE 12: Glosario -->
+<section class="slide">
+  <span class="slide-eyebrow">Referencias</span>
+  <h2>Glosario</h2>
+  <ul>
+    <li><strong>UAT:</strong> User Acceptance Testing — validación final por el usuario sponsor.</li>
+    <li><strong>CE:</strong> Criterio de Éxito — métrica medible de la Visión del Producto.</li>
+    <li><strong>FC:</strong> Feature Crítica — capacidad cuyo fallo impide la aceptación.</li>
+    <li><strong>JAX-RS:</strong> Jakarta RESTful Web Services — framework para APIs REST en Java.</li>
+    <li><strong>BFS:</strong> Breadth-First Search — algoritmo de recorrido de grafos.</li>
+  </ul>
+  <p style="margin-top: 2rem; color: #4a4a5e;">
+    Reporte completo: <code>docs/entregables/v2/fase-6-uat/reporte-ejecucion-uat.md</code><br>
+    Acta de aceptación: <code>docs/entregables/v2/fase-6-uat/acta-aceptacion-uat.md</code>
+  </p>
+</section>
+
+</body>
+</html>

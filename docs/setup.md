@@ -105,7 +105,8 @@ cd ..
 docker compose up -d postgres qdrant keycloak
 
 # Opcion B: Stack completo (backend incluido)
-export OPENAI_API_KEY="sk-tu-api-key-aqui"
+# Cargar API key desde .env (recomendado)
+export $(cat .env | xargs)
 docker compose up -d
 ```
 
@@ -113,7 +114,8 @@ docker compose up -d
 
 ```bash
 # Con Docker (recomendado para evaluacion rapida)
-export OPENAI_API_KEY="sk-..."
+# Cargar API key desde .env
+export $(cat .env | xargs)
 docker compose up -d
 
 # Verificar que todo esta funcionando
@@ -123,7 +125,8 @@ curl http://localhost:8443/realms/abax-memory # Keycloak
 
 # Modo desarrollo Quarkus (hot reload)
 cd backend-quarkus
-export OPENAI_API_KEY="sk-..."
+# Cargar API key desde .env (raiz del proyecto)
+export $(cat ../.env | xargs)
 export QUARKUS_DATASOURCE_JDBC_URL="jdbc:postgresql://localhost:5432/pmoadb"
 export QUARKUS_DATASOURCE_USERNAME="pmoa"
 export QUARKUS_DATASOURCE_PASSWORD="pmoa"
@@ -217,7 +220,12 @@ sleep 30 && curl -s http://localhost:8443/realms/abax-memory | head -c 50
 
 **OpenAI API Key no configurada**:
 ```bash
+# Opcion A — Cargar desde .env (recomendado)
+export $(cat .env | xargs)
+
+# Opcion B — Exportar directamente
 export OPENAI_API_KEY="sk-proj-..."
+
 # Verificar longitud (debe ser ~164 caracteres):
 echo ${#OPENAI_API_KEY}
 ```
@@ -256,6 +264,34 @@ curl -s https://api.openai.com/v1/models \
   -H "Authorization: Bearer ${OPENAI_API_KEY}" | \
   python3 -c "import sys,json; print(len(json.load(sys.stdin)['data']), 'models')"
 ```
+
+#### Persistencia de la API key (`.env`)
+
+Para evitar perder la API key al reiniciar sesion, guardala en un archivo `.env` en la raiz
+del proyecto (ya esta en `.gitignore` para que nunca se commitee):
+
+**Crear `.env`**:
+```bash
+echo 'OPENAI_API_KEY=sk-proj-...' > .env
+```
+
+**Cargar las variables antes de iniciar el backend**:
+```bash
+# Opcion A — exportar todas las variables del .env
+export $(cat .env | xargs)
+
+# Opcion B — cargar variables en el shell actual (bash/zsh)
+set -a && source .env && set +a
+```
+
+**Verificar que la key se cargo**:
+```bash
+echo "Key length: ${#OPENAI_API_KEY}"
+# Debe mostrar: 164
+```
+
+> **Nota**: El script de verificacion `scripts/verify-stack.sh` detecta automaticamente
+> si `OPENAI_API_KEY` esta configurada en el entorno.
 
 ### Qdrant (Base de Datos Vectorial)
 

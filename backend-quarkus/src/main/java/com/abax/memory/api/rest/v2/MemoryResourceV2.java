@@ -339,9 +339,10 @@ public class MemoryResourceV2 {
     })
     public SearchResponse list(
             @HeaderParam("X-Tenant-Id") String xTenantId,
+            @HeaderParam("X-Role") String xRole,
             @Valid @BeanParam SearchRequest request) {
 
         String tenantId = resolveTenant(xTenantId);
-        return memoryService.listV2(request, tenantId);
+        return memoryService.listV2(request, tenantId, xRole);
     }
 }

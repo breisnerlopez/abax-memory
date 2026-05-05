@@ -359,6 +359,7 @@ class MemoryResourceV2Test {
         // List without any query filter (query="*")
         given()
                 .header("X-Tenant-Id", TENANT_A)
+                .header("X-Role", "admin")
                 .queryParam("query", "*")
                 .queryParam("page", 0)
                 .queryParam("size", 10)
@@ -395,6 +396,7 @@ class MemoryResourceV2Test {
         // List with kind filter
         given()
                 .header("X-Tenant-Id", TENANT_A)
+                .header("X-Role", "admin")
                 .queryParam("query", "*")
                 .queryParam("kind", "DECISION")
                 .queryParam("size", 20)

@@ -9,8 +9,8 @@ permission:
   edit: allow
   glob: allow
   grep: allow
-  bash: ask
-  webfetch: ask
+  bash: allow
+  webfetch: allow
   skill: allow
 ---
 

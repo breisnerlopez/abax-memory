@@ -1,9 +1,13 @@
 -- ============================================================
 -- Abax-Memory v2.0.0 — Migration V7
--- Creates the processing_jobs table: async job queue for
--- embedding generation, Qdrant indexing, and reconciliation.
+-- Replaces the v1 processing_jobs table with the v2 schema:
+-- async job queue for embedding generation, Qdrant indexing,
+-- and reconciliation. Drops v1 table (VARCHAR IDs, different
+-- columns) before recreating with v2 schema (UUID, JSONB payload).
 -- PostgreSQL 16+
 -- ============================================================
+
+DROP TABLE IF EXISTS processing_jobs CASCADE;
 
 CREATE TABLE processing_jobs (
     id              UUID            PRIMARY KEY,

@@ -100,9 +100,10 @@ public interface MemoryService {
      *
      * @param request  filter and pagination parameters
      * @param tenantId tenant scope identifier
+     * @param role     caller's role for visibility filtering (admin, reviewer, consumer)
      * @return paginated search results with facets
      */
-    SearchResponse listV2(SearchRequest request, String tenantId);
+    SearchResponse listV2(SearchRequest request, String tenantId, String role);
 
     // ── EP-006: Review Workflow ──────────────────────────────────────
 

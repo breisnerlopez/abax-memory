@@ -278,7 +278,7 @@ public class MemoryServiceImpl implements MemoryService {
     }
 
     @Override
-    public SearchResponse listV2(SearchRequest request, String tenantId) {
+    public SearchResponse listV2(SearchRequest request, String tenantId, String role) {
         // A5: Build dynamic query with tenant_id filter
         var queryBuilder = new StringBuilder("tenantId = :tenantId and deletedAt IS NULL");
         var params = new LinkedHashMap<String, Object>();
@@ -292,6 +292,20 @@ public class MemoryServiceImpl implements MemoryService {
         if (request.getLifecycleStates() != null && !request.getLifecycleStates().isEmpty()) {
             queryBuilder.append(" and lifecycleState IN :lifecycleStates");
             params.put("lifecycleStates", request.getLifecycleStates());
+        } else {
+            // BR-001: Role-based lifecycle visibility enforcement.
+            // DRAFT → creator only. PENDING → reviewer + creator only.
+            // Without real OIDC user identity, we approximate:
+            //   - admin / reviewer → see all states
+            //   - consumer (or unknown role) → only see ACTIVE + ARCHIVED
+            // MOCK: Role resolution via X-Role header. REPLACE_BEFORE_PROD with OIDC claims.
+            boolean isPrivileged = role != null
+                    && (role.equalsIgnoreCase("admin") || role.equalsIgnoreCase("reviewer"));
+            if (!isPrivileged) {
+                queryBuilder.append(" and lifecycleState IN :consumerVisibleStates");
+                params.put("consumerVisibleStates",
+                        List.of(LifecycleState.ACTIVE, LifecycleState.ARCHIVED));
+            }
         }
         if (request.getSensitivityMax() != null) {
             // Sensitivity ordering: PUBLIC < INTERNAL < CONFIDENTIAL < SECRET

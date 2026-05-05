@@ -77,7 +77,7 @@ class TenantIsolationTest {
 
         // Tenant Beta searches — should only see Beta's data
         var betaSearch = new SearchRequest("*", null, null, null, null, null, null, 0, 20);
-        var betaResults = memoryService.listV2(betaSearch, TENANT_BETA);
+        var betaResults = memoryService.listV2(betaSearch, TENANT_BETA, "admin");
 
         assertThat(betaResults.items()).hasSize(1);
         assertThat(betaResults.items().get(0).tenantId()).isEqualTo(TENANT_BETA);
@@ -85,7 +85,7 @@ class TenantIsolationTest {
 
         // Tenant Alpha searches — should only see Alpha's data
         var alphaSearch = new SearchRequest("*", null, null, null, null, null, null, 0, 20);
-        var alphaResults = memoryService.listV2(alphaSearch, TENANT_ALPHA);
+        var alphaResults = memoryService.listV2(alphaSearch, TENANT_ALPHA, "admin");
 
         assertThat(alphaResults.items()).hasSize(2);
         alphaResults.items().forEach(item ->
@@ -152,7 +152,7 @@ class TenantIsolationTest {
     @Transactional
     void listV2_returnsEmptyForUnknownTenant() {
         var search = new SearchRequest("*", null, null, null, null, null, null, 0, 20);
-        var results = memoryService.listV2(search, "non-existent-tenant");
+        var results = memoryService.listV2(search, "non-existent-tenant", "admin");
 
         assertThat(results.items()).isEmpty();
         assertThat(results.total()).isEqualTo(0);

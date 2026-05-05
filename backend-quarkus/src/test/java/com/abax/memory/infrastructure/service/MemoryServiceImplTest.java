@@ -265,7 +265,8 @@ class MemoryServiceImplTest {
                         MemoryKind.FACT, null, null, null, null, null, null, null), TENANT_A);
 
         var request = new SearchRequest("*", null, null, null, null, null, null, 0, 10);
-        var result = memoryService.listV2(request, TENANT_A);
+        // Use admin role to see all fragments (including DRAFT)
+        var result = memoryService.listV2(request, TENANT_A, "admin");
 
         assertThat(result.items()).isNotEmpty();
         assertThat(result.total()).isGreaterThanOrEqualTo(2);
@@ -285,7 +286,7 @@ class MemoryServiceImplTest {
         memoryService.softDeleteV2(created.id(), TENANT_A);
 
         var request = new SearchRequest("To Delete List", null, null, null, null, null, null, 0, 10);
-        var result = memoryService.listV2(request, TENANT_A);
+        var result = memoryService.listV2(request, TENANT_A, "admin");
 
         assertThat(result.items()).isEmpty();
     }
@@ -299,9 +300,62 @@ class MemoryServiceImplTest {
                 new CreateMemoryRequest("TenantA Entry", "Content.", null, null, null, null, null, null, null, null), TENANT_A);
 
         var request = new SearchRequest("TenantA Entry", null, null, null, null, null, null, 0, 10);
-        var result = memoryService.listV2(request, TENANT_B);
+        var result = memoryService.listV2(request, TENANT_B, "admin");
 
         assertThat(result.items()).isEmpty();
         assertThat(result.total()).isEqualTo(0);
+    }
+
+    @Test
+    @Order(15)
+    @DisplayName("listV2 — BR-001: hides DRAFT from consumers, shows to admin")
+    @Transactional
+    void listV2_shouldHideDraftFromConsumers() {
+        // Create a DRAFT memory
+        memoryService.createV2(
+                new CreateMemoryRequest("Secret Draft", "Draft content.",
+                        null, null, null, null, null, null, null, null), TENANT_A);
+
+        // Consumer search (no role or consumer role) should NOT find DRAFT
+        var consumerRequest = new SearchRequest("*", null, null, null, null, null, null, 0, 10);
+        var consumerResult = memoryService.listV2(consumerRequest, TENANT_A, "consumer");
+        assertThat(consumerResult.items()).noneMatch(r -> "Secret Draft".equals(r.title()));
+
+        // Admin search SHOULD find DRAFT
+        var adminRequest = new SearchRequest("*", null, null, null, null, null, null, 0, 10);
+        var adminResult = memoryService.listV2(adminRequest, TENANT_A, "admin");
+        assertThat(adminResult.items()).anyMatch(r -> "Secret Draft".equals(r.title()));
+
+        // Null role (unknown role) should also hide DRAFT
+        var unknownResult = memoryService.listV2(
+                new SearchRequest("*", null, null, null, null, null, null, 0, 10),
+                TENANT_A, null);
+        assertThat(unknownResult.items()).noneMatch(r -> "Secret Draft".equals(r.title()));
+    }
+
+    @Test
+    @Order(16)
+    @DisplayName("listV2 — BR-001: hides PENDING from consumers, shows to reviewer")
+    @Transactional
+    void listV2_shouldHidePendingFromConsumers() {
+        // Create a memory and move it to PENDING
+        var created = memoryService.createV2(
+                new CreateMemoryRequest("Pending Memory", "Pending content.",
+                        null, null, null, null, null, null, null, null), TENANT_A);
+        memoryService.updateV2(created.id(),
+                new UpdateMemoryRequest(null, null, null, LifecycleState.PENDING, null, null),
+                TENANT_A);
+
+        // Consumer should NOT see PENDING
+        var consumerResult = memoryService.listV2(
+                new SearchRequest("*", null, null, null, null, null, null, 0, 10),
+                TENANT_A, "consumer");
+        assertThat(consumerResult.items()).noneMatch(r -> "Pending Memory".equals(r.title()));
+
+        // Reviewer SHOULD see PENDING
+        var reviewerResult = memoryService.listV2(
+                new SearchRequest("*", null, null, null, null, null, null, 0, 10),
+                TENANT_A, "reviewer");
+        assertThat(reviewerResult.items()).anyMatch(r -> "Pending Memory".equals(r.title()));
     }
 }
