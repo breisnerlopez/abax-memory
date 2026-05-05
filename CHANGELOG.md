@@ -1,6 +1,15 @@
 # Changelog — Abax-Memory
 
 
+## [2.0.8] — 2026-05-05
+
+### Fixed
+- #18: Qdrant relevance scores ahora se mapean correctamente a la respuesta API. Búsqueda semántica ya no retorna score: null.
+
+### Docker
+- ghcr.io/breisnerlopez/abax-memory:v2.0.8
+- ghcr.io/breisnerlopez/abax-memory:latest
+
 ## [2.0.7] — 2026-05-05
 
 ### Fixed
