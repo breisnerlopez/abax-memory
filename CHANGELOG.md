@@ -1,5 +1,15 @@
 # Changelog — Abax-Memory
 
+
+## [2.0.7] — 2026-05-05
+
+### Fixed
+- #17: embedding_id ahora se persiste en PostgreSQL tras el upsert en Qdrant. Búsqueda semántica ya no retorna score: null.
+
+### Docker
+- ghcr.io/breisnerlopez/abax-memory:v2.0.7
+- ghcr.io/breisnerlopez/abax-memory:latest
+
 ## [2.0.6] — 2026-05-05
 
 ### Fixed

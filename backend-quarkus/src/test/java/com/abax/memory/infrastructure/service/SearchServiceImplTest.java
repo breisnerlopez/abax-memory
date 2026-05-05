@@ -264,7 +264,7 @@ class SearchServiceImplTest {
 
     @Test
     @Order(10)
-    @DisplayName("indexFragment — successfully indexes a memory fragment")
+    @DisplayName("indexFragment — successfully indexes a memory fragment and writes back embedding_id")
     @Transactional
     void indexFragment_shouldSucceed() {
         var fragment = memoryService.createV2(
@@ -272,11 +272,18 @@ class SearchServiceImplTest {
 
         assertThatNoException()
                 .isThrownBy(() -> searchService.indexFragment(fragment.id(), TENANT_A));
+
+        // Issue #17: verify embedding_id is written back to PostgreSQL after Qdrant upsert
+        var reloaded = memoryService.getByIdV2(fragment.id(), TENANT_A);
+        assertThat(reloaded.embeddingId())
+                .as("embedding_id must be set after indexing — Issue #17")
+                .isNotNull()
+                .isEqualTo(fragment.id().toString());
     }
 
     @Test
     @Order(11)
-    @DisplayName("reindexAll — counts indexed fragments")
+    @DisplayName("reindexAll — counts indexed fragments and writes back embedding_id")
     @Transactional
     void reindexAll_shouldCountIndexedFragments() {
         var f1 = memoryService.createV2(
@@ -286,6 +293,18 @@ class SearchServiceImplTest {
 
         int indexed = searchService.reindexAll(TENANT_A);
         assertThat(indexed).isGreaterThanOrEqualTo(2);
+
+        // Issue #17: verify embedding_id is written back after reindexAll
+        var reloaded1 = memoryService.getByIdV2(f1.id(), TENANT_A);
+        var reloaded2 = memoryService.getByIdV2(f2.id(), TENANT_A);
+        assertThat(reloaded1.embeddingId())
+                .as("embedding_id must be set after reindexAll — Issue #17")
+                .isNotNull()
+                .isEqualTo(f1.id().toString());
+        assertThat(reloaded2.embeddingId())
+                .as("embedding_id must be set after reindexAll — Issue #17")
+                .isNotNull()
+                .isEqualTo(f2.id().toString());
     }
 
     // ── Unified Search Tests ──────────────────────────────────────────

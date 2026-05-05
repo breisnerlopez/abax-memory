@@ -451,6 +451,10 @@ public class SearchServiceImpl implements SearchService {
             );
 
             qdrantClient.upsert(QDRANT_COLLECTION, entity.getId().toString(), vector, payload);
+            // Issue #17: write embedding_id back to PostgreSQL so semantic search
+            // can return non-null scores for newly indexed memories.
+            entity.setEmbeddingId(entity.getId().toString());
+            entity.persist();
             LOG.debugv("Indexed fragment {0} for tenant {1}", fragmentId, tenantId);
         } catch (Exception e) {
             // MOCK: Qdrant is in-memory and won't fail in test,
@@ -484,6 +488,9 @@ public class SearchServiceImpl implements SearchService {
                         entity.getScopeId()
                 );
                 qdrantClient.upsert(QDRANT_COLLECTION, entity.getId().toString(), vector, payload);
+                // Issue #17: write embedding_id back to PostgreSQL.
+                ((MemoryFragmentEntity) entity).setEmbeddingId(entity.getId().toString());
+                ((MemoryFragmentEntity) entity).persist();
                 indexed++;
             } catch (Exception e) {
                 LOG.warnv("Failed to re-index fragment {0}: {1}",

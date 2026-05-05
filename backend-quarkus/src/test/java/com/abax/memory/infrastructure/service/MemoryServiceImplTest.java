@@ -525,7 +525,7 @@ class MemoryServiceImplTest {
 
     @Test
     @Order(25)
-    @DisplayName("approveReview — triggers indexing on ACTIVE transition (#16)")
+    @DisplayName("approveReview — triggers indexing on ACTIVE transition and writes embedding_id (#16, #17)")
     @Transactional
     void approveReview_shouldTriggerIndexingOnActive() {
         var created = memoryService.createV2(
@@ -538,8 +538,11 @@ class MemoryServiceImplTest {
 
         assertThat(approved.lifecycleState()).isEqualTo(LifecycleState.ACTIVE);
         assertThat(approved.isConsumerVisible()).isTrue();
-        // Indexing is best-effort — no exception means the call reached
-        // the Qdrant client (in-memory stub in tests, real in production).
+        // Issue #17: verify embedding_id is written back after approval-triggered indexing
+        assertThat(approved.embeddingId())
+                .as("embedding_id must be set after approval triggers indexing — Issue #17")
+                .isNotNull()
+                .isEqualTo(created.id().toString());
     }
 
     @Test
