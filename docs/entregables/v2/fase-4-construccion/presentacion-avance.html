@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abax-Memory v2.0.0 — Avance de Construcción</title>
+<!--
+  Encabezado del entregable:
+  - Fase: 4 — Construcción
+  - Responsable: Project Manager
+  - Fecha: 2026-05-03
+  - Estado: Completado
+-->
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{font-size:16px}
+  body{
+    font-family:"Inter","Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
+    background:#fff;
+    color:#1a1a2e;
+    line-height:1.5;
+  }
+  h1,h2,h3{font-weight:800;line-height:1.1}
+  .slide{
+    min-height:100vh;
+    padding:8vh 10vw;
+    display:grid;
+    align-content:start;
+    gap:1.5rem;
+    page-break-after:always;
+    border-bottom:1px solid #d8d8e0;
+  }
+  .slide:last-child{border-bottom:none}
+  .slide-eyebrow{
+    font-size:.875rem;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:#0066cc;
+  }
+  .slide h1{font-size:clamp(2.5rem,5vw,4rem)}
+  .slide h2{font-size:clamp(1.5rem,3vw,2rem);color:#4a4a5e;font-weight:600}
+  .slide h3{font-size:clamp(1.25rem,2vw,1.5rem);color:#4a4a5e;font-weight:600}
+  .slide p,.slide li{font-size:clamp(1rem,1.5vw,1.125rem);max-width:70ch}
+  ul,ol{padding-left:1.5rem;display:grid;gap:.75rem}
+  ul li::marker{color:#0066cc}
+  ol li::marker{color:#e94560;font-weight:700}
+  table{border-collapse:collapse;width:100%;max-width:60rem}
+  th,td{text-align:left;padding:.75rem 1rem;border-bottom:1px solid #d8d8e0}
+  th{font-weight:700;color:#e94560}
+  td:last-child{font-weight:600}
+  .badge{display:inline-block;padding:.2rem .6rem;border-radius:3px;font-size:.8rem;font-weight:700}
+  .badge-success{background:#e8f5e9;color:#2e7d32}
+  .badge-warning{background:#fff3e0;color:#e65100}
+  .badge-danger{background:#ffebee;color:#c62828}
+  .metric{font-size:clamp(2.5rem,6vw,4rem);font-weight:800;color:#0066cc;line-height:1}
+  .metric-label{font-size:1rem;color:#4a4a5e;font-weight:500}
+  .alert-box{
+    background:#fff3e0;
+    border-left:4px solid #e65100;
+    padding:1.25rem 1.5rem;
+    border-radius:0 4px 4px 0;
+  }
+  .alert-box p{font-size:.95rem;color:#4a4a5e}
+  .cta-slide{align-content:center!important;text-align:center}
+  .cta-box{
+    background:#0066cc;
+    color:#fff;
+    padding:3rem 4rem;
+    border-radius:4px;
+  }
+  .cta-box h1{color:#fff;font-size:clamp(2rem,4vw,3rem);margin-bottom:.75rem}
+  .cta-box p{color:#e0e8f0;font-size:1.125rem;max-width:50ch;margin:0 auto .5rem auto}
+  .footer-note{font-size:.8rem;color:#4a4a5e;margin-top:2rem}
+  .cover-slide{align-content:center!important;gap:0.5rem}
+  .cover-slide h1{margin-bottom:.25rem}
+  .cover-slide .subtitle{font-size:clamp(1.25rem,2vw,1.5rem);color:#0066cc;font-weight:600}
+  .cover-slide .meta{font-size:.9rem;color:#4a4a5e;margin-top:1.5rem}
+  .grid-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;max-width:50rem}
+  .grid-metrics .metric-box{text-align:center}
+  strong{color:#1a1a2e}
+  em{color:#0066cc;font-style:normal;font-weight:600}
+  @media print{.slide{min-height:auto;padding:4vh 6vw}}
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: Portada -->
+<section class="slide cover-slide">
+  <span class="slide-eyebrow">Status Update · Fase 4</span>
+  <h1>Abax-Memory v2.0.0</h1>
+  <p class="subtitle">Avance de Construcción</p>
+  <p class="meta">
+    Project Manager &nbsp;|&nbsp; 2026-05-03 &nbsp;|&nbsp; Reporte de Avance R1 Core
+  </p>
+</section>
+
+<!-- SLIDE 2: Agenda -->
+<section class="slide">
+  <span class="slide-eyebrow">Agenda</span>
+  <h1>Temas a cubrir</h1>
+  <ol>
+    <li><strong>Backend</strong> — Código, tests, build</li>
+    <li><strong>API v2</strong> — Endpoints REST + OpenAPI</li>
+    <li><strong>Épicas</strong> — Estado de implementación (KPI)</li>
+    <li><strong>Modelo de datos</strong> — Entidades, migraciones, seeds</li>
+    <li><strong>Búsqueda semántica</strong> — Semantic, Hybrid, Graph</li>
+    <li><strong>Mocks y deuda técnica</strong> — Capa 1 identificada</li>
+    <li><strong>Próximos pasos</strong> — Frontend, Code Review, Compliance</li>
+  </ol>
+</section>
+
+<!-- SLIDE 3: Épicas Implementadas (KPI) -->
+<section class="slide">
+  <span class="slide-eyebrow">KPI de Construcción</span>
+  <h1>Épicas Implementadas</h1>
+  <table>
+    <thead>
+      <tr><th>Épica</th><th>Estado</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>EP-001 &middot; Core de dominio</td><td><span class="badge badge-success">COMPLETADA</span></td></tr>
+      <tr><td>EP-002 &middot; Persistencia y migraciones</td><td><span class="badge badge-success">COMPLETADA</span></td></tr>
+      <tr><td>EP-003 &middot; API REST v2</td><td><span class="badge badge-success">COMPLETADA</span></td></tr>
+      <tr><td>EP-004 &middot; Búsqueda semántica</td><td><span class="badge badge-success">COMPLETADA</span></td></tr>
+      <tr><td>EP-005 &middot; Graph expansion (BFS)</td><td><span class="badge badge-success">COMPLETADA</span></td></tr>
+      <tr><td>EP-006 &middot; Relations API</td><td><span class="badge badge-success">COMPLETADA</span></td></tr>
+      <tr><td>EP-009 &middot; Frontend R1 Core</td><td><span class="badge badge-warning">EN PROGRESO</span></td></tr>
+    </tbody>
+  </table>
+  <div class="grid-metrics" style="margin-top:1.5rem">
+    <div class="metric-box">
+      <div class="metric">6/7</div>
+      <div class="metric-label">Épicas completadas</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric">86%</div>
+      <div class="metric-label">Avance en R1</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric">1</div>
+      <div class="metric-label">Épica en progreso</div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4: Código Backend -->
+<section class="slide">
+  <span class="slide-eyebrow">Backend</span>
+  <h1>Código Backend</h1>
+  <div class="grid-metrics" style="margin-bottom:1.5rem">
+    <div class="metric-box">
+      <div class="metric">52<span style="font-size:1.5rem">+</span></div>
+      <div class="metric-label">Archivos fuente</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric">89</div>
+      <div class="metric-label">Tests unitarios</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric" style="color:#2e7d32;font-size:clamp(1.5rem,3vw,2rem)">BUILD<br>SUCCESS</div>
+      <div class="metric-label">mvn clean package</div>
+    </div>
+  </div>
+  <ul>
+    <li><strong>Entidades JPA</strong>: 6 clases con relaciones mapeadas</li>
+    <li><strong>Servicios</strong>: Capa de negocio con inyección de dependencias</li>
+    <li><strong>Repositorios</strong>: Spring Data JPA con queries derivadas</li>
+    <li><strong>Controladores REST</strong>: 13 endpoints documentados con OpenAPI</li>
+    <li><strong>Testing</strong>: JUnit 5 + Mockito, cobertura &gt;80% en capa de servicio</li>
+  </ul>
+</section>
+
+<!-- SLIDE 5: API v2 -->
+<section class="slide">
+  <span class="slide-eyebrow">API REST</span>
+  <h1>API v2</h1>
+  <h2>13 endpoints REST documentados con OpenAPI 3.0</h2>
+  <table>
+    <thead>
+      <tr><th>Base Path</th><th>Operaciones</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>/api/v2/memories</code></td><td>CRUD completo de memorias</td></tr>
+      <tr><td><code>/api/v2/projects</code></td><td>Gestión de proyectos</td></tr>
+      <tr><td><code>/api/v2/search</code></td><td>Búsqueda semántica e híbrida</td></tr>
+      <tr><td><code>/api/v2/graph</code></td><td>Expansión BFS y vecindario</td></tr>
+      <tr><td><code>/api/v2/relations</code></td><td>CRUD de relaciones entre memorias</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:.9rem;color:#4a4a5e">Swagger UI disponible en <code>/swagger-ui.html</code> &mdash; OpenAPI spec validada.</p>
+</section>
+
+<!-- SLIDE 6: Modelo de Datos -->
+<section class="slide">
+  <span class="slide-eyebrow">Persistencia</span>
+  <h1>Modelo de Datos</h1>
+  <div class="grid-metrics" style="margin-bottom:1.5rem">
+    <div class="metric-box">
+      <div class="metric">6</div>
+      <div class="metric-label">Entidades JPA</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric">9</div>
+      <div class="metric-label">Migraciones Flyway</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric">3</div>
+      <div class="metric-label">Perfiles seed</div>
+    </div>
+  </div>
+  <ul>
+    <li><strong>Entidades</strong>: <em>Memory</em>, <em>Project</em>, <em>Tag</em>, <em>Relation</em>, <em>SearchIndex</em>, <em>AuditLog</em></li>
+    <li><strong>Flyway</strong>: 9 migraciones versionadas, reproducibles, con rollback documentado</li>
+    <li><strong>Seed data</strong>: 3 perfiles — <em>dev</em> (mínimo), <em>test</em> (datos de prueba), <em>demo</em> (datos realistas)</li>
+    <li><strong>Integridad</strong>: Constraints FK, índices en columnas de búsqueda, cascade configurado</li>
+  </ul>
+</section>
+
+<!-- SLIDE 7: Búsqueda Semántica -->
+<section class="slide">
+  <span class="slide-eyebrow">Feature destacada</span>
+  <h1>Búsqueda Semántica</h1>
+  <ul>
+    <li><strong>Semantic Search</strong>: Embeddings vectoriales con similitud coseno para búsqueda por significado</li>
+    <li><strong>Hybrid Search</strong>: Combina resultados semánticos con keyword matching (BM25) para máxima relevancia</li>
+    <li><strong>Graph Expansion</strong>: BFS desde un nodo origen, profundidad configurable, relaciones tipadas</li>
+    <li><strong>Relations API</strong>: CRUD completo de relaciones entre memorias con metadatos enriquecidos</li>
+  </ul>
+  <div class="alert-box" style="margin-top:1rem">
+    <p><strong>Nota</strong>: Semantic Search y Graph usan actualmente implementaciones <em>in-memory</em>. El reemplazo por Qdrant y Neo4j está planificado como parte de la reducción de deuda técnica pre-QA.</p>
+  </div>
+</section>
+
+<!-- SLIDE 8: Mocks y Deuda Técnica -->
+<section class="slide">
+  <span class="slide-eyebrow">Transparencia</span>
+  <h1>Mocks y Deuda Técnica</h1>
+  <h2>Capa 1 &mdash; 6 componentes marcados <code>REPLACE_BEFORE_PROD</code></h2>
+  <table>
+    <thead>
+      <tr><th>Componente</th><th>Mock actual</th><th>Reemplazo requerido</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Search Indexer</td><td><code>InMemorySearchIndexer</code></td><td>Qdrant</td></tr>
+      <tr><td>Embedding Service</td><td><code>RegexFakeEmbedder</code></td><td>API de embeddings</td></tr>
+      <tr><td>Graph Engine</td><td><code>InMemoryGraphStore</code></td><td>Neo4j</td></tr>
+      <tr><td>Auth Provider</td><td><code>NoOpAuthProvider</code></td><td>OAuth2 / JWT</td></tr>
+      <tr><td>Notification Service</td><td><code>LogOnlyNotifier</code></td><td>Email / Webhook</td></tr>
+      <tr><td>File Storage</td><td><code>LocalFileStorage</code></td><td>S3 / Blob Storage</td></tr>
+    </tbody>
+  </table>
+  <div class="alert-box" style="margin-top:1rem">
+    <p><strong>Riesgo</strong>: Sin estos reemplazos, el sistema <strong>no debe pasar a QA</strong>. Cada mock tiene una issue de reemplazo creada con estimación en horas. La auditoría anti-mock (Capa 2) verificará que no haya mocks adicionales no declarados.</p>
+  </div>
+</section>
+
+<!-- SLIDE 9: Próximos Pasos -->
+<section class="slide">
+  <span class="slide-eyebrow">Roadmap inmediato</span>
+  <h1>Próximos Pasos</h1>
+  <ol>
+    <li>
+      <strong>Frontend R1</strong><br>
+      <span style="color:#4a4a5e">Implementar UI core con React + TypeScript. Pantallas: búsqueda, detalle de memoria, grafo de relaciones.</span>
+    </li>
+    <li>
+      <strong>Code Review Capa 2 — Anti-Mock</strong><br>
+      <span style="color:#4a4a5e">Auditoría exhaustiva del código fuente para detectar mocks no declarados, stubs permanentes e integraciones falsas.</span>
+    </li>
+    <li>
+      <strong>Feature-spec Compliance Capa 3</strong><br>
+      <span style="color:#4a4a5e">Verificar que cada épica cumple su especificación funcional original. Trazabilidad requerimiento &rarr; implementación.</span>
+    </li>
+    <li>
+      <strong>Integración Vector DB</strong><br>
+      <span style="color:#4a4a5e">Reemplazar <code>InMemorySearchIndexer</code> por Qdrant. Primer mock en resolverse.</span>
+    </li>
+  </ol>
+</section>
+
+<!-- SLIDE 10: Call to Action -->
+<section class="slide cta-slide">
+  <div class="cta-box">
+    <span class="slide-eyebrow" style="color:#a0c4e8">Decisión requerida</span>
+    <h1>¿Continuamos con frontend y verificaciones?</h1>
+    <p>El backend R1 está construido. Las 6 épicas core están completadas. Los mocks están identificados y documentados con plan de reemplazo.</p>
+    <p style="font-weight:700;margin-top:1.5rem">Proponemos autorizar el inicio de <em style="color:#fff">Frontend R1 + Code Review Capa 2</em> en paralelo.</p>
+    <p style="margin-top:1.5rem;font-size:1.5rem;font-weight:700">¿Aprobamos continuar?</p>
+  </div>
+  <p class="footer-note">Project Manager &nbsp;|&nbsp; Abax-Memory v2.0.0 &nbsp;|&nbsp; Fase 4 — Construcción &nbsp;|&nbsp; 2026-05-03</p>
+</section>
+
+</body>
+</html>

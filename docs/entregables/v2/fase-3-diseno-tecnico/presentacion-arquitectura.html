@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abax-Memory v2.0.0 — Arquitectura</title>
+<style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{font-size:16px}body{font-family:"Inter","Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}h1,h2,h3{font-weight:800;line-height:1.1}body[data-style="corporate-minimal"]{--bg:#fff;--bg-alt:#f5f5f7;--text:#1a1a2e;--text-muted:#4a4a5e;--accent:#0066cc;--accent-strong:#e94560;--border:#d8d8e0}body[data-style="tech-editorial"]{--bg:#fff;--bg-alt:#f0f0f3;--text:#111118;--text-muted:#44444c;--accent:#FFCC00;--accent-strong:#111118;--border:#d0d0d8}body[data-style="dark-premium"]{--bg:#0d1117;--bg-alt:#1a1a2e;--text:#e6e6f0;--text-muted:#a0a0b0;--accent:#00d4ff;--accent-strong:#00ff88;--border:#2a2a3e}.slide{min-height:100vh;padding:8vh 10vw;display:grid;align-content:start;gap:1.5rem;page-break-after:always;border-bottom:1px solid var(--border)}.slide:last-child{border-bottom:none}.slide-eyebrow{font-size:.875rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}.slide h1{font-size:clamp(2.5rem,5vw,4rem)}.slide h2{font-size:clamp(2rem,4vw,3rem)}.slide h3{font-size:clamp(1.25rem,2vw,1.5rem);color:var(--text-muted);font-weight:600}.slide p,.slide li{font-size:clamp(1rem,1.5vw,1.125rem);max-width:70ch}ul,ol{padding-left:1.5rem;display:grid;gap:.75rem}ul li::marker,ol li::marker{color:var(--accent)}table{border-collapse:collapse;width:100%;max-width:60rem}th,td{text-align:left;padding:.75rem 1rem;border-bottom:1px solid var(--border)}th{font-weight:700;color:var(--accent-strong)}pre{background:var(--bg-alt);padding:1.5rem;border-radius:4px;overflow-x:auto;font-size:.9rem;max-width:60rem}code{font-family:"JetBrains Mono","Fira Code",monospace;font-size:.9em}.card{background:var(--bg-alt);padding:2rem;border-radius:4px;border:1px solid var(--border);max-width:42rem}.cta{background:var(--accent);color:var(--bg);padding:3rem 4rem;border-radius:4px;display:inline-block}body[data-style="tech-editorial"] .cta{color:#111118}.cta-question{font-size:clamp(1.5rem,3vw,2rem);font-weight:700}@media print{.slide{min-height:auto;padding:4vh 6vw}}</style>
+</head>
+<body data-style="corporate-minimal">
+
+<!-- SLIDE 1 — COVER -->
+<section class="slide">
+  <span class="slide-eyebrow">Fase 3 — Diseño Técnico</span>
+  <h1>Abax-Memory v2.0.0 — Arquitectura</h1>
+  <h3>Motor genérico de memoria con API REST v2, búsqueda semántica, grafo de conocimiento y gobernanza multi-tenant</h3>
+  <p style="margin-top: 2rem; color: var(--text-muted);">
+    Release v2.0.0 · solution-architect · 2026-05-03 · Comité directivo
+  </p>
+</section>
+
+<!-- SLIDE 2 — AGENDA -->
+<section class="slide">
+  <span class="slide-eyebrow">Agenda</span>
+  <h2>Qué cubre esta presentación</h2>
+  <ol>
+    <li><strong>Stack Tecnológico:</strong> componentes y alternativas evaluadas</li>
+    <li><strong>Arquitectura de Servicios:</strong> Modulith con 34 paquetes Java</li>
+    <li><strong>Modelo de Datos:</strong> 6 tablas, 14 índices, PostgreSQL canónico</li>
+    <li><strong>Seguridad:</strong> OIDC + RBAC 5×13 + multi-tenant</li>
+    <li><strong>API Design:</strong> 22 endpoints REST v2</li>
+    <li><strong>ADRs:</strong> 5 decisiones arquitectónicas con justificación</li>
+    <li><strong>CI/CD:</strong> Pipeline, GHCR, 4 ambientes</li>
+    <li><strong>Riesgos Técnicos y Próximos Pasos</strong></li>
+  </ol>
+</section>
+
+<!-- SLIDE 3 — PRINCIPIOS RECTORES -->
+<section class="slide">
+  <span class="slide-eyebrow">Fundamentos</span>
+  <h2>Principios Rectores — 9 pilares</h2>
+  <table>
+    <thead><tr><th>#</th><th>Principio</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><strong>P-01</strong></td><td><strong>API-First</strong></td><td>El producto se expone exclusivamente como API REST v2. Frontend y SDKs son consumidores, no componentes acoplados.</td></tr>
+      <tr><td><strong>P-02</strong></td><td><strong>English-Only Internals</strong></td><td>Todo identificador del sistema en inglés: kinds, estados, endpoints, enums, columnas, códigos de error.</td></tr>
+      <tr><td><strong>P-03</strong></td><td><strong>Stateless &amp; Horizontal Scaling</strong></td><td>API sin estado de sesión. Toda autorización viaja en JWT. Pods completamente intercambiables.</td></tr>
+      <tr><td><strong>P-04</strong></td><td><strong>Containerized</strong></td><td>Todos los componentes en Docker. Docker Compose (dev) / Kubernetes (prod).</td></tr>
+      <tr><td><strong>P-05</strong></td><td><strong>Observable by Default</strong></td><td>Logging JSON estructurado, métricas Prometheus, health checks y tracing distribuido desde R1.</td></tr>
+      <tr><td><strong>P-06</strong></td><td><strong>Multi-Tenant Isolation</strong></td><td>Aislamiento garantizado por capa de datos (discriminator column + índices), no por lógica condicional.</td></tr>
+      <tr><td><strong>P-07</strong></td><td><strong>Core Genérico + Perfiles</strong></td><td>El core no contiene lógica de dominio. Especialización vía perfiles configurables sin modificar código.</td></tr>
+      <tr><td><strong>P-08</strong></td><td><strong>Seguridad desde R1</strong></td><td>OIDC con Keycloak, JWT validado en cada request, RBAC 5 roles, TLS extremo a extremo.</td></tr>
+      <tr><td><strong>P-09</strong></td><td><strong>Auditabilidad Completa</strong></td><td>Toda mutación genera registro de auditoría inmutable con actor, timestamp, acción y diff.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SLIDE 4 — STACK RESUMEN -->
+<section class="slide">
+  <span class="slide-eyebrow">Stack Tecnológico</span>
+  <h2>Resumen del Stack MVP</h2>
+  <table>
+    <thead><tr><th>Capa</th><th>Tecnología</th><th>Versión</th><th>Origen</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Runtime</strong></td><td>Quarkus</td><td>3.x LTS</td><td>v1 (reutilizado)</td></tr>
+      <tr><td><strong>Lenguaje</strong></td><td>Java</td><td>21 LTS</td><td>v1 (reutilizado)</td></tr>
+      <tr><td><strong>Base de Datos</strong></td><td>PostgreSQL</td><td>16 Alpine</td><td>v1 (reutilizado)</td></tr>
+      <tr><td><strong>Vector DB</strong></td><td>Qdrant</td><td>1.17</td><td>v1 (reutilizado)</td></tr>
+      <tr><td><strong>Auth (OIDC)</strong></td><td>Keycloak</td><td>26.1</td><td>v1 (reutilizado)</td></tr>
+      <tr><td><strong>Embeddings</strong></td><td>OpenAI text-embedding-3-large</td><td>API</td><td>v1 (reutilizado)</td></tr>
+      <tr><td><strong>LLM Validation</strong></td><td>OpenAI GPT-4o</td><td>API</td><td>v1 (reutilizado)</td></tr>
+      <tr><td><strong>Frontend</strong></td><td>React + TypeScript</td><td>19.x</td><td>Nuevo v2</td></tr>
+      <tr><td><strong>Contenedores</strong></td><td>Docker / Podman</td><td>latest</td><td>v1 (reutilizado)</td></tr>
+      <tr><td><strong>CI/CD</strong></td><td>GitHub Actions + GHCR</td><td>—</td><td>v1 (reutilizado)</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 1rem;"><strong>Exclusiones del MVP:</strong> Kafka, Redis, Neo4j, Git/GitHub. PostgreSQL es la fuente canónica de verdad; Qdrant es índice derivado regenerable.</p>
+</section>
+
+<!-- SLIDE 5 — STACK COMPARATIVA RUNTIME -->
+<section class="slide">
+  <span class="slide-eyebrow">Stack — Decisión</span>
+  <h2>Runtime: Quarkus 3.x vs Alternativas</h2>
+  <table>
+    <thead><tr><th>Criterio</th><th>Quarkus 3.x ✓</th><th>Spring Boot 3.x</th><th>Micronaut 4.x</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Startup</strong></td><td>Sub-second (native)</td><td>~3-5s (JVM)</td><td>Sub-second (native)</td></tr>
+      <tr><td><strong>Memoria</strong></td><td>~30 MB (native)</td><td>~250 MB (JVM)</td><td>~40 MB (native)</td></tr>
+      <tr><td><strong>OIDC integración</strong></td><td>Maduro, Keycloak-first</td><td>Spring Security OAuth2</td><td>Micronaut Security</td></tr>
+      <tr><td><strong>Legado equipo</strong></td><td>Probado en v1</td><td>Nuevo</td><td>Nuevo</td></tr>
+      <tr><td><strong>Dev experience</strong></td><td>Hot-reload, live coding</td><td>DevTools</td><td>Hot-reload</td></tr>
+    </tbody>
+  </table>
+  <div class="card">
+    <p><strong>Decisión (ADR-001):</strong> Quarkus 3.x. Stack v1 probado en producción. Startup sub-second, baja huella de memoria, integración nativa Keycloak. Migrar a Spring Boot o Micronaut no justifica la pérdida del conocimiento operativo acumulado.</p>
+  </div>
+</section>
+
+<!-- SLIDE 6 — STACK COMPARATIVA VECTOR DB -->
+<section class="slide">
+  <span class="slide-eyebrow">Stack — Decisión</span>
+  <h2>Vector DB: Qdrant vs Alternativas</h2>
+  <table>
+    <thead><tr><th>Criterio</th><th>Qdrant ✓</th><th>Milvus</th><th>Weaviate</th><th>PGVector</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Rendimiento top-K</strong></td><td>Sub-10ms</td><td>Sub-10ms</td><td>~20ms</td><td>~50-100ms</td></tr>
+      <tr><td><strong>Payload filters</strong></td><td>Nativos, eficientes</td><td>Scalar filters</td><td>GraphQL</td><td>WHERE SQL</td></tr>
+      <tr><td><strong>Operacionalidad</strong></td><td>Binario único</td><td>etcd+MinIO+Pulsar</td><td>Módulos internos</td><td>Extensión PG</td></tr>
+      <tr><td><strong>Legado equipo</strong></td><td>Probado en v1</td><td>Nuevo</td><td>Nuevo</td><td>Nuevo</td></tr>
+    </tbody>
+  </table>
+  <div class="card">
+    <p><strong>Decisión (ADR-003):</strong> Qdrant 1.17. Probado en producción. Payload filters nativos críticos para combinar búsqueda semántica con filtros estructurados. Milvus es más complejo operativamente; PGVector compromete rendimiento en filtros combinados.</p>
+  </div>
+</section>
+
+<!-- SLIDE 7 — STACK COMPARATIVA EMBEDDINGS -->
+<section class="slide">
+  <span class="slide-eyebrow">Stack — Decisión</span>
+  <h2>Embeddings: OpenAI vs Modelos Locales</h2>
+  <table>
+    <thead><tr><th>Criterio</th><th>OpenAI 3-large ✓</th><th>OpenAI 3-small</th><th>Cohere Embed v3</th><th>Modelo local (BGE)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Calidad MTEB</strong></td><td>Top-tier</td><td>Muy buena</td><td>Excelente</td><td>Competitiva</td></tr>
+      <tr><td><strong>Dimensión</strong></td><td>3072</td><td>1536</td><td>1024</td><td>1024</td></tr>
+      <tr><td><strong>Costo (1M tokens)</strong></td><td>~$0.13</td><td>~$0.02</td><td>~$0.10</td><td>$0 (infra propia)</td></tr>
+      <tr><td><strong>Privacidad</strong></td><td>API externa</td><td>API externa</td><td>API externa</td><td>Datos locales</td></tr>
+      <tr><td><strong>Operacionalidad</strong></td><td>Sin infraestructura</td><td>Sin infraestructura</td><td>Sin infraestructura</td><td>Requiere GPU</td></tr>
+    </tbody>
+  </table>
+  <div class="card">
+    <p><strong>Decisión (ADR-004):</strong> OpenAI text-embedding-3-large como base, con abstracción <code>EmbeddingProvider</code> (puerto/adapter) que permite cambiar a cualquier proveedor sin modificar lógica de negocio. Probado en v1 con NDCG@10 0.920.</p>
+  </div>
+</section>
+
+<!-- SLIDE 8 — ARQUITECTURA DE SERVICIOS -->
+<section class="slide">
+  <span class="slide-eyebrow">Arquitectura</span>
+  <h2>Modular Monolith (Modulith)</h2>
+  <p><strong>2 artefactos de despliegue</strong> compartiendo un solo código base:</p>
+  <ul>
+    <li><strong><code>memory-api</code>:</strong> API REST v2 — operaciones síncronas (CRUD, búsqueda, revisión)</li>
+    <li><strong><code>memory-worker</code>:</strong> Procesamiento asíncrono — indexación Qdrant, reconciliación</li>
+  </ul>
+
+  <h3 style="margin-top: 1.5rem;">¿Por qué no microservicios?</h3>
+  <ul>
+    <li>Velocidad de desarrollo (66 historias Must en un ciclo ágil)</li>
+    <li>Simplicidad operativa (1 código base, 2 artefactos)</li>
+    <li>Transaccionalidad ACID en PostgreSQL sin sagas complejas</li>
+    <li>Preparado para extracción gradual si la escala lo requiere (ADR-005)</li>
+  </ul>
+
+  <h3 style="margin-top: 1.5rem;">34 paquetes Java — Capas estrictas</h3>
+  <table>
+    <thead><tr><th>Capa</th><th>Contenido</th></tr></thead>
+    <tbody>
+      <tr><td><strong><code>api/</code></strong></td><td>REST Resources, DTOs, Exception Mappers</td></tr>
+      <tr><td><strong><code>service/</code></strong></td><td>8 servicios de aplicación (Memory, Search, Relation, Entity, Profile, Audit, Tenant, Lifecycle)</td></tr>
+      <tr><td><strong><code>domain/</code></strong></td><td>10 entidades + enums (8 kinds, 6 estados, 9 tipos rel., 4 sens.) + value objects</td></tr>
+      <tr><td><strong><code>repository/</code></strong></td><td>6 interfaces + 6 implementaciones PostgreSQL</td></tr>
+      <tr><td><strong><code>integration/</code></strong></td><td>EmbeddingProvider, QdrantClient, LlmProvider, OIDC</td></tr>
+      <tr><td><strong><code>security/</code></strong></td><td>RBAC, TenantIsolation, SecurityContext</td></tr>
+      <tr><td><strong><code>worker/</code></strong></td><td>Scheduler + IndexingWorker + ReconciliationWorker</td></tr>
+      <tr><td><strong><code>common/</code></strong></td><td>ID generation, validación, correlation ID</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SLIDE 9 — MODELO DE DATOS -->
+<section class="slide">
+  <span class="slide-eyebrow">Modelo de Datos</span>
+  <h2>6 Tablas · 14 Índices · PostgreSQL</h2>
+  <table>
+    <thead><tr><th>Tabla</th><th>Propósito</th><th>Detalles clave</th></tr></thead>
+    <tbody>
+      <tr><td><strong><code>memory_fragments</code></strong></td><td>Entidad central</td><td>24 columnas, 8 kinds, 6 estados, 4 niveles de sensibilidad, JSONB para topics/entities/metadata</td></tr>
+      <tr><td><strong><code>relations</code></strong></td><td>Grafo de relaciones</td><td>9 tipos: related_to, depends_on, caused_by, resolves, contradicts, supports, mentions, belongs_to, supersedes</td></tr>
+      <tr><td><strong><code>audit_records</code></strong></td><td>Auditoría inmutable</td><td>Diff JSONB con before/after, correlation ID, IP, user agent</td></tr>
+      <tr><td><strong><code>profiles</code></strong></td><td>Perfiles de dominio</td><td>Configuración JSONB, versionado</td></tr>
+      <tr><td><strong><code>tenant_configs</code></strong></td><td>Configuración por tenant</td><td>Rate limits, max top-K, max graph depth, max batch size</td></tr>
+      <tr><td><strong><code>processing_jobs</code></strong></td><td>Job queue</td><td>FOR UPDATE SKIP LOCKED, idempotentes, retry con backoff</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 1rem;"><strong>Índices:</strong> todos incluyen <code>tenant_id</code> como columna líder. Índices GIN para full-text search sobre <code>content</code> y JSONB sobre <code>topics</code> y <code>extracted_entities</code>. Índice compuesto para filtros combinados frecuentes.</p>
+</section>
+
+<!-- SLIDE 10 — INTEGRACIÓN QDRANT -->
+<section class="slide">
+  <span class="slide-eyebrow">Integración</span>
+  <h2>Qdrant — Consistencia Eventual Controlada</h2>
+
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <p><strong>Modelo:</strong> PostgreSQL es la fuente canónica de verdad transaccional. Qdrant es un índice derivado regenerable.</p>
+  </div>
+
+  <ol>
+    <li><strong>Transacción ACID en PostgreSQL:</strong> crear/actualizar memoria + insertar <code>processing_jobs</code> en misma transacción</li>
+    <li><strong>Indexación asíncrona:</strong> <code>memory-worker</code> procesa jobs, genera embeddings vía OpenAI, upsert en Qdrant</li>
+    <li><strong>Idempotencia:</strong> jobs idempotentes por <code>(memory_id, job_type)</code>. Retry con backoff exponencial (máx 3 intentos)</li>
+    <li><strong>Degradación controlada:</strong> Qdrant no disponible → API sigue funcionando para CRUD. Búsqueda semántica retorna <code>503 DATABASE_UNAVAILABLE</code></li>
+  </ol>
+
+  <p style="margin-top: 1rem;"><strong>Colección Qdrant <code>abax_memories_v2</code>:</strong> vector size 3072 · Cosine distance · HNSW index (m=16) · Payload filters: tenant_id, kind, status, topics, entities, importance, confidence, sensitivity.</p>
+  <p><strong>Regenerable:</strong> ante corrupción o cambio de motor de embeddings, se regenera completamente desde PostgreSQL.</p>
+</section>
+
+<!-- SLIDE 11 — SEGURIDAD -->
+<section class="slide">
+  <span class="slide-eyebrow">Seguridad</span>
+  <h2>3 Pilares: OIDC · RBAC 5×13 · Multi-Tenant</h2>
+
+  <h3>1. OIDC con Keycloak 26</h3>
+  <ul>
+    <li>Authorization Code + PKCE (frontend SPA)</li>
+    <li>JWT validado en cada request: firma RS256, expiración, issuer, audience</li>
+    <li>Claims custom: <code>tenantId</code>, <code>realm_access.roles</code></li>
+  </ul>
+
+  <h3>2. RBAC — 5 Roles × 13 Operaciones</h3>
+  <table>
+    <thead><tr><th>Rol</th><th>Alcance</th></tr></thead>
+    <tbody>
+      <tr><td><strong><code>api-consumer</code></strong></td><td>Buscar y consultar memorias active</td></tr>
+      <tr><td><strong><code>memory-operator</code></strong></td><td>Crear, actualizar, relacionar memorias propias</td></tr>
+      <tr><td><strong><code>memory-reviewer</code></strong></td><td>Aprobar/rechazar memorias en revisión</td></tr>
+      <tr><td><strong><code>memory-admin</code></strong></td><td>Gobernanza total, cross-tenant, config</td></tr>
+      <tr><td><strong><code>memory-auditor</code></strong></td><td>Consultar auditoría, estadísticas, trazabilidad</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3. Multi-Tenant Isolation — Discriminator Column</h3>
+  <ul>
+    <li><strong>Columna discriminadora:</strong> <code>tenant_id</code> en todas las tablas</li>
+    <li><strong>Filtro automático:</strong> <code>TenantIdFilter</code> (interceptor JAX-RS global)</li>
+    <li><strong>Cross-tenant 404:</strong> si tenant A consulta recurso de tenant B → <code>404 NOT_FOUND</code></li>
+    <li><strong>Admin cross-tenant:</strong> solo <code>memory-admin</code> con registro de auditoría obligatorio</li>
+  </ul>
+</section>
+
+<!-- SLIDE 12 — API DESIGN -->
+<section class="slide">
+  <span class="slide-eyebrow">API Design</span>
+  <h2>22 Endpoints REST v2</h2>
+
+  <p><strong>Estándares:</strong> path prefix <code>/api/v2/</code> · recursos en plural kebab-case · IDs <code>MEM-xxxxxxxx</code> · paginación offset-based · OpenAPI 3.1 code-first</p>
+
+  <table>
+    <thead><tr><th>Categoría</th><th>#</th><th>Operaciones</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Memories</strong></td><td>10</td><td>CRUD, search, graph expand, relations, review, extract, batch ingest</td></tr>
+      <tr><td><strong>Entities</strong></td><td>2</td><td>Búsqueda y detalle de entidades extraídas</td></tr>
+      <tr><td><strong>Profiles</strong></td><td>2</td><td>Listar y crear perfiles de dominio</td></tr>
+      <tr><td><strong>Admin/Audit</strong></td><td>3</td><td>Stats de tenant, consulta de auditoría, health checks</td></tr>
+      <tr><td><strong>Health/Metrics</strong></td><td>4</td><td>Health, liveness, readiness, métricas Prometheus</td></tr>
+      <tr><td><strong>OpenAPI</strong></td><td>1</td><td>Especificación OpenAPI 3.1</td></tr>
+      <tr style="font-weight: 700;"><td><strong>Total</strong></td><td><strong>22</strong></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top: 1rem;"><strong>Rate Limiting:</strong> 1000 req/min por tenant · 300 req/min por usuario · Burst 5× · Headers <code>X-RateLimit-Remaining</code>, <code>Retry-After</code></p>
+  <p><strong>Errores:</strong> 13 códigos estructurados con <code>errorCode</code>, <code>message</code>, <code>details[]</code>, <code>correlationId</code> para trazabilidad.</p>
+</section>
+
+<!-- SLIDE 13 — ADRs -->
+<section class="slide">
+  <span class="slide-eyebrow">Decisiones Arquitectónicas</span>
+  <h2>5 ADRs Clave</h2>
+  <table>
+    <thead><tr><th>ADR</th><th>Decisión</th><th>Justificación</th></tr></thead>
+    <tbody>
+      <tr><td><strong>ADR-001</strong></td><td><strong>Quarkus 3.x</strong></td><td>Startup sub-second, baja memoria, integración Keycloak nativa, probado en v1. Spring Boot y Micronaut no justifican migración.</td></tr>
+      <tr><td><strong>ADR-002</strong></td><td><strong>Discriminator Column</strong></td><td>Simplicidad operativa vs Row-Level Security de PostgreSQL. Filtro global en interceptor JAX-RS. Tests de seguridad automatizados.</td></tr>
+      <tr><td><strong>ADR-003</strong></td><td><strong>Qdrant 1.17</strong></td><td>Payload filters nativos, sub-10ms top-K, binario único. Milvus requiere 4+ servicios; PGVector compromete rendimiento en filtros combinados.</td></tr>
+      <tr><td><strong>ADR-004</strong></td><td><strong>OpenAI + abstracción</strong></td><td>Calidad top-tier MTEB (NDCG@10 0.920). Abstracción <code>EmbeddingProvider</code> permite cambiar a modelo local o Cohere sin modificar lógica.</td></tr>
+      <tr><td><strong>ADR-005</strong></td><td><strong>Monolito Modular</strong></td><td>Velocidad de desarrollo, simplicidad operativa, transaccionalidad ACID. Preparado para extracción gradual si la escala lo requiere.</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 1rem; color: var(--text-muted);">Cada ADR incluye contexto completo, alternativas evaluadas, consecuencias y riesgos en el Documento de Arquitectura (§11).</p>
+</section>
+
+<!-- SLIDE 14 — CI/CD -->
+<section class="slide">
+  <span class="slide-eyebrow">Pipeline</span>
+  <h2>CI/CD y Despliegue</h2>
+
+  <p><strong>Pipeline (GitHub Actions):</strong> Push a <code>develop</code>/<code>main</code> → Unit tests → Integration tests (Testcontainers) → Build JVM image → Push to GHCR → Deploy staging</p>
+  <p><strong>Registry:</strong> <code>ghcr.io/breisnerlopez/abax-memory-api:v2.0.0</code></p>
+
+  <table>
+    <thead><tr><th>Ambiente</th><th>Estrategia</th><th>Orquestador</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Desarrollo local</strong></td><td><code>docker compose up -d</code></td><td>Docker Compose</td></tr>
+      <tr><td><strong>QA</strong></td><td>PR preview environment</td><td>Docker Compose</td></tr>
+      <tr><td><strong>Staging</strong></td><td>Push on main → redeploy inmutable</td><td>Kubernetes / Docker Compose</td></tr>
+      <tr><td><strong>Producción</strong></td><td>Release tag → deploy manual con aprobación</td><td>Kubernetes</td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top: 1rem;"><strong>Principios:</strong> inmutable (nunca modificar contenedor en ejecución) · rolling update sin downtime · rollback &lt; 5 minutos · health checks liveness/readiness</p>
+
+  <p><strong>Capacidad Producción (MVP):</strong> 2 réplicas API (2 GB c/u) · 1-2 workers (2 GB) · PostgreSQL 8 GB SSD · Qdrant 4-8 GB · Keycloak 2 réplicas (1 GB c/u)</p>
+</section>
+
+<!-- SLIDE 15 — RIESGOS -->
+<section class="slide">
+  <span class="slide-eyebrow">Riesgos</span>
+  <h2>Riesgos Técnicos — Top 8</h2>
+  <table>
+    <thead><tr><th>#</th><th>Riesgo</th><th>Prob.</th><th>Impacto</th><th>Mitigación clave</th></tr></thead>
+    <tbody>
+      <tr><td><strong>R-01</strong></td><td>Latencia búsqueda &gt; 500ms p95</td><td>Media</td><td>Alto</td><td>Top-k acotado, payload filters Qdrant, re-ranking opcional</td></tr>
+      <tr><td><strong>R-02</strong></td><td>Fuga de datos cross-tenant</td><td>Baja</td><td>Crítico</td><td>Interceptor global TenantIdFilter, tests CE-07, 404 cross-tenant</td></tr>
+      <tr><td><strong>R-03</strong></td><td>Divergencia PG↔Qdrant</td><td>Media</td><td>Medio</td><td>Workers idempotentes, rebuild desde PostgreSQL</td></tr>
+      <tr><td><strong>R-04</strong></td><td>OpenAI API downtime</td><td>Media</td><td>Medio</td><td>Retry + backoff, abstracción para failover a otro proveedor</td></tr>
+      <tr><td><strong>R-05</strong></td><td>Backlog de jobs creciente</td><td>Media</td><td>Medio</td><td>Monitoreo gauge <code>abax_jobs_pending</code>, auto-scaling worker</td></tr>
+      <tr><td><strong>R-06</strong></td><td>Máquina de estados compleja</td><td>Media</td><td>Medio</td><td>Tests exhaustivos de transiciones, diagrama documentado</td></tr>
+      <tr><td><strong>R-07</strong></td><td>CTEs recursivas lentas (graph)</td><td>Media</td><td>Medio</td><td><code>max_graph_depth</code> configurable (default 5), caché en R2</td></tr>
+      <tr><td><strong>R-08</strong></td><td>Extracción futura a microservicios</td><td>Baja</td><td>Bajo</td><td>Bounded contexts con interfaces explícitas, tests ArchUnit</td></tr>
+    </tbody>
+  </table>
+  <div class="card" style="margin-top: 1rem;">
+    <p><strong>Complejidad global del MVP: Alta</strong> — 66 historias Must, 7 épicas, 22 endpoints, 5 roles RBAC, multi-tenant, búsqueda semántica + grafo + auditoría. Concentrada en SearchService, LifecycleService y Seguridad.</p>
+  </div>
+</section>
+
+<!-- SLIDE 16 — PRÓXIMOS PASOS -->
+<section class="slide">
+  <span class="slide-eyebrow">Roadmap</span>
+  <h2>Próximos Pasos</h2>
+  <ol>
+    <li><strong>Aprobación de arquitectura</strong> por el comité → Gate para Fase 4 (Construcción)</li>
+    <li><strong>Setup de infraestructura base:</strong> <code>docker-compose.yml</code> con PostgreSQL 16, Qdrant 1.17, Keycloak 26</li>
+    <li><strong>Migraciones Flyway:</strong> 6 migraciones incrementales (V1–V7)</li>
+    <li><strong>Implementación por épica</strong> (orden de prioridad):
+      <ul>
+        <li>Épica 1: Core de Memorias (CRUD + estados)</li>
+        <li>Épica 2: Búsqueda Semántica (Qdrant + filtros)</li>
+        <li>Épica 3: Relaciones y Grafo</li>
+        <li>Épica 4: Seguridad y Multi-Tenancy</li>
+        <li>Épica 5: Auditoría</li>
+        <li>Épica 6: Perfiles de Dominio</li>
+        <li>Épica 7: Gobernanza y Admin</li>
+      </ul>
+    </li>
+    <li><strong>Revisión de arquitectura</strong> post-Épica 2 (validar rendimiento de búsqueda contra CE-04)</li>
+  </ol>
+</section>
+
+<!-- SLIDE 17 — CTA -->
+<section class="slide">
+  <span class="slide-eyebrow">Decisión Solicitada</span>
+  <h2>¿Aprobamos esta Arquitectura para la Fase 4 de Construcción?</h2>
+
+  <p><strong>Entregables fundacionales disponibles:</strong></p>
+  <ul>
+    <li>Documento de Arquitectura completo (15 secciones) ✅</li>
+    <li>5 ADRs con alternativas evaluadas ✅</li>
+    <li>Modelo de datos físico con DDL completo ✅</li>
+    <li>Diagramas C4 (Contexto + Contenedores) ✅</li>
+    <li>Matriz de integraciones (8 integraciones) ✅</li>
+    <li>Estrategia de testing y CI/CD ✅</li>
+    <li>8 riesgos técnicos con mitigación ✅</li>
+  </ul>
+
+  <div class="cta">
+    <span class="cta-question">Sí, aprobamos · Necesitamos ajustes · Revisar en próxima sesión</span>
+  </div>
+</section>
+
+<!-- SLIDE 18 — GLOSARIO -->
+<section class="slide">
+  <span class="slide-eyebrow">Referencia</span>
+  <h2>Glosario</h2>
+  <ul>
+    <li><strong>ADR:</strong> Architecture Decision Record — documento que registra una decisión arquitectónica, su contexto, alternativas evaluadas y consecuencias.</li>
+    <li><strong>Qdrant:</strong> Base de datos vectorial open-source para almacenar embeddings y ejecutar búsqueda semántica por similitud de coseno.</li>
+    <li><strong>OIDC:</strong> OpenID Connect — protocolo de autenticación sobre OAuth 2.0 que permite verificar identidad y obtener claims desde Keycloak.</li>
+    <li><strong>RBAC:</strong> Role-Based Access Control — control de acceso basado en 5 roles: api-consumer, memory-operator, memory-reviewer, memory-admin, memory-auditor.</li>
+    <li><strong>Modulith:</strong> Monolito modular — patrón que implementa bounded contexts como módulos dentro de un solo deployable, preparado para evolución futura a microservicios.</li>
+    <li><strong>PKCE:</strong> Proof Key for Code Exchange — extensión de OAuth 2.0 que protege SPAs contra ataques de interceptación de código de autorización.</li>
+    <li><strong>JWT:</strong> JSON Web Token — token de acceso firmado que transporta claims del usuario (sub, tenantId, roles, exp).</li>
+  </ul>
+</section>
+
+</body>
+</html>

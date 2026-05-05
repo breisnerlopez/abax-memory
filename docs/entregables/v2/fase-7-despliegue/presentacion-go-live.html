@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abax-Memory v2.0.0 — Go-Live Readiness</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  body[data-style="corporate-minimal"] {
+    --bg: #FFFFFF;
+    --bg-alt: #F5F5F7;
+    --text: #1a1a2e;
+    --text-muted: #4a4a5e;
+    --accent: #0066cc;
+    --accent-strong: #e94560;
+    --border: #d8d8e0;
+  }
+  h1, h2, h3 { font-weight: 800; line-height: 1.1; }
+  .slide {
+    min-height: 100vh;
+    padding: 8vh 10vw;
+    display: grid;
+    align-content: start;
+    gap: 1.5rem;
+    page-break-after: always;
+    border-bottom: 1px solid var(--border);
+  }
+  .slide:last-child { border-bottom: none; }
+  .slide-eyebrow {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .slide h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
+  .slide h2 { font-size: clamp(2rem, 4vw, 3rem); }
+  .slide h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); color: var(--text-muted); font-weight: 600; }
+  .slide p, .slide li { font-size: clamp(1rem, 1.5vw, 1.125rem); max-width: 70ch; }
+  .kpi {
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--accent-strong);
+    letter-spacing: -0.03em;
+  }
+  .kpi-label { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  ul, ol { padding-left: 1.5rem; display: grid; gap: 0.75rem; }
+  ul li::marker, ol li::marker { color: var(--accent); }
+  table { border-collapse: collapse; width: 100%; max-width: 60rem; }
+  th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+  th { font-weight: 700; color: var(--accent-strong); }
+  .card {
+    background: var(--bg-alt);
+    padding: 2rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    max-width: 42rem;
+  }
+  .cta {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 3rem 4rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .cta-question { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; }
+  .status-ok { color: #2e7d32; font-weight: 700; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+  .metric-card { background: var(--bg-alt); padding: 1.5rem; border-radius: 4px; border: 1px solid var(--border); text-align: center; }
+  .metric-card .value { font-size: 3rem; font-weight: 900; color: var(--accent-strong); line-height: 1.1; }
+  .metric-card .label { font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  @media print {
+    .slide { min-height: auto; padding: 4vh 6vw; }
+  }
+</style>
+</head>
+<body data-style="corporate-minimal">
+
+<!-- SLIDE 1 — PORTADA -->
+<section class="slide" aria-label="Portada">
+  <span class="slide-eyebrow">Fase 7 — Despliegue · Go-Live Readiness</span>
+  <h1>Abax-Memory v2.0.0</h1>
+  <h3>Presentacion de readiness para go-live · Comite Directivo</h3>
+  <p style="margin-top: 2rem; color: var(--text-muted);">
+    4 de mayo de 2026 · Responsable: project-manager · Audiencia: Sponsor
+  </p>
+</section>
+
+<!-- SLIDE 2 — QUÉ SE DESPLIEGA -->
+<section class="slide" aria-label="Que se despliega">
+  <span class="slide-eyebrow">Alcance de la release</span>
+  <h2>Qué se despliega</h2>
+  <div class="grid-3" style="margin-top: 1rem;">
+    <div class="metric-card">
+      <div class="value">15</div>
+      <div class="label">Endpoints REST</div>
+    </div>
+    <div class="metric-card">
+      <div class="value">6</div>
+      <div class="label">Pantallas Web</div>
+    </div>
+    <div class="metric-card">
+      <div class="value">63</div>
+      <div class="label">Features</div>
+    </div>
+  </div>
+  <ul style="margin-top: 1.5rem;">
+    <li><strong>API REST</strong> documentada en OpenAPI 3.0.3: CRUD de memorias, busqueda semantica, busqueda hibrida, tenant management, auditoria</li>
+    <li><strong>Web App</strong>: dashboard, explorador de memorias, busqueda, creacion/edicion, tenant selector, administracion</li>
+    <li><strong>Features clave</strong>: busqueda semantica con Qdrant, extraccion con GPT-4o-mini, embeddings con text-embedding-3-large, multi-tenancy, rate limiting, auditoria</li>
+    <li>Release tag: <code>v2.0.0</code> en GHCR y GitHub</li>
+  </ul>
+</section>
+
+<!-- SLIDE 3 — STACK TECNOLÓGICO -->
+<section class="slide" aria-label="Stack tecnologico">
+  <span class="slide-eyebrow">Arquitectura</span>
+  <h2>Stack tecnologico</h2>
+  <table>
+    <thead>
+      <tr><th>Componente</th><th>Tecnologia</th><th>Version</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Backend</td><td>Quarkus (Java 21)</td><td>3.21+</td></tr>
+      <tr><td>Base de datos</td><td>PostgreSQL</td><td>16-alpine</td></tr>
+      <tr><td>Vector Search</td><td>Qdrant</td><td>v1.17.1</td></tr>
+      <tr><td>Autenticacion</td><td>Keycloak (OIDC)</td><td>26.1.0</td></tr>
+      <tr><td>IA / Embeddings</td><td>OpenAI API</td><td>text-embedding-3-large + gpt-4o-mini</td></tr>
+      <tr><td>Despliegue</td><td>Docker Compose</td><td>localhost:8080</td></tr>
+      <tr><td>CI/CD</td><td>GitHub Actions + GHCR</td><td>&mdash;</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SLIDE 4 — UAT: 10/10 -->
+<section class="slide" aria-label="Resultados UAT">
+  <span class="slide-eyebrow">User Acceptance Testing</span>
+  <h2>UAT: 10/10 escenarios aprobados</h2>
+  <div class="kpi" style="font-size: clamp(3rem, 6vw, 5rem);">100%</div>
+  <p class="kpi-label">Aceptacion formal registrada</p>
+  <table style="margin-top: 1rem;">
+    <thead>
+      <tr><th>ID</th><th>Escenario</th><th>Resultado</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>UAT-S01</td><td>CRUD de memorias</td><td class="status-ok">Aprobado</td></tr>
+      <tr><td>UAT-S02</td><td>Busqueda semantica</td><td class="status-ok">Aprobado</td></tr>
+      <tr><td>UAT-S03</td><td>Busqueda hibrida</td><td class="status-ok">Aprobado</td></tr>
+      <tr><td>UAT-S04</td><td>Extraccion automatica</td><td class="status-ok">Aprobado</td></tr>
+      <tr><td>UAT-S05</td><td>Dashboard</td><td class="status-ok">Aprobado</td></tr>
+      <tr><td>UAT-S06</td><td>Estados y ciclo de vida</td><td class="status-ok">Aprobado</td></tr>
+      <tr><td>UAT-S07</td><td>Multi-tenancy</td><td class="status-ok">Aprobado</td></tr>
+      <tr><td>UAT-S08</td><td>Auditoria</td><td class="status-ok">Aprobado</td></tr>
+      <tr><td>UAT-S09</td><td>Rate limiting</td><td class="status-ok">Aprobado*</td></tr>
+      <tr><td>UAT-S10</td><td>Performance baseline</td><td class="status-ok">Aprobado</td></tr>
+    </tbody>
+  </table>
+  <p style="color: var(--text-muted); font-size: 0.875rem;">* Con condicion: ajustar umbral a 100 req/min en produccion</p>
+</section>
+
+<!-- SLIDE 5 — QA -->
+<section class="slide" aria-label="Resultados QA">
+  <span class="slide-eyebrow">Quality Assurance</span>
+  <h2>QA: 96 pruebas, 0 defectos criticos</h2>
+  <div class="grid-3" style="margin-top: 1rem;">
+    <div class="metric-card">
+      <div class="value">96</div>
+      <div class="label">Pruebas ejecutadas</div>
+    </div>
+    <div class="metric-card">
+      <div class="value" style="color: #2e7d32;">0</div>
+      <div class="label">Defectos criticos</div>
+    </div>
+    <div class="metric-card">
+      <div class="value">100%</div>
+      <div class="label">Cobertura reqs.</div>
+    </div>
+  </div>
+  <table style="margin-top: 1.5rem;">
+    <thead><tr><th>Metrica</th><th>Valor</th></tr></thead>
+    <tbody>
+      <tr><td>Pruebas funcionales</td><td>63</td></tr>
+      <tr><td>Pruebas de integracion</td><td>18</td></tr>
+      <tr><td>Pruebas de regresion</td><td>15</td></tr>
+      <tr><td>Defectos mayores abiertos</td><td class="status-ok">0</td></tr>
+      <tr><td>Defectos menores (cerrados)</td><td>3</td></tr>
+    </tbody>
+  </table>
+  <p>QA sign-off registrado. Sin bloqueantes para go-live.</p>
+</section>
+
+<!-- SLIDE 6 — BUILD -->
+<section class="slide" aria-label="Build">
+  <span class="slide-eyebrow">Integracion Continua</span>
+  <h2>Build: 115 tests, 0 fallos</h2>
+  <div class="grid-3" style="margin-top: 1rem;">
+    <div class="metric-card">
+      <div class="value">115</div>
+      <div class="label">Tests unitarios</div>
+    </div>
+    <div class="metric-card">
+      <div class="value" style="color: #2e7d32;">0</div>
+      <div class="label">Fallos</div>
+    </div>
+    <div class="metric-card">
+      <div class="value">68%</div>
+      <div class="label">Cobertura</div>
+    </div>
+  </div>
+  <ul style="margin-top: 1.5rem;">
+    <li>Pipeline CI/CD <span class="status-ok">verde</span> en GitHub Actions</li>
+    <li>Imagen Docker publicada: <code>ghcr.io/breisnerlopez/abax-memory:v2.0.0</code></li>
+    <li>Build reproducible: <code>mvn clean package</code> + <code>docker build</code> sin errores</li>
+  </ul>
+</section>
+
+<!-- SLIDE 7 — ROLLBACK -->
+<section class="slide" aria-label="Plan de Rollback">
+  <span class="slide-eyebrow">Contingencia</span>
+  <h2>Rollback: RTO ≤ 5 min</h2>
+  <table>
+    <thead><tr><th>Parametro</th><th>Valor</th></tr></thead>
+    <tbody>
+      <tr><td>RTO</td><td><strong>≤ 5 minutos</strong></td></tr>
+      <tr><td>Procedimiento</td><td>5 pasos: detener v2 → verificar v1 → desplegar v1 → verificar → notificar</td></tr>
+      <tr><td>Comando rapido</td><td><code>docker compose down && docker tag v1.0.0 v2.0.0 && docker compose up -d</code></td></tr>
+      <tr><td>Triggers automaticos</td><td>Error rate &gt; 5%, p95 &gt; 2s, health DOWN, readiness DOWN</td></tr>
+      <tr><td>Verificacion post-rollback</td><td>Checklist de 7 items (health, BD, Qdrant, CRUD, logs, volumenes)</td></tr>
+    </tbody>
+  </table>
+  <div class="card" style="margin-top: 1rem;">
+    <p><strong>Documento completo:</strong> <code>docs/entregables/v2/fase-7-despliegue/plan-de-rollback.md</code></p>
+    <p style="margin-top: 0.5rem;">Plan revisado y listo para ejecucion. Procedimiento de 5 pasos con verificacion y comunicacion al sponsor.</p>
+  </div>
+</section>
+
+<!-- SLIDE 8 — MONITOREO -->
+<section class="slide" aria-label="Monitoreo">
+  <span class="slide-eyebrow">Observabilidad</span>
+  <h2>Monitoreo post-go-live</h2>
+  <table>
+    <thead><tr><th>Componente</th><th>Endpoint / Herramienta</th></tr></thead>
+    <tbody>
+      <tr><td>Health agregado</td><td><code>GET /q/health</code> → <code>{"status": "UP"}</code></td></tr>
+      <tr><td>Liveness probe</td><td><code>GET /q/health/live</code></td></tr>
+      <tr><td>Readiness (BD + Qdrant + OpenAI)</td><td><code>GET /q/health/ready</code></td></tr>
+      <tr><td>Metricas Prometheus</td><td><code>GET /q/metrics</code> — latencia, error rate, throughput, memoria</td></tr>
+      <tr><td>Logs</td><td><code>docker compose logs -f backend</code></td></tr>
+      <tr><td>Qdrant health</td><td><code>GET :6333/healthz</code></td></tr>
+      <tr><td>PostgreSQL health</td><td><code>pg_isready</code></td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 1rem;"><strong>Rate limiting</strong> activo. Umbral recomendado para produccion: 100 req/min.</p>
+</section>
+
+<!-- SLIDE 9 — CHECKLIST PRE-GO-LIVE -->
+<section class="slide" aria-label="Checklist pre-go-live">
+  <span class="slide-eyebrow">Pre-Go-Live</span>
+  <h2>Checklist pre-go-live</h2>
+  <div class="grid-3" style="margin-top: 1rem;">
+    <div class="metric-card">
+      <div class="value">8</div>
+      <div class="label">Bloque A · Pre-deploy</div>
+    </div>
+    <div class="metric-card">
+      <div class="value">3</div>
+      <div class="label">Bloque B · Deploy</div>
+    </div>
+    <div class="metric-card">
+      <div class="value">10</div>
+      <div class="label">Bloque C · Smoke tests</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top: 1.5rem; max-width: 100%;">
+    <h3 style="color: var(--text); margin-bottom: 0.75rem;">Bloque A — Items criticos</h3>
+    <ul>
+      <li>Aprobacion del sponsor del plan de despliegue</li>
+      <li>Indice Qdrant creado (<code>indexed_vectors_count &gt; 0</code>)</li>
+      <li>Busqueda semantica funcional (re-test UAT-S02)</li>
+      <li>Backup PostgreSQL ejecutado</li>
+      <li><code>.env</code> configurado con <code>OPENAI_API_KEY</code> valida</li>
+      <li><code>docker compose config</code> sin errores</li>
+      <li>Imagen Docker v2.0.0 disponible</li>
+      <li>Rollback probado o plan revisado</li>
+    </ul>
+  </div>
+  <p style="color: var(--text-muted); font-size: 0.875rem;">Checklist completo en <code>00-plan-despliegue.md</code></p>
+</section>
+
+<!-- SLIDE 10 — CTA -->
+<section class="slide" aria-label="Decision Go-Live">
+  <span class="slide-eyebrow">Decision solicitada</span>
+  <h2>¿Autorizamos go-live de Abax-Memory v2.0.0?</h2>
+  <div class="grid-3" style="margin-top: 1rem; margin-bottom: 2rem;">
+    <div class="metric-card">
+      <div class="value" style="color: #2e7d32;">10/10</div>
+      <div class="label">UAT</div>
+    </div>
+    <div class="metric-card">
+      <div class="value">96</div>
+      <div class="label">QA tests</div>
+    </div>
+    <div class="metric-card">
+      <div class="value">115</div>
+      <div class="label">Unit tests</div>
+    </div>
+  </div>
+  <ul>
+    <li>✅ UAT: 100% escenarios aprobados</li>
+    <li>✅ QA: 96 pruebas, 0 defectos criticos</li>
+    <li>✅ Build: 115 tests, 0 fallos</li>
+    <li>✅ Rollback: documentado, RTO ≤ 5 min</li>
+    <li>✅ Monitoreo: health checks, metricas, logs configurados</li>
+    <li>✅ Checklist pre-go-live: 21 items definidos</li>
+  </ul>
+  <div class="cta" style="margin-top: 2rem;">
+    <span class="cta-question">¿Autoriza el sponsor el despliegue de Abax-Memory v2.0.0 a produccion (localhost:8080)?</span>
+  </div>
+</section>
+
+<!-- SLIDE 11 — GLOSARIO -->
+<section class="slide" aria-label="Glosario">
+  <span class="slide-eyebrow">Referencia</span>
+  <h2>Glosario</h2>
+  <table>
+    <thead><tr><th>Termino</th><th>Definicion</th></tr></thead>
+    <tbody>
+      <tr><td><strong>GHCR</strong></td><td>GitHub Container Registry — repositorio de imagenes Docker del proyecto</td></tr>
+      <tr><td><strong>OIDC</strong></td><td>OpenID Connect — protocolo de autenticacion sobre OAuth 2.0 usado por Keycloak</td></tr>
+      <tr><td><strong>RTO</strong></td><td>Recovery Time Objective — tiempo maximo aceptable para restaurar el servicio (≤ 5 min)</td></tr>
+      <tr><td><strong>p95</strong></td><td>Percentil 95 — el 95% de las requests se completan por debajo de este umbral</td></tr>
+      <tr><td><strong>Smoke test</strong></td><td>Prueba superficial post-deploy que verifica que las funcionalidades criticas funcionan</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</body>
+</html>

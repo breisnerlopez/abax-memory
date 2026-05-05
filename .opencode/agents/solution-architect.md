@@ -10,7 +10,7 @@ permission:
   glob: allow
   grep: allow
   bash: deny
-  webfetch: ask
+  webfetch: allow
   skill: allow
 ---
 
