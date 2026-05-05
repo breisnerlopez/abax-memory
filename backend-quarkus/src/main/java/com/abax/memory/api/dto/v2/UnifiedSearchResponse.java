@@ -1,5 +1,7 @@
 package com.abax.memory.api.dto.v2;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +16,7 @@ import java.util.Map;
  *
  * <p>References: EP-005 v2, Unified Search</p>
  */
+@RegisterForReflection
 public class UnifiedSearchResponse {
 
     private List<ScoredMemory> items;

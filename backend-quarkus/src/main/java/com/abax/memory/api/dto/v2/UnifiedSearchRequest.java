@@ -3,6 +3,7 @@ package com.abax.memory.api.dto.v2;
 import com.abax.memory.domain.enums.LifecycleState;
 import com.abax.memory.domain.enums.MemoryKind;
 import com.abax.memory.domain.enums.SensitivityLevel;
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.List;
  *
  * <p>References: EP-005 v2, Unified Search</p>
  */
+@RegisterForReflection
 public class UnifiedSearchRequest {
 
     @NotBlank(message = "query is required")
