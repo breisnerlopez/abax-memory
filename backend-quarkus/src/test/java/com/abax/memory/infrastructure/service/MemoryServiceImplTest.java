@@ -358,4 +358,166 @@ class MemoryServiceImplTest {
                 TENANT_A, "reviewer");
         assertThat(reviewerResult.items()).anyMatch(r -> "Pending Memory".equals(r.title()));
     }
+
+    // ── Review Workflow (EP-006 / UAT-S05) ──────────────────────────
+
+    @Test
+    @Order(17)
+    @DisplayName("requestReview — DRAFT → PENDING transition works")
+    @Transactional
+    void requestReview_shouldTransitionDraftToPending() {
+        var created = memoryService.createV2(
+                new CreateMemoryRequest("Review Me", "Content for review.",
+                        null, null, null, null, null, null, null, null), TENANT_A);
+        assertThat(created.lifecycleState()).isEqualTo(LifecycleState.DRAFT);
+
+        var result = memoryService.requestReview(created.id(), TENANT_A, "reviewer-1");
+
+        assertThat(result.lifecycleState()).isEqualTo(LifecycleState.PENDING);
+        assertThat(result.id()).isEqualTo(created.id());
+    }
+
+    @Test
+    @Order(18)
+    @DisplayName("requestReview — throws on invalid transition (ACTIVE → PENDING)")
+    @Transactional
+    void requestReview_shouldThrowWhenTransitionInvalid() {
+        var created = memoryService.createV2(
+                new CreateMemoryRequest("Active Mem", "Content.",
+                        null, null, null, null, null, null, null, null), TENANT_A);
+        // Move to ACTIVE via updateV2
+        memoryService.updateV2(created.id(),
+                new UpdateMemoryRequest(null, null, null, LifecycleState.PENDING, null, null),
+                TENANT_A);
+        memoryService.updateV2(created.id(),
+                new UpdateMemoryRequest(null, null, null, LifecycleState.ACTIVE, null, null),
+                TENANT_A);
+
+        // ACTIVE → PENDING is not a valid transition
+        assertThatThrownBy(() ->
+                memoryService.requestReview(created.id(), TENANT_A, "reviewer-1"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Cannot request review");
+    }
+
+    @Test
+    @Order(19)
+    @DisplayName("approveReview — PENDING → ACTIVE transition works")
+    @Transactional
+    void approveReview_shouldTransitionPendingToActive() {
+        var created = memoryService.createV2(
+                new CreateMemoryRequest("Approve Me", "Content.",
+                        null, null, null, null, null, null, null, null), TENANT_A);
+        memoryService.requestReview(created.id(), TENANT_A, "submitter");
+
+        var result = memoryService.approveReview(created.id(), TENANT_A, "reviewer-1", "Looks good");
+
+        assertThat(result.lifecycleState()).isEqualTo(LifecycleState.ACTIVE);
+        assertThat(result.reviewerId()).isEqualTo("reviewer-1");
+        assertThat(result.reviewComment()).isEqualTo("Looks good");
+        assertThat(result.isConsumerVisible()).isTrue();
+    }
+
+    @Test
+    @Order(20)
+    @DisplayName("approveReview — throws on invalid transition (DRAFT → ACTIVE)")
+    @Transactional
+    void approveReview_shouldThrowWhenTransitionInvalid() {
+        var created = memoryService.createV2(
+                new CreateMemoryRequest("Draft Mem", "Content.",
+                        null, null, null, null, null, null, null, null), TENANT_A);
+
+        // DRAFT → ACTIVE is not valid (must go through PENDING)
+        assertThatThrownBy(() ->
+                memoryService.approveReview(created.id(), TENANT_A, "reviewer-1", "skip pending"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Cannot approve review");
+    }
+
+    @Test
+    @Order(21)
+    @DisplayName("returnToDraft — PENDING → DRAFT (reject/rework) transition works")
+    @Transactional
+    void returnToDraft_shouldTransitionPendingToDraft() {
+        var created = memoryService.createV2(
+                new CreateMemoryRequest("Reject Me", "Content.",
+                        null, null, null, null, null, null, null, null), TENANT_A);
+        memoryService.requestReview(created.id(), TENANT_A, "submitter");
+
+        var result = memoryService.returnToDraft(created.id(), TENANT_A, "reviewer-1", "Needs more detail");
+
+        assertThat(result.lifecycleState()).isEqualTo(LifecycleState.DRAFT);
+        assertThat(result.reviewerId()).isEqualTo("reviewer-1");
+        assertThat(result.reviewComment()).isEqualTo("Needs more detail");
+    }
+
+    @Test
+    @Order(22)
+    @DisplayName("returnToDraft — throws on invalid transition (ACTIVE → DRAFT is invalid)")
+    @Transactional
+    void returnToDraft_shouldThrowWhenTransitionInvalid() {
+        var created = memoryService.createV2(
+                new CreateMemoryRequest("Active To Draft", "Content.",
+                        null, null, null, null, null, null, null, null), TENANT_A);
+        memoryService.updateV2(created.id(),
+                new UpdateMemoryRequest(null, null, null, LifecycleState.PENDING, null, null),
+                TENANT_A);
+        memoryService.updateV2(created.id(),
+                new UpdateMemoryRequest(null, null, null, LifecycleState.ACTIVE, null, null),
+                TENANT_A);
+
+        // ACTIVE → DRAFT is not a valid transition
+        assertThatThrownBy(() ->
+                memoryService.returnToDraft(created.id(), TENANT_A, "reviewer-1", "invalid"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Cannot return to DRAFT");
+    }
+
+    @Test
+    @Order(23)
+    @DisplayName("review workflow — REJECTED → DRAFT → PENDING (resubmit after rejection)")
+    @Transactional
+    void requestReview_shouldAllowResubmitAfterRejection() {
+        var created = memoryService.createV2(
+                new CreateMemoryRequest("Resubmit Me", "Content.",
+                        null, null, null, null, null, null, null, null), TENANT_A);
+        // DRAFT → PENDING → REJECTED (via rejectReview)
+        memoryService.requestReview(created.id(), TENANT_A, "submitter");
+        memoryService.rejectReview(created.id(), TENANT_A, "reviewer-1", "Not ready yet");
+
+        // Verify it's REJECTED
+        var rejected = memoryService.getByIdV2(created.id(), TENANT_A);
+        assertThat(rejected.lifecycleState()).isEqualTo(LifecycleState.REJECTED);
+
+        // Step 1: REJECTED → DRAFT (return to draft for rework)
+        memoryService.returnToDraft(created.id(), TENANT_A, "submitter", "Revised");
+        var draft = memoryService.getByIdV2(created.id(), TENANT_A);
+        assertThat(draft.lifecycleState()).isEqualTo(LifecycleState.DRAFT);
+
+        // Step 2: DRAFT → PENDING (resubmit for review)
+        memoryService.requestReview(created.id(), TENANT_A, "submitter");
+        var pending = memoryService.getByIdV2(created.id(), TENANT_A);
+        assertThat(pending.lifecycleState()).isEqualTo(LifecycleState.PENDING);
+    }
+
+    @Test
+    @Order(24)
+    @DisplayName("review workflow — full DRAFT → PENDING → ACTIVE happy path")
+    @Transactional
+    void reviewWorkflow_fullHappyPath() {
+        var created = memoryService.createV2(
+                new CreateMemoryRequest("Full Cycle", "Full content.",
+                        null, null, null, null, null, null, null, null), TENANT_A);
+
+        assertThat(created.lifecycleState()).isEqualTo(LifecycleState.DRAFT);
+
+        // Step 1: Submit for review
+        var pending = memoryService.requestReview(created.id(), TENANT_A, "author");
+        assertThat(pending.lifecycleState()).isEqualTo(LifecycleState.PENDING);
+
+        // Step 2: Approve
+        var active = memoryService.approveReview(created.id(), TENANT_A, "reviewer", "Great work!");
+        assertThat(active.lifecycleState()).isEqualTo(LifecycleState.ACTIVE);
+        assertThat(active.isConsumerVisible()).isTrue();
+    }
 }

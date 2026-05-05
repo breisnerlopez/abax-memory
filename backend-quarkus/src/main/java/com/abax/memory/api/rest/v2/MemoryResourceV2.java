@@ -225,7 +225,7 @@ public class MemoryResourceV2 {
      *
      * <p>Dispatches to the appropriate review method based on the action:
      * <ul>
-     *   <li>{@code REQUEST} — submit for review: DRAFT → PENDING</li>
+     *   <li>{@code REQUEST} / {@code SUBMIT} — submit for review: DRAFT → PENDING</li>
      *   <li>{@code APPROVE} — approve and activate: PENDING → ACTIVE</li>
      *   <li>{@code REJECT}  — send back for rework: PENDING → DRAFT</li>
      * </ul>
@@ -250,9 +250,9 @@ public class MemoryResourceV2 {
         String actorId = resolveActorId();
 
         MemoryResponse response = switch (request.action()) {
-            case REQUEST -> memoryService.requestReview(id, tenantId, actorId);
-            case APPROVE -> memoryService.approveReview(id, tenantId, actorId, request.comment());
-            case REJECT  -> memoryService.returnToDraft(id, tenantId, actorId, request.comment());
+            case REQUEST, SUBMIT -> memoryService.requestReview(id, tenantId, actorId);
+            case APPROVE         -> memoryService.approveReview(id, tenantId, actorId, request.comment());
+            case REJECT          -> memoryService.returnToDraft(id, tenantId, actorId, request.comment());
         };
 
         return Response.ok(response).build();
