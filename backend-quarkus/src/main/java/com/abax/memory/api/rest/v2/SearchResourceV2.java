@@ -1,6 +1,7 @@
 package com.abax.memory.api.rest.v2;
 
 import com.abax.memory.api.dto.v2.CreateRelationRequest;
+import com.abax.memory.api.dto.v2.ErrorResponse;
 import com.abax.memory.api.dto.v2.GraphResponse;
 import com.abax.memory.api.dto.v2.MemoryResponse;
 import com.abax.memory.api.dto.v2.SearchResponse;
@@ -8,8 +9,10 @@ import com.abax.memory.api.dto.v2.SemanticSearchRequest;
 import com.abax.memory.api.dto.v2.UnifiedSearchRequest;
 import com.abax.memory.api.dto.v2.UnifiedSearchResponse;
 import com.abax.memory.domain.enums.GraphEntryStrategy;
+import com.abax.memory.domain.model.DeleteNamespaceResult;
 import com.abax.memory.domain.model.GraphStrategyOverride;
 import com.abax.memory.domain.model.Relation;
+import com.abax.memory.domain.service.NamespaceService;
 import com.abax.memory.domain.service.RelationService;
 import com.abax.memory.domain.service.SearchService;
 import com.abax.memory.infrastructure.security.TenantContext;
@@ -25,8 +28,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -73,7 +78,20 @@ public class SearchResourceV2 {
     RelationService relationService;
 
     @Inject
+    NamespaceService namespaceService;
+
+    @Inject
     TenantContext tenantContext;
+
+    @Context
+    UriInfo uriInfo;
+
+    /**
+     * Returns the current request path for error responses.
+     */
+    private String requestPath() {
+        return uriInfo != null ? uriInfo.getRequestUri().getPath() : "/api/v2";
+    }
 
     // ── Tenant resolution ───────────────────────────────────────────
 
@@ -126,13 +144,16 @@ public class SearchResourceV2 {
             @APIResponse(responseCode = "400", description = "Validation error"),
             @APIResponse(responseCode = "403", description = "Forbidden")
     })
-    public SearchResponse hybridSearch(
+    public Response hybridSearch(
             @HeaderParam("X-Tenant-Id") String xTenantId,
             @Valid SemanticSearchRequest request) {
         String tenantId = resolveTenant(xTenantId);
         SearchResponse result = searchService.hybridSearch(request, tenantId);
-        // Cannot set headers on SearchResponse directly; deprecation is documented in OpenAPI
-        return result;
+        return Response.ok(result)
+                .header("Deprecation", "true")
+                .header("Sunset", "Sat, 01 Nov 2026 00:00:00 GMT")
+                .header("Warning", "299 - \"This endpoint is deprecated. Use POST /api/v2/search with semanticWeight and lexicalWeight instead.\"")
+                .build();
     }
 
     /**
@@ -155,19 +176,19 @@ public class SearchResourceV2 {
     })
     public UnifiedSearchResponse unifiedSearch(
             @HeaderParam("X-Tenant-Id") String xTenantId,
-            @Valid UnifiedSearchRequest request,
             @HeaderParam("X-Graph-Strategy")
-            @Parameter(description = "Graph expansion strategy: auto, on, off. 'off' disables graph expansion.",
+            @Parameter(description = "Graph expansion strategy: auto, on, off, single, top-k, threshold. 'off' disables graph expansion entirely.",
                        example = "auto")
             String xGraphStrategy,
             @HeaderParam("X-Graph-K")
-            @Parameter(description = "Number of entry points for top-k strategy (1-10).",
+            @Parameter(description = "Number of entry points for top-k strategy (1-10). Required when X-Graph-Strategy=top-k.",
                        example = "5")
             Integer xGraphK,
             @HeaderParam("X-Graph-Threshold")
-            @Parameter(description = "Score threshold for threshold strategy (0.0-1.0).",
+            @Parameter(description = "Score threshold for threshold strategy (0.0-1.0). Required when X-Graph-Strategy=threshold.",
                        example = "0.85")
-            Double xGraphThreshold) {
+            Double xGraphThreshold,
+            @Valid UnifiedSearchRequest request) {
         String tenantId = resolveTenant(xTenantId);
 
         // FT-V21-004.1: Parse X-Graph-Strategy header
@@ -333,10 +354,9 @@ public class SearchResourceV2 {
         // REPLACE_BEFORE_PROD with OIDC role claim validation.
         if (xRole == null || !"admin".equalsIgnoreCase(xRole.trim())) {
             return Response.status(Response.Status.FORBIDDEN)
-                    .entity(Map.of(
-                            "errorCode", "FORBIDDEN",
-                            "message", "Admin role required for re-index operation"
-                    ))
+                    .entity(ErrorResponse.of("FORBIDDEN",
+                            "Admin role required for re-index operation",
+                            requestPath()))
                     .build();
         }
 
@@ -407,6 +427,73 @@ public class SearchResourceV2 {
         )).build();
     }
 
+    /**
+     * Delete a namespace and all its resources atomically — FT-V21-004.3.
+     *
+     * <p>Migrated from {@code AdminResourceV2} to consolidate admin endpoints
+     * and fix DEF-V21-001 (RESTEasy Reactive path resolution conflict).</p>
+     *
+     * <p>Requires:
+     * <ul>
+     *   <li>Role: {@code memory-admin}</li>
+     *   <li>Header: {@code X-Confirm-Delete: true}</li>
+     * </ul>
+     * </p>
+     */
+    @DELETE
+    @Path("/admin/namespaces/{name}")
+    @Tag(name = "Admin V2")
+    @Operation(summary = "Delete namespace", description = "Atomically deletes all memories, relations, and Qdrant points for a namespace. Requires memory-admin role and X-Confirm-Delete header.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Namespace deleted successfully",
+                    content = @Content(schema = @Schema(implementation = DeleteNamespaceResult.class))),
+            @APIResponse(responseCode = "400", description = "Missing X-Confirm-Delete header"),
+            @APIResponse(responseCode = "403", description = "Forbidden — admin role required"),
+            @APIResponse(responseCode = "404", description = "Namespace not found"),
+            @APIResponse(responseCode = "500", description = "Internal server error (Qdrant cleanup failed)")
+    })
+    public Response deleteNamespace(
+            @HeaderParam("X-Tenant-Id") String xTenantId,
+            @HeaderParam("X-Role") String xRole,
+            @HeaderParam("X-Confirm-Delete") String xConfirmDelete,
+            @Parameter(description = "Namespace name to delete", required = true, example = "production-incidents")
+            @PathParam("name") String namespace) {
+
+        // Role check — memory-admin required
+        if (xRole == null || !"memory-admin".equalsIgnoreCase(xRole.trim())) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(ErrorResponse.of("FORBIDDEN",
+                            "Admin role (memory-admin) required for namespace deletion",
+                            requestPath()))
+                    .build();
+        }
+
+        // Confirmation header required
+        if (!"true".equalsIgnoreCase(xConfirmDelete)) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(ErrorResponse.of("CONFIRMATION_REQUIRED",
+                            "X-Confirm-Delete: true header required for namespace deletion",
+                            requestPath()))
+                    .build();
+        }
+
+        String tenantId = resolveTenant(xTenantId);
+
+        try {
+            DeleteNamespaceResult result = namespaceService.deleteNamespace(namespace, tenantId);
+            return Response.ok(result).build();
+        } catch (jakarta.ws.rs.NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.errorv(e, "Namespace deletion failed: namespace={0}, tenant={1}", namespace, tenantId);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(ErrorResponse.of("NAMESPACE_DELETE_FAILED",
+                            "Namespace deletion failed: " + e.getMessage(),
+                            requestPath()))
+                    .build();
+        }
+    }
+
     // ── Private helpers ─────────────────────────────────────────────
 
     /**
@@ -460,9 +547,10 @@ public class SearchResourceV2 {
                 LOG.warnv("Invalid X-Graph-Strategy header value: {0}. Valid: auto, on, off, single, top-k, threshold", xGraphStrategy);
                 throw new jakarta.ws.rs.BadRequestException(
                         jakarta.ws.rs.core.Response.status(400)
-                                .entity(Map.of("errorCode", "INVALID_HEADER",
-                                        "message", "Invalid X-Graph-Strategy: " + xGraphStrategy
-                                                + ". Valid: auto, on, off, single, top-k, threshold"))
+                                .entity(ErrorResponse.of("INVALID_HEADER",
+                                        "Invalid X-Graph-Strategy: " + xGraphStrategy
+                                                + ". Valid: auto, on, off, single, top-k, threshold",
+                                        requestPath()))
                                 .build());
         }
     }
@@ -471,8 +559,9 @@ public class SearchResourceV2 {
         if (k < 1 || k > 10) {
             throw new jakarta.ws.rs.BadRequestException(
                     jakarta.ws.rs.core.Response.status(400)
-                            .entity(Map.of("errorCode", "INVALID_HEADER",
-                                    "message", "X-Graph-K must be between 1 and 10, got: " + k))
+                            .entity(ErrorResponse.of("INVALID_HEADER",
+                                    "X-Graph-K must be between 1 and 10, got: " + k,
+                                    requestPath()))
                             .build());
         }
     }
@@ -481,8 +570,9 @@ public class SearchResourceV2 {
         if (threshold < 0.0 || threshold > 1.0) {
             throw new jakarta.ws.rs.BadRequestException(
                     jakarta.ws.rs.core.Response.status(400)
-                            .entity(Map.of("errorCode", "INVALID_HEADER",
-                                    "message", "X-Graph-Threshold must be between 0.0 and 1.0, got: " + threshold))
+                            .entity(ErrorResponse.of("INVALID_HEADER",
+                                    "X-Graph-Threshold must be between 0.0 and 1.0, got: " + threshold,
+                                    requestPath()))
                             .build());
         }
     }
