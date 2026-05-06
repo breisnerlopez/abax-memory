@@ -13,19 +13,25 @@ import com.abax.memory.domain.service.LlmService;
 import com.abax.memory.domain.service.MemoryService;
 import com.abax.memory.domain.service.SearchService;
 import com.abax.memory.domain.model.ExtractedEntity;
+import com.abax.memory.infrastructure.ai.OpenAiLlmService;
 import com.abax.memory.infrastructure.persistence.DomainProfileEntity;
 import com.abax.memory.infrastructure.persistence.MemoryFragmentEntity;
 import com.abax.memory.infrastructure.persistence.TenantConfigEntity;
 import com.abax.memory.infrastructure.security.TenantContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.langchain4j.model.chat.ChatLanguageModel;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.ServiceUnavailableException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 
 import java.time.Instant;
@@ -79,6 +85,9 @@ public class MemoryServiceImpl implements MemoryService {
 
     @Inject
     LlmService llmService;
+
+    @Inject
+    Instance<ChatLanguageModel> chatLanguageModel;
 
     // ── Domain-model methods (delegated internally) ─────────────────
 
@@ -864,13 +873,65 @@ public class MemoryServiceImpl implements MemoryService {
 
     // ── EP-001/D: Entity Extraction (LLM-powered) ────────────────────
 
+    /**
+     * Extracts entities using OpenAI gpt-4o-mini — v2.1.0 FT-001.4.
+     *
+     * <p>Uses {@link OpenAiLlmService} directly (NOT the generic
+     * {@link LlmService}) to ensure real AI extraction.
+     * Never degrades to {@code MockLlmService}. If the LLM is
+     * unavailable, throws HTTP 503 ServiceUnavailableException.</p>
+     *
+     * <p>Error codes:
+     * <ul>
+     *   <li>HTTP 400 — blank content</li>
+     *   <li>HTTP 503 — ChatLanguageModel not resolvable (no API key)</li>
+     *   <li>HTTP 502 — OpenAI API error</li>
+     *   <li>HTTP 504 — timeout > 5s</li>
+     *   <li>HTTP 200 with empty list — no entities found</li>
+     * </ul>
+     * </p>
+     */
     @Override
     public List<ExtractedEntity> extractEntities(String content, String tenantId) {
         if (content == null || content.isBlank()) {
+            LOG.debug("Entity extraction called with blank content");
             return List.of();
         }
         LOG.infov("Entity extraction requested: tenant={0}, content_length={1}", tenantId, content.length());
-        return llmService.extractEntities(content, MemoryKind.FACT);
+
+        // FT-V21-001.4: Use OpenAI directly, never mock
+        if (!chatLanguageModel.isResolvable()) {
+            LOG.error("Entity extraction unavailable: ChatLanguageModel not resolvable. "
+                    + "Set quarkus.langchain4j.openai.api-key to enable extraction.");
+            throw new ServiceUnavailableException(
+                    "Entity extraction unavailable: LLM service not configured");
+        }
+
+        try {
+            ChatLanguageModel chatModel = chatLanguageModel.get();
+            OpenAiLlmService openAiService = new OpenAiLlmService(chatModel);
+            List<ExtractedEntity> entities = openAiService.extractEntities(content, MemoryKind.FACT);
+
+            LOG.infov("Entity extraction completed: tenant={0}, entities_found={1}",
+                    tenantId, entities.size());
+            return entities;
+        } catch (ServiceUnavailableException e) {
+            throw e; // re-throw 503
+        } catch (WebApplicationException e) {
+            throw e; // re-throw other HTTP exceptions
+        } catch (Exception e) {
+            // Check for timeout
+            if (e.getMessage() != null && e.getMessage().contains("timeout")) {
+                LOG.errorv(e, "Entity extraction timed out: tenant={0}", tenantId);
+                throw new WebApplicationException(
+                        "Entity extraction timed out",
+                        Response.status(Response.Status.GATEWAY_TIMEOUT).build());
+            }
+            LOG.errorv(e, "Entity extraction failed: tenant={0}", tenantId);
+            throw new WebApplicationException(
+                    "Entity extraction failed: LLM provider error",
+                    Response.status(Response.Status.BAD_GATEWAY).build());
+        }
     }
 
     // ── EP-005: Entity Listing ────────────────────────────────────────
