@@ -1,22 +1,28 @@
-# Setup del Proyecto — Abax-Memory v2.0.0
+# Setup del Proyecto — Abax-Memory v2.1.0
 
-- **Versión**: 2.0.0
+- **Versión actual**: 2.1.0 (Hardening & Producción Real)
 - **Stack**: Quarkus 3.15.3 + PostgreSQL 16 + Qdrant v1.17.1 + Keycloak 26.1
-- **Última actualización**: 2026-05-03
+- **Última actualización**: 2026-05-06
 - **Responsable**: DevOps / Release Engineer
+- **Iteraciones**:
+  - `v1.0.0`: Motor PMOA (IT ops) — 2026-04
+  - `v2.0.0`: Motor Multi-Dominio — 2026-05-03, business-analyst
+  - `v2.1.0`: Hardening & Producción Real — 2026-05-06, devops
 
 ---
 
 ## Prerrequisitos
 
-| Herramienta | Versión mínima | Verificación |
-|---|---|---|
-| Java (OpenJDK) | 21+ | `java -version` |
-| Maven | 3.9+ (3.8.7 funcional) | `mvn --version` |
-| Docker | 24+ | `docker --version` |
-| Docker Compose | 2.x (incluido en Docker) | `docker compose version` |
-| Git | 2.40+ | `git --version` |
-| Node.js (opcional, tooling) | 20+ | `node --version` |
+| Herramienta | Versión mínima | Verificación | v2.1.0 |
+|---|---|---|---|
+| Java (OpenJDK) | 21+ | `java -version` | ✅ 21.0.10 |
+| Maven | 3.9+ (3.8.7 funcional) | `mvn --version` | ⚠️ 3.8.7 |
+| Docker | 24+ | `docker --version` | ✅ 29.4.2 |
+| Docker Compose | 2.x (incluido en Docker) | `docker compose version` | ✅ v5.1.3 |
+| Git | 2.40+ | `git --version` | ✅ 2.43.0 |
+| Node.js (opcional, tooling) | 20+ | `node --version` | ✅ 22.22.0 |
+| PostgreSQL Client (`psql`) | 16+ | `psql --version` | ✅ 16.13 |
+| `curl` + `python3` | cualquier | `curl --version` | ✅ requeridos por verify-stack.sh |
 
 ---
 
@@ -319,6 +325,13 @@ curl -s http://localhost:6333/healthz   # Debe mostrar "healthz check passed"
 
 Keycloak gestiona autenticacion y autorizacion via OIDC/OAuth 2.0 para el backend y los usuarios.
 
+> **⚠️ v2.1.0 — Realm debe crearse manualmente**: El contenedor Keycloak arranca con el realm `master` por defecto. El realm `abax-memory` y su cliente OIDC `abax-memory-api` **no se crean automáticamente**. Debes crearlos antes de iniciar el backend:
+> 1. Accede a `http://localhost:8443/admin` (credenciales `admin`/`admin`)
+> 2. Crea el realm `abax-memory`
+> 3. Crea el client `abax-memory-api` (confidential, OIDC)
+> 4. Configura `Client secret`: `ZN8NB5raPHtfYozXLVrEGnbBdXI48BTI`
+> 5. Verifica con: `curl -s http://localhost:8443/realms/abax-memory/.well-known/openid-configuration | python3 -c "import sys,json; print(json.load(sys.stdin)['issuer'])"`
+
 **Levantar con Docker**:
 ```bash
 docker run -d --name keycloak \
@@ -430,6 +443,60 @@ abax-memory/
 
 ---
 
+## JWT Caching (v2.1.0 Feature FT-V21-002.3)
+
+### Comportamiento
+
+El backend cachea la validacion de tokens JWT en memoria (Caffeine) para reducir la latencia de autenticacion en cada request. Un token validado exitosamente se almacena con TTL igual al campo `exp` del JWT (tipicamente 1 hora). Requests subsecuentes con el mismo token se validan contra el cache local sin llamar a Keycloak:
+
+1. **Primer request**: cache miss → validacion contra Keycloak (50-200ms)
+2. **Requests 2-100+**: cache hit → validacion local ≤ 5ms
+
+### Configuracion
+
+| Propiedad | Default | Descripcion |
+|---|---|---|
+| `abax.v2.jwt-cache.enabled` | `true` | Habilita el cache JWT |
+| `abax.v2.jwt-cache.max-size` | `10000` | Maximo de tokens en cache |
+| `abax.v2.jwt-cache.admin-events-enabled` | `true` | Polling de eventos Keycloak para invalidacion |
+| `abax.v2.jwt-cache.admin-events-poll-interval` | `5s` | Intervalo de polling de eventos de revocacion |
+
+### Invalidacion
+
+Ante eventos de revocacion en Keycloak (logout, cambio de roles), la entrada correspondiente se invalida en ≤ 5s (via polling de Keycloak Admin Events). Si Keycloak Admin Events no esta disponible, la invalidacion depende del TTL del JWT (ventana maxima de hasta 1 hora).
+
+### Cacheo del lado del cliente (recomendado para consumidores de API)
+
+Los consumidores de la API deben reutilizar el mismo JWT durante su TTL:
+
+```
+Authorization: Bearer <mismo-token>
+```
+
+Para obtener un JWT con TTL correcto:
+```bash
+curl -X POST http://localhost:8443/realms/abax-memory/protocol/openid-connect/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=client_credentials" \
+  -d "client_id=abax-memory-api" \
+  -d "client_secret=<secret>"
+```
+
+La respuesta incluye:
+- `access_token`: el JWT (cachear este valor)
+- `expires_in`: TTL en segundos (ej. 3600 = 1 hora)
+- `refresh_token`: para renovar sin re-autenticar
+
+### Resiliencia ante caidas de Keycloak
+
+Si Keycloak esta inaccesible:
+- **Tokens cacheados NO expirados**: se aceptan normalmente (cache hit)
+- **Tokens NO cacheados**: HTTP 503 `"Authentication service unavailable"`
+
+Esto proporciona resiliencia ante caidas temporales de Keycloak para clientes ya autenticados.
+
+---
+
 ## Solucion de Problemas
 
 ### Error: `Cannot connect to PostgreSQL`
@@ -489,6 +556,64 @@ sudo lsof -i :8443
 # Si es otra instancia de Docker, detenerla
 docker compose down
 ```
+
+---
+
+## Cambios v2.1.0 — Hardening & Producción Real (2026-05-06)
+
+### Nuevas Dependencias en `pom.xml`
+
+Para la Fase 4 — Construcción de v2.1.0, el `pom.xml` requiere dependencias adicionales
+que no estaban en v2.0.9:
+
+| Artefacto | Propósito | Features que lo usan |
+|---|---|---|
+| `quarkus-cache` | Caché con Caffeine (`@CacheResult`, `@CacheInvalidate`) | FT-V21-002.1 (Cache de Grafo), FT-V21-002.3 (Cache JWT) |
+| `caffeine` (opcional) | API directa de Caffeine para `GraphCacheServiceImpl` | FT-V21-002.1 |
+
+Agregar al `pom.xml` antes de iniciar la construcción:
+
+```xml
+<!-- v2.1.0: Cache con Caffeine -->
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-cache</artifactId>
+</dependency>
+```
+
+### Configuración de Keycloak
+
+El realm `abax-memory` **debe crearse manualmente** en esta versión. Ver instrucciones
+en la sección [Keycloak (Identity Provider)](#keycloak-identity-provider) arriba.
+
+### Verificación de Stack
+
+El script `scripts/verify-stack.sh` fue actualizado para v2.1.0. Ahora verifica 5
+servicios (incluye conectividad a OpenAI API). Ejecutar antes de iniciar desarrollo:
+
+```bash
+export $(grep OPENAI_API_KEY .env | xargs)
+./scripts/verify-stack.sh
+```
+
+### Qué se mantiene de v2.0.0
+
+- Stack tecnológico idéntico: Quarkus 3.15.3, PostgreSQL 16, Qdrant 1.17.1, Keycloak 26.1.
+- Docker Compose para infraestructura local.
+- Flujo de desarrollo: `mvn quarkus:dev` con hot reload.
+- Tests unitarios con H2 en memoria.
+- `OPENAI_API_KEY` como única variable obligatoria.
+
+### Qué se deprecia de v2.0.0
+
+- `MockLlmService` reemplazado por OpenAI real en `POST /extract` (FT-V21-001.4).
+- `InMemoryEmbeddingProvider` reemplazado por OpenAI `text-embedding-3-large` real.
+- `expandGraph=true` como default — ahora es `false` (FT-V21-001.2).
+
+### Versión del Artefacto
+
+- `pom.xml` versión: `1.0.0-SNAPSHOT` → debe actualizarse a `2.1.0-SNAPSHOT`.
+- Imagen Docker: `ghcr.io/breisnerlopez/abax-memory:v2.1.0` (a construir).
 
 ---
 
