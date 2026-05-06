@@ -315,7 +315,7 @@ public class MemoryResourceV2 {
 
         long startTime = System.currentTimeMillis();
         String tenantId = resolveTenant(xTenantId);
-        List<ExtractedEntity> entities = memoryService.extractEntities(request.content(), tenantId);
+        List<ExtractedEntity> entities = memoryService.extractEntities(request.getContent(), tenantId);
 
         List<ExtractResponse.ExtractedEntityDto> dtos = entities.stream()
                 .map(e -> new ExtractResponse.ExtractedEntityDto(e.name(), e.type(), e.confidence()))
