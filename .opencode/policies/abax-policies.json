@@ -1,0 +1,1219 @@
+{
+  "task_contracts": {
+    "atomic_actions": [
+      {
+        "id": "read",
+        "keywords": [
+          "read",
+          "lee",
+          "revisa",
+          "analiza",
+          "inspect",
+          "inspeccion",
+          "examinar"
+        ]
+      },
+      {
+        "id": "plan",
+        "keywords": [
+          "plan",
+          "planifica",
+          "disena",
+          "design",
+          "esboza",
+          "propone"
+        ]
+      },
+      {
+        "id": "write-doc",
+        "keywords": [
+          "escribe",
+          "redacta",
+          "document",
+          "documenta",
+          "crea archivo",
+          "create file",
+          "markdown"
+        ]
+      },
+      {
+        "id": "write-code",
+        "keywords": [
+          "implementa",
+          "codifica",
+          "refactor",
+          "fix bug",
+          "arregla",
+          "corrige",
+          "code",
+          "programa"
+        ]
+      },
+      {
+        "id": "build",
+        "keywords": [
+          "build",
+          "compila",
+          "mvn package",
+          "npm build",
+          "docker build",
+          "gradle build"
+        ]
+      },
+      {
+        "id": "test",
+        "keywords": [
+          "test",
+          "prueba",
+          "mvn test",
+          "npm test",
+          "pytest",
+          "ejecuta tests",
+          "run tests"
+        ]
+      },
+      {
+        "id": "commit",
+        "keywords": [
+          "git commit",
+          "commitea",
+          "commit changes"
+        ]
+      },
+      {
+        "id": "push",
+        "keywords": [
+          "git push",
+          "publica al repo",
+          "sube al remoto",
+          "push to remote"
+        ]
+      },
+      {
+        "id": "deploy",
+        "keywords": [
+          "deploy",
+          "despliega",
+          "kubectl apply",
+          "helm upgrade",
+          "docker run prod",
+          "rollout"
+        ]
+      },
+      {
+        "id": "close-issue",
+        "keywords": [
+          "gh issue close",
+          "cierra issue",
+          "close ticket",
+          "resuelve ticket"
+        ]
+      },
+      {
+        "id": "notify",
+        "keywords": [
+          "notifica al usuario",
+          "anuncia",
+          "comunica al sponsor",
+          "informa al sponsor"
+        ]
+      }
+    ],
+    "forbidden_combinations": [
+      {
+        "id": "fix-and-ship",
+        "actions": [
+          "write-code",
+          "test",
+          "commit",
+          "push"
+        ],
+        "reason": "Fix + verify + commit + push collapses three roles into one Task.\nThe fixer cannot also be the validator. Split into two Tasks:\n(1) developer-* writes the fix and reports SHA;\n(2) qa-* re-executes the failing case + regression suite.\nOrigin: 2-Tasks-post-fix rule from the orchestrator.\n"
+      },
+      {
+        "id": "deploy-and-validate",
+        "actions": [
+          "deploy",
+          "test"
+        ],
+        "reason": "Whoever deploys must not validate. devops deploys; qa or the sponsor\nvalidates against acceptance criteria. Split into two consecutive\nTasks. Origin: anti-cross-role matrix (Phase 7).\n"
+      },
+      {
+        "id": "build-ship-prod",
+        "actions": [
+          "build",
+          "push",
+          "deploy"
+        ],
+        "reason": "build + push + deploy in one Task removes the human gate between\npackaging and production. Split into three Tasks; the deploy Task\nrequires explicit approval from the gate approver of Phase 7.\n"
+      },
+      {
+        "id": "fix-and-close-issue",
+        "actions": [
+          "write-code",
+          "close-issue"
+        ],
+        "reason": "Developers should not close their own issues. The closer is the\nreporter or the qa role that certified the fix. Split into two\nTasks: (1) fix + report SHA; (2) close-issue after qa attestation.\n"
+      },
+      {
+        "id": "build-merge-deploy-changelog",
+        "actions": [
+          "build",
+          "push",
+          "write-doc",
+          "deploy"
+        ],
+        "reason": "En el ciclo Abax-Memory este combo era la firma de \"publicar\nv2.0.X\": build container + merge a main + actualizar CHANGELOG\n+ redeploy GHCR. Cuatro responsabilidades distintas en una\nTask. Dividir en 4 Tasks: build (devops), merge (devops con\napproval PM), changelog (tech-writer / project-manager),\ndeploy (devops con sponsor approval).\n"
+      }
+    ],
+    "exemptions": []
+  },
+  "secret_patterns": {
+    "patterns": [
+      {
+        "id": "openai-api-key",
+        "regex": "sk-(proj-|live-)?[A-Za-z0-9_-]{30,}",
+        "severity": "block",
+        "description": "OpenAI API key"
+      },
+      {
+        "id": "anthropic-api-key",
+        "regex": "sk-ant-(api03-|admin01-)?[A-Za-z0-9_-]{40,}",
+        "severity": "block",
+        "description": "Anthropic API key"
+      },
+      {
+        "id": "aws-access-key",
+        "regex": "AKIA[0-9A-Z]{16}",
+        "severity": "block",
+        "description": "AWS Access Key ID"
+      },
+      {
+        "id": "github-pat",
+        "regex": "gh[pousr]_[A-Za-z0-9]{36,}",
+        "severity": "block",
+        "description": "GitHub Personal Access Token"
+      },
+      {
+        "id": "gcp-service-account",
+        "regex": "\"private_key_id\"\\s*:\\s*\"[a-f0-9]{40}\"",
+        "severity": "block",
+        "description": "GCP service account JSON private_key_id"
+      },
+      {
+        "id": "jwt-token",
+        "regex": "eyJ[A-Za-z0-9_-]{20,}\\.eyJ[A-Za-z0-9_-]{20,}\\.[A-Za-z0-9_-]{20,}",
+        "severity": "warn",
+        "description": "JWT (could be legitimate in auth docs)"
+      },
+      {
+        "id": "generic-bearer",
+        "regex": "Bearer [A-Za-z0-9_\\-\\.=]{40,}",
+        "severity": "warn",
+        "description": "Authorization Bearer header"
+      },
+      {
+        "id": "high-entropy-base64",
+        "regex": "[A-Za-z0-9+/]{60,}={0,2}",
+        "severity": "warn",
+        "description": "long base64 string (probably a secret or hash)"
+      },
+      {
+        "id": "ssh-private-key-header",
+        "regex": "-----BEGIN (RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----",
+        "severity": "block",
+        "description": "SSH/PGP private key header"
+      }
+    ]
+  },
+  "runaway_limits": {
+    "default": {
+      "parts_max": 300,
+      "duration_min_max": 30,
+      "tokens_max": 200000
+    },
+    "by_category": {
+      "construction": {
+        "parts_max": 500,
+        "duration_min_max": 60,
+        "tokens_max": 400000
+      },
+      "quality": {
+        "parts_max": 400,
+        "duration_min_max": 45
+      },
+      "deployment": {
+        "parts_max": 350,
+        "duration_min_max": 45
+      },
+      "data": {
+        "parts_max": 350,
+        "duration_min_max": 45
+      }
+    },
+    "by_role": {
+      "developer-backend": {
+        "parts_max": 700,
+        "duration_min_max": 90,
+        "tokens_max": 600000
+      },
+      "qa-functional": {
+        "parts_max": 250,
+        "duration_min_max": 30
+      }
+    }
+  },
+  "role_categories": {
+    "project-manager": "management",
+    "business-analyst": "analysis",
+    "tech-lead": "technology",
+    "developer-backend": "construction",
+    "qa-functional": "quality",
+    "solution-architect": "architecture",
+    "devops": "deployment",
+    "developer-frontend": "construction"
+  },
+  "phases": [
+    {
+      "id": "discovery",
+      "name": "Descubrimiento y Definicion de Alcance",
+      "gate_approver": "product-owner",
+      "deliverables": [
+        {
+          "id": "vision-producto",
+          "name": "Vision del Producto",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "epicas-features",
+          "name": "Mapa de Epicas y Features",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "historias-usuario",
+          "name": "Historias de Usuario con Criterios de Aceptacion",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "design-system-template",
+          "name": "Design System de Presentaciones (HTML template)",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "backlog-priorizado",
+          "name": "Product Backlog Priorizado (MVP identificado)",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "discovery-presentation",
+          "name": "Presentacion de Descubrimiento (HTML)",
+          "responsible": "project-manager",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "presentation",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        }
+      ],
+      "gates": [],
+      "narrative_only": true,
+      "narrative_markdown": "### Fase 0: Descubrimiento y Definicion de Alcance\n\n**Gate**: Aprueba el usuario\n\nEsta fase es OBLIGATORIA y debe iterar hasta tener claridad suficiente para iniciar\nel proyecto. NO es una fase rapida — es el fundamento de todo lo que sigue.\nSi durante fases posteriores surgen dudas de alcance, se vuelve a esta fase.\n\n#### Paso 1: Entendimiento Inicial (tu, orquestador, con el usuario)\n\nPregunta directamente al usuario (sin Task) para entender el contexto completo:\n- **Problema**: Que problema de negocio resuelve? Por que ahora?\n- **Usuarios**: Quienes son los usuarios finales? Que roles tienen?\n- **Alcance**: Que funcionalidades espera? Que NO debe incluir?\n- **Integraciones**: Con que sistemas existentes debe conectarse?\n- **Restricciones**: Tiempo, presupuesto, tecnologia, regulaciones?\n- **Exito**: Como se mide que el proyecto fue exitoso?\n\nITERA: Si las respuestas son vagas, sigue preguntando. No avances con ambiguedades.\nCada respuesta puede generar nuevas preguntas. Continua hasta tener un panorama claro.\n\n#### Paso 2: Vision del Producto (delegar a {visionAgent})\n\nDelega via Task al {visionAgent} para elaborar el **Documento de Vision** en\n`docs/entregables/fase-0-descubrimiento/vision-producto.md`:\n- Proposito y justificacion del proyecto\n- Usuarios objetivo y sus necesidades\n- Alcance de alto nivel (dentro/fuera)\n- Supuestos y restricciones\n- Criterios de exito medibles\n\n#### Paso 3: Epicas y Features (delegar a business-analyst)\n\nDelega via Task al business-analyst para elaborar el **Mapa de Epicas y Features** en\n`docs/entregables/fase-0-descubrimiento/epicas-features.md`:\n- Identificar epicas (bloques grandes de funcionalidad)\n- Descomponer cada epica en features concretas\n- Formato:\n  ```\n  ## EP-001: [Nombre Epica]\n  Descripcion: [Que logra esta epica]\n  ### Features:\n  - FT-001.1: [Feature] — [Descripcion breve]\n  - FT-001.2: [Feature] — [Descripcion breve]\n  ```\n\n#### Paso 4: Historias de Usuario (delegar a business-analyst)\n\nDelega via Task al business-analyst para elaborar las **Historias de Usuario** en\n`docs/entregables/fase-0-descubrimiento/historias-usuario.md`:\n- Para cada feature, escribir historias de usuario en formato:\n  ```\n  ### HU-001.1.1: [Titulo]\n  **Como** [rol de usuario]\n  **Quiero** [accion/funcionalidad]\n  **Para** [beneficio/valor de negocio]\n\n  **Criterios de aceptacion**:\n  - Dado [contexto], cuando [accion], entonces [resultado]\n  - Dado [contexto], cuando [accion], entonces [resultado]\n  ```\n- Incluir criterios de aceptacion verificables para cada historia\n- Marcar prioridad: Must / Should / Could / Won't (MoSCoW)\n\n#### Paso 5: Design System de Presentaciones (delegar a {designSystemAgent})\n\nDelega via Task al {designSystemAgent} para crear el **Template HTML de Presentaciones** en\n`docs/design-system/presentacion-template.html`:\n- Archivo HTML autonomo (single-file, sin dependencias externas)\n- CSS custom properties con paleta de colores, tipografia, espaciado del proyecto\n- Layouts de slides: portada, agenda, contenido, dos columnas, tabla, cierre\n- Header/footer consistente con nombre del proyecto, fase, fecha\n- Estilos para tablas, listas, badges de estado, graficos\n- Responsive: visualizable en navegador e imprimible\n- Este template sera OBLIGATORIO para todas las presentaciones del proyecto\n\n#### Paso 6: Priorizacion del Backlog (delegar a {backlogAgent})\n\nDelega via Task al {backlogAgent} para elaborar el **Product Backlog Priorizado** en\n`docs/entregables/fase-0-descubrimiento/backlog-priorizado.md`:\n- Ordenar todas las historias por valor de negocio y esfuerzo\n- Aplicar priorizacion MoSCoW\n- Identificar el MVP (Minimum Viable Product): que es lo minimo para lanzar?\n- Agrupar en releases o iteraciones sugeridas\n- Formato dashboard:\n  ```\n  | ID | Historia | Epica | Prioridad | Esfuerzo | Release |\n  |---|---|---|---|---|---|\n  | HU-001.1.1 | [Titulo] | EP-001 | Must | M | R1-MVP |\n  ```\n\n#### Paso 7: Presentacion y Validacion con el Usuario\n\nDelega al agente responsable (project-manager o business-analyst) para crear la\n**Presentacion de Descubrimiento** en formato HTML usando el template del Paso 5:\n`docs/entregables/fase-0-descubrimiento/presentacion-descubrimiento.html`\n\nLa presentacion debe incluir:\n1. Vision del producto (de paso 2)\n2. Lista de epicas con sus features (de paso 3)\n3. Cantidad total de historias de usuario\n4. Backlog priorizado con MVP identificado (de paso 6)\n5. Alcance propuesto: que entra en MVP, que queda para despues\n\nPresenta al usuario y pregunta:\n> \"Este es el alcance propuesto del proyecto. ¿Refleja correctamente tu necesidad?\n> ¿Hay epicas, features o historias que falten o sobren?\n> ¿Estas de acuerdo con la priorizacion y el MVP propuesto?\"\n\n#### Paso 8: Iteracion (si es necesario)\n\nSi el usuario pide cambios:\n1. Ajusta delegando nuevamente al agente correspondiente\n2. Vuelve al Paso 7 para revalidar\n3. Repite hasta que el usuario confirme\n\n**Solo avanza a Fase 1 cuando el usuario apruebe explicitamente el alcance y backlog.**\n\n#### Entregables obligatorios de Fase 0:\n- [ ] Vision del Producto → delegar via Task a {visionAgent}\n- [ ] Mapa de Epicas y Features → delegar via Task a business-analyst\n- [ ] Historias de Usuario con Criterios de Aceptacion → delegar via Task a business-analyst\n- [ ] Design System de Presentaciones (HTML template) → delegar via Task a {designSystemAgent}\n- [ ] Product Backlog Priorizado (MVP identificado) → delegar via Task a {backlogAgent}\n- [ ] Presentacion de Descubrimiento (HTML) → delegar via Task a project-manager o business-analyst\n- [ ] Confirmacion explicita del usuario sobre alcance y backlog\n\nIMPORTANTE:\n- Esta fase puede durar varios ciclos de conversacion — es normal\n- Si en fases posteriores surgen dudas de alcance, VOLVER a Fase 0 para refinar\n- NUNCA inicies Fase 1 sin confirmacion explicita del usuario sobre el backlog\n"
+    },
+    {
+      "id": "inception",
+      "name": "Inicio",
+      "gate_approver": "product-owner",
+      "deliverables": [
+        {
+          "id": "project-charter",
+          "name": "Acta de Constitucion del Proyecto",
+          "responsible": "project-manager",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "kickoff-presentation",
+          "name": "Presentacion de Kickoff",
+          "responsible": "project-manager",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "presentation",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "stakeholder-register",
+          "name": "Registro de Interesados",
+          "responsible": "project-manager",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "initial-risk-matrix",
+          "name": "Matriz de Riesgos Inicial",
+          "responsible": "project-manager",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "project-schedule",
+          "name": "Cronograma Preliminar",
+          "responsible": "project-manager",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "diagram",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        }
+      ],
+      "gates": [],
+      "narrative_only": false,
+      "narrative_markdown": ""
+    },
+    {
+      "id": "functional-analysis",
+      "name": "Analisis Funcional",
+      "gate_approver": "product-owner",
+      "deliverables": [
+        {
+          "id": "functional-spec",
+          "name": "Especificacion Funcional",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "business-rules-doc",
+          "name": "Documento de Reglas de Negocio",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "process-diagrams",
+          "name": "Diagramas de Proceso",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "diagram",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "acceptance-criteria-doc",
+          "name": "Criterios de Aceptacion",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "functional-presentation",
+          "name": "Presentacion de Propuesta Funcional",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "presentation",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        }
+      ],
+      "gates": [],
+      "narrative_only": false,
+      "narrative_markdown": ""
+    },
+    {
+      "id": "technical-design",
+      "name": "Diseno Tecnico",
+      "gate_approver": "solution-architect",
+      "deliverables": [
+        {
+          "id": "architecture-doc",
+          "name": "Documento de Arquitectura",
+          "responsible": "solution-architect",
+          "approver": "tech-lead",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "tech-lead"
+          ],
+          "approver_fallback": []
+        },
+        {
+          "id": "architecture-presentation",
+          "name": "Presentacion de Arquitectura",
+          "responsible": "solution-architect",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "presentation",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "tech-lead"
+          ],
+          "approver_fallback": []
+        },
+        {
+          "id": "data-model",
+          "name": "Modelo de Datos",
+          "responsible": "tech-lead",
+          "approver": "solution-architect",
+          "mandatory": true,
+          "artifact_type": "diagram",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "tech-lead",
+            "developer-backend"
+          ],
+          "approver_fallback": [
+            "tech-lead"
+          ]
+        },
+        {
+          "id": "test-strategy-doc",
+          "name": "Estrategia de Pruebas",
+          "responsible": "qa-functional",
+          "approver": "project-manager",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "qa-functional"
+          ],
+          "approver_fallback": []
+        },
+        {
+          "id": "technical-task-breakdown",
+          "name": "Descomposicion Tecnica de Tareas",
+          "responsible": "tech-lead",
+          "approver": "project-manager",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        }
+      ],
+      "gates": [],
+      "narrative_only": false,
+      "narrative_markdown": ""
+    },
+    {
+      "id": "construction",
+      "name": "Construccion",
+      "gate_approver": "tech-lead",
+      "deliverables": [
+        {
+          "id": "env-verification",
+          "name": "Verificacion de entorno y dependencias",
+          "responsible": "devops",
+          "approver": "tech-lead",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": true,
+          "responsible_fallback": [
+            "tech-lead"
+          ],
+          "approver_fallback": []
+        },
+        {
+          "id": "source-code",
+          "name": "Codigo Fuente Implementado",
+          "responsible": "developer-backend",
+          "approver": "tech-lead",
+          "mandatory": true,
+          "artifact_type": "code",
+          "verification": [
+            {
+              "id": "backend-tests-pass",
+              "cmd": "{stack.backend.test_command}",
+              "expect_exit_code": 0,
+              "timeout_sec": 60,
+              "on_failure": "block"
+            },
+            {
+              "id": "no-mock-in-main",
+              "cmd": "grep -rE 'class (Mock|Fake|Stub|InMemory)[A-Z]' src 2>/dev/null || echo OK",
+              "expect_regex": "^OK$",
+              "expect_exit_code": 0,
+              "timeout_sec": 60,
+              "on_failure": "warn"
+            }
+          ],
+          "attestation_required": true,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "unit-tests",
+          "name": "Pruebas Unitarias",
+          "responsible": "developer-backend",
+          "approver": "tech-lead",
+          "mandatory": true,
+          "artifact_type": "code",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "api-documentation",
+          "name": "Documentacion de API",
+          "responsible": "developer-backend",
+          "approver": "tech-lead",
+          "mandatory": false,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "project-readme",
+          "name": "README del Proyecto",
+          "responsible": "tech-lead",
+          "approver": "tech-lead",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "tech-lead"
+          ],
+          "approver_fallback": []
+        },
+        {
+          "id": "docs-structure-skeleton",
+          "name": "Esqueleto de docs/",
+          "responsible": "tech-lead",
+          "approver": "tech-lead",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "tech-lead"
+          ],
+          "approver_fallback": []
+        },
+        {
+          "id": "sprint-status-presentation",
+          "name": "Presentacion de Avance",
+          "responsible": "project-manager",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "presentation",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "code-review-report",
+          "name": "Reporte de Revision de Codigo",
+          "responsible": "tech-lead",
+          "approver": "solution-architect",
+          "mandatory": true,
+          "artifact_type": "report",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "feature-spec-compliance",
+          "name": "Verificacion de cumplimiento Feature vs Especificacion",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "report",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        }
+      ],
+      "gates": [
+        {
+          "type": "git-check",
+          "id": "not-on-main",
+          "check": "branch",
+          "not_in": [
+            "main",
+            "master",
+            "trunk"
+          ],
+          "on_failure": "block"
+        },
+        {
+          "type": "file-exists",
+          "id": "env-verified",
+          "target": "docs/entregables/{phase}/00-verificacion-entorno.md",
+          "on_failure": "block"
+        },
+        {
+          "type": "attestation",
+          "id": "smoke-runtime-passed",
+          "attestor_role": "devops",
+          "deliverable": "env-verification",
+          "on_failure": "block"
+        }
+      ],
+      "narrative_only": false,
+      "narrative_markdown": ""
+    },
+    {
+      "id": "qa-testing",
+      "name": "Pruebas QA",
+      "gate_approver": "qa-lead",
+      "deliverables": [
+        {
+          "id": "test-cases",
+          "name": "Casos de Prueba",
+          "responsible": "qa-functional",
+          "approver": "qa-lead",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "test-execution-report",
+          "name": "Reporte de Ejecucion de Pruebas",
+          "responsible": "qa-functional",
+          "approver": "qa-lead",
+          "mandatory": true,
+          "artifact_type": "report",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "defect-report",
+          "name": "Reporte de Defectos",
+          "responsible": "qa-functional",
+          "approver": "qa-lead",
+          "mandatory": true,
+          "artifact_type": "report",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "qa-results-presentation",
+          "name": "Presentacion de Resultados QA",
+          "responsible": "qa-functional",
+          "approver": "project-manager",
+          "mandatory": true,
+          "artifact_type": "presentation",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "qa-functional"
+          ],
+          "approver_fallback": []
+        },
+        {
+          "id": "regression-report",
+          "name": "Reporte de Regresion",
+          "responsible": "qa-functional",
+          "approver": "qa-functional",
+          "mandatory": true,
+          "artifact_type": "report",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "qa-functional"
+          ],
+          "approver_fallback": [
+            "qa-functional"
+          ]
+        }
+      ],
+      "gates": [],
+      "narrative_only": false,
+      "narrative_markdown": ""
+    },
+    {
+      "id": "uat",
+      "name": "Pruebas de Aceptacion",
+      "gate_approver": "product-owner",
+      "deliverables": [
+        {
+          "id": "uat-plan",
+          "name": "Plan de UAT",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "uat-execution-report",
+          "name": "Reporte de Ejecucion UAT",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "report",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "uat-signoff",
+          "name": "Acta de Aceptacion UAT",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "uat-presentation",
+          "name": "Presentacion de Resultados UAT",
+          "responsible": "business-analyst",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "presentation",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        }
+      ],
+      "gates": [],
+      "narrative_only": false,
+      "narrative_markdown": ""
+    },
+    {
+      "id": "deployment",
+      "name": "Despliegue",
+      "gate_approver": "project-manager",
+      "deliverables": [
+        {
+          "id": "deployment-plan-doc",
+          "name": "Plan de Despliegue",
+          "responsible": "devops",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": true,
+          "responsible_fallback": [
+            "tech-lead"
+          ],
+          "approver_fallback": []
+        },
+        {
+          "id": "rollback-plan",
+          "name": "Plan de Rollback",
+          "responsible": "devops",
+          "approver": "tech-lead",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": true,
+          "responsible_fallback": [
+            "tech-lead"
+          ],
+          "approver_fallback": []
+        },
+        {
+          "id": "go-live-presentation",
+          "name": "Presentacion Go-Live Readiness",
+          "responsible": "project-manager",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "presentation",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "communication-plan-doc",
+          "name": "Plan de Comunicacion",
+          "responsible": "project-manager",
+          "approver": "project-manager",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "project-manager"
+          ],
+          "approver_fallback": []
+        },
+        {
+          "id": "runbook",
+          "name": "Runbook Operativo",
+          "responsible": "tech-lead",
+          "approver": "tech-lead",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "tech-lead"
+          ],
+          "approver_fallback": []
+        }
+      ],
+      "gates": [
+        {
+          "type": "attestation",
+          "id": "deployment-plan-attested",
+          "attestor_role": "devops",
+          "deliverable": "deployment-plan-doc",
+          "on_failure": "block"
+        },
+        {
+          "type": "attestation",
+          "id": "rollback-plan-attested",
+          "attestor_role": "devops",
+          "deliverable": "rollback-plan",
+          "on_failure": "block"
+        },
+        {
+          "type": "url-reachable",
+          "id": "public-url-reachable",
+          "url": "{project_url}",
+          "expect_status": 200,
+          "timeout_ms": 5000,
+          "on_failure": "warn"
+        }
+      ],
+      "narrative_only": false,
+      "narrative_markdown": ""
+    },
+    {
+      "id": "stabilization",
+      "name": "Estabilizacion",
+      "gate_approver": "project-manager",
+      "deliverables": [
+        {
+          "id": "incident-report",
+          "name": "Reporte de Incidentes Post-Produccion",
+          "responsible": "tech-lead",
+          "approver": "project-manager",
+          "mandatory": true,
+          "artifact_type": "report",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "support-status-report",
+          "name": "Reporte de Soporte",
+          "responsible": "tech-lead",
+          "approver": "project-manager",
+          "mandatory": true,
+          "artifact_type": "report",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "stabilization-presentation",
+          "name": "Presentacion de Estabilizacion",
+          "responsible": "project-manager",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "presentation",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        }
+      ],
+      "gates": [],
+      "narrative_only": false,
+      "narrative_markdown": ""
+    },
+    {
+      "id": "closure",
+      "name": "Cierre",
+      "gate_approver": "product-owner",
+      "deliverables": [
+        {
+          "id": "closure-report",
+          "name": "Informe de Cierre del Proyecto",
+          "responsible": "project-manager",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "report",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "lessons-learned",
+          "name": "Lecciones Aprendidas",
+          "responsible": "project-manager",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "closure-presentation",
+          "name": "Presentacion de Cierre",
+          "responsible": "project-manager",
+          "approver": "product-owner",
+          "mandatory": true,
+          "artifact_type": "presentation",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [],
+          "approver_fallback": []
+        },
+        {
+          "id": "final-documentation",
+          "name": "Documentacion Final del Proyecto",
+          "responsible": "project-manager",
+          "approver": "project-manager",
+          "mandatory": true,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "project-manager"
+          ],
+          "approver_fallback": []
+        }
+      ],
+      "gates": [],
+      "narrative_only": false,
+      "narrative_markdown": ""
+    }
+  ],
+  "stacks": {},
+  "iteration_scopes": {
+    "scopes": [
+      {
+        "id": "major",
+        "name": "Iteración mayor",
+        "description": "Nueva versión que altera arquitectura, alcance o cohorte de stakeholders.\nCascada completa porque cualquier fase puede aportar insight crítico.\n",
+        "keywords": [
+          "v3",
+          "v4",
+          "rewrite",
+          "redesign",
+          "evolución mayor",
+          "rearquitectura",
+          "nueva versión mayor"
+        ],
+        "skip_phases": [],
+        "minimal_phases": {},
+        "full_phases": [
+          "discovery",
+          "inception",
+          "functional-analysis",
+          "technical-design",
+          "construction",
+          "qa-testing",
+          "uat",
+          "deployment",
+          "stabilization",
+          "closure"
+        ],
+        "default_layout_strategy": "C"
+      },
+      {
+        "id": "minor",
+        "name": "Iteración menor (mejoras)",
+        "description": "Mejoras incrementales sobre versión cerrada. NO requiere repetir\nDiscovery (ya hubo) ni Inicio (acta+kickoff vigentes). Análisis\nsólo para los items afectados. Diseño sólo para componentes nuevos.\nConstrucción + QA + UAT + Deploy completos para el delta.\n",
+        "keywords": [
+          "mejoras",
+          "mejora",
+          "v2.1",
+          "v2.2",
+          "v3.1",
+          "incremental",
+          "evolución",
+          "siguiente iteración",
+          "refinamiento"
+        ],
+        "skip_phases": [
+          "discovery",
+          "inception"
+        ],
+        "minimal_phases": {
+          "functional-analysis": [
+            "functional-spec",
+            "acceptance-criteria-doc"
+          ],
+          "technical-design": [
+            "architecture-doc",
+            "technical-task-breakdown"
+          ]
+        },
+        "full_phases": [
+          "construction",
+          "qa-testing",
+          "uat",
+          "deployment"
+        ],
+        "default_layout_strategy": "A"
+      },
+      {
+        "id": "patch",
+        "name": "Patch / corrección",
+        "description": "Corrección de defecto sobre versión cerrada. Sin cambio de scope.\nSalta Discovery, Inicio, Análisis funcional y Diseño. Construcción\nenfocada al fix + QA de regresión + Deploy.\n",
+        "keywords": [
+          "patch",
+          "fix",
+          "corrección",
+          "bug fix",
+          "v2.0.1",
+          "v2.0.x",
+          "hotpatch"
+        ],
+        "skip_phases": [
+          "discovery",
+          "inception",
+          "functional-analysis",
+          "technical-design",
+          "uat"
+        ],
+        "minimal_phases": {},
+        "full_phases": [
+          "construction",
+          "qa-testing",
+          "deployment"
+        ],
+        "default_layout_strategy": "A"
+      },
+      {
+        "id": "hotfix",
+        "name": "Hotfix urgente",
+        "description": "Defecto crítico en producción. Salta TODO menos construcción del\nfix + smoke deploy. QA queda como follow-up post-fix. Use con\nprecaución — la deuda de QA debe registrarse en stabilization.\n",
+        "keywords": [
+          "hotfix",
+          "urgente",
+          "incidente",
+          "P0",
+          "production down",
+          "crítico"
+        ],
+        "skip_phases": [
+          "discovery",
+          "inception",
+          "functional-analysis",
+          "technical-design",
+          "qa-testing",
+          "uat",
+          "stabilization",
+          "closure"
+        ],
+        "minimal_phases": {},
+        "full_phases": [
+          "construction",
+          "deployment"
+        ],
+        "default_layout_strategy": "A"
+      }
+    ],
+    "require_scope_for_phases": [
+      "discovery",
+      "inception"
+    ]
+  }
+}

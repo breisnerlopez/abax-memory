@@ -67,6 +67,14 @@ Reglas de operacion:
 - Los criterios de aceptacion pueden no estar formalizados — escala al BA
   antes de inventar criterios.
 
+## Herramientas disponibles
+
+Tu set de herramientas en este proyecto esta restringido por tu rol. Antes de
+intentar una llamada, verifica esta lista — el runtime rechaza con `tool: invalid`
+cualquier llamada a una herramienta no disponible y desperdicia un round trip.
+
+**Puedes llamar:** `read`, `write`, `edit`, `glob`, `grep`, `bash`, `webfetch`, `websearch`, `skill`, `attest-deliverable`, `create-document`, `run-tests`, `verify-deliverable`
+
 ## Protocolo de entrega
 
 Cuando el orquestador te asigne una tarea con instruccion de escribir en archivo:

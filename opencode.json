@@ -16,6 +16,11 @@
         "skill": "deny",
         "webfetch": "deny",
         "todowrite": "deny"
+      },
+      "model": "anthropic/claude-opus-4-7",
+      "thinking": {
+        "type": "enabled",
+        "budgetTokens": 32000
       }
     },
     "project-manager": {
@@ -118,6 +123,11 @@
         "grep": "allow",
         "bash": "allow",
         "skill": "allow"
+      },
+      "model": "anthropic/claude-sonnet-4-6",
+      "thinking": {
+        "type": "enabled",
+        "budgetTokens": 16000
       }
     },
     "developer-frontend": {
@@ -142,5 +152,8 @@
       "*": "allow"
     },
     "external_directory": "allow"
-  }
+  },
+  "plugin": [
+    ".opencode/plugins/abax-policy.ts"
+  ]
 }
