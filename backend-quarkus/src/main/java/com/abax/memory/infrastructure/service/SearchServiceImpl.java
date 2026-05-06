@@ -8,10 +8,12 @@ import com.abax.memory.api.dto.v2.SearchResponse;
 import com.abax.memory.api.dto.v2.SemanticSearchRequest;
 import com.abax.memory.api.dto.v2.UnifiedSearchRequest;
 import com.abax.memory.api.dto.v2.UnifiedSearchResponse;
+import com.abax.memory.domain.enums.GraphEntryStrategy;
 import com.abax.memory.domain.enums.LifecycleState;
 import com.abax.memory.domain.enums.MemoryKind;
 import com.abax.memory.domain.enums.SensitivityLevel;
 import com.abax.memory.domain.model.GraphExpansionResult;
+import com.abax.memory.domain.model.GraphStrategyOverride;
 import com.abax.memory.domain.model.InferredRelation;
 import com.abax.memory.domain.model.MemoryFragment;
 import com.abax.memory.domain.model.RerankedHit;
@@ -218,6 +220,12 @@ public class SearchServiceImpl implements SearchService {
 
     @Override
     public UnifiedSearchResponse unifiedSearch(UnifiedSearchRequest request, String tenantId) {
+        return unifiedSearch(request, tenantId, null);
+    }
+
+    @Override
+    public UnifiedSearchResponse unifiedSearch(UnifiedSearchRequest request, String tenantId,
+                                                 GraphStrategyOverride strategyOverride) {
         long startTime = System.currentTimeMillis();
         int page = Math.max(0, request.getPage());
         int size = Math.max(1, Math.min(100, request.getSize()));
@@ -339,13 +347,27 @@ public class SearchServiceImpl implements SearchService {
                 seeds.retainAll(validSeeds.keySet());
                 entryPointSource = "client-provided";
                 entryPointCount = seeds.size();
+            } else if (strategyOverride != null && strategyOverride.getStrategy() == GraphEntryStrategy.SINGLE_BEST) {
+                // FT-V21-004.1: X-Graph-Strategy: single → single-best entry point
+                seeds = new LinkedHashSet<>();
+                if (!rankedResults.isEmpty()) {
+                    seeds.add(rankedResults.get(0).id());
+                }
+                entryPointSource = "header-override-single";
+                entryPointCount = 1;
             } else {
-                // Auto-select from semantic top-K
-                int topK = Math.max(1, Math.min(request.getGraphTopK(), rankedResults.size()));
+                // Auto-select from semantic top-K (default) or header override
+                int topK;
+                if (strategyOverride != null && strategyOverride.getGraphK() != null) {
+                    topK = Math.max(1, Math.min(strategyOverride.getGraphK(), rankedResults.size()));
+                    entryPointSource = "header-override-top-" + topK;
+                } else {
+                    topK = Math.max(1, Math.min(request.getGraphTopK(), rankedResults.size()));
+                    entryPointSource = "dense-retrieval-top-" + topK;
+                }
                 seeds = rankedResults.subList(0, topK).stream()
                         .map(MemoryResponse::id)
                         .collect(Collectors.toCollection(LinkedHashSet::new));
-                entryPointSource = "dense-retrieval-top-" + topK;
                 entryPointCount = topK;
             }
 

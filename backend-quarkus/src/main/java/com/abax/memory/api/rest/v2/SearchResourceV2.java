@@ -7,6 +7,8 @@ import com.abax.memory.api.dto.v2.SearchResponse;
 import com.abax.memory.api.dto.v2.SemanticSearchRequest;
 import com.abax.memory.api.dto.v2.UnifiedSearchRequest;
 import com.abax.memory.api.dto.v2.UnifiedSearchResponse;
+import com.abax.memory.domain.enums.GraphEntryStrategy;
+import com.abax.memory.domain.model.GraphStrategyOverride;
 import com.abax.memory.domain.model.Relation;
 import com.abax.memory.domain.service.RelationService;
 import com.abax.memory.domain.service.SearchService;
@@ -32,6 +34,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.logging.Logger;
 
 import java.net.URI;
 import java.util.List;
@@ -60,6 +63,8 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class SearchResourceV2 {
+
+    private static final Logger LOG = Logger.getLogger(SearchResourceV2.class);
 
     @Inject
     SearchService searchService;
@@ -135,7 +140,7 @@ public class SearchResourceV2 {
     @POST
     @Path("/search")
     @Tag(name = "Search V2")
-    @Operation(summary = "Unified search", description = "Performs a unified search combining vector similarity, keyword matching, and optional graph expansion into a single result set.")
+    @Operation(summary = "Unified search", description = "Performs a unified search combining vector similarity, keyword matching, and optional graph expansion into a single result set. Accepts optional X-Graph-Strategy, X-Graph-K, and X-Graph-Threshold headers for per-request graph control.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Search results",
                     content = @Content(schema = @Schema(implementation = UnifiedSearchResponse.class))),
@@ -144,9 +149,25 @@ public class SearchResourceV2 {
     })
     public UnifiedSearchResponse unifiedSearch(
             @HeaderParam("X-Tenant-Id") String xTenantId,
-            @Valid UnifiedSearchRequest request) {
+            @Valid UnifiedSearchRequest request,
+            @HeaderParam("X-Graph-Strategy")
+            @Parameter(description = "Graph expansion strategy: auto, on, off. 'off' disables graph expansion.",
+                       example = "auto")
+            String xGraphStrategy,
+            @HeaderParam("X-Graph-K")
+            @Parameter(description = "Number of entry points for top-k strategy (1-10).",
+                       example = "5")
+            Integer xGraphK,
+            @HeaderParam("X-Graph-Threshold")
+            @Parameter(description = "Score threshold for threshold strategy (0.0-1.0).",
+                       example = "0.85")
+            Double xGraphThreshold) {
         String tenantId = resolveTenant(xTenantId);
-        return searchService.unifiedSearch(request, tenantId);
+
+        // FT-V21-004.1: Parse X-Graph-Strategy header
+        GraphStrategyOverride strategyOverride = parseGraphHeaders(request, xGraphStrategy, xGraphK, xGraphThreshold);
+
+        return searchService.unifiedSearch(request, tenantId, strategyOverride);
     }
 
     /**
@@ -378,5 +399,85 @@ public class SearchResourceV2 {
                 "status", "OK",
                 "timestamp", java.time.Instant.now().toString()
         )).build();
+    }
+
+    // ── Private helpers ─────────────────────────────────────────────
+
+    /**
+     * Parses X-Graph-* headers into a {@link GraphStrategyOverride} — FT-V21-004.1.
+     *
+     * <p>Accepted values:
+     * <ul>
+     *   <li>{@code auto} or null → no override (use domain profile strategy)</li>
+     *   <li>{@code on} → force graph expansion with default top-K</li>
+     *   <li>{@code off} → disable graph expansion (sets expandGraph=false)</li>
+     *   <li>{@code single} → single-best entry point</li>
+     *   <li>{@code top-k} → top-K entry points (use X-Graph-K)</li>
+     *   <li>{@code threshold} → threshold-based (use X-Graph-Threshold)</li>
+     * </ul>
+     * </p>
+     */
+    private GraphStrategyOverride parseGraphHeaders(UnifiedSearchRequest request,
+                                                       String xGraphStrategy,
+                                                       Integer xGraphK,
+                                                       Double xGraphThreshold) {
+        if (xGraphStrategy == null || xGraphStrategy.isBlank()) {
+            return null; // no override
+        }
+
+        String normalized = xGraphStrategy.trim().toLowerCase();
+
+        switch (normalized) {
+            case "auto":
+                return null; // use profile defaults
+            case "off":
+                // Force-disable graph expansion
+                request.setExpandGraph(false);
+                return null;
+            case "on":
+                // Force-enable graph expansion with defaults
+                request.setExpandGraph(true);
+                if (xGraphK != null) {
+                    validateGraphK(xGraphK);
+                    request.setGraphTopK(xGraphK);
+                }
+                return null;
+            case "single":
+                return new GraphStrategyOverride(GraphEntryStrategy.SINGLE_BEST, null, null);
+            case "top-k":
+                if (xGraphK != null) validateGraphK(xGraphK);
+                return new GraphStrategyOverride(GraphEntryStrategy.TOP_K, xGraphK, null);
+            case "threshold":
+                if (xGraphThreshold != null) validateGraphThreshold(xGraphThreshold);
+                return new GraphStrategyOverride(GraphEntryStrategy.THRESHOLD, null, xGraphThreshold);
+            default:
+                LOG.warnv("Invalid X-Graph-Strategy header value: {0}. Valid: auto, on, off, single, top-k, threshold", xGraphStrategy);
+                throw new jakarta.ws.rs.BadRequestException(
+                        jakarta.ws.rs.core.Response.status(400)
+                                .entity(Map.of("errorCode", "INVALID_HEADER",
+                                        "message", "Invalid X-Graph-Strategy: " + xGraphStrategy
+                                                + ". Valid: auto, on, off, single, top-k, threshold"))
+                                .build());
+        }
+    }
+
+    private void validateGraphK(Integer k) {
+        if (k < 1 || k > 10) {
+            throw new jakarta.ws.rs.BadRequestException(
+                    jakarta.ws.rs.core.Response.status(400)
+                            .entity(Map.of("errorCode", "INVALID_HEADER",
+                                    "message", "X-Graph-K must be between 1 and 10, got: " + k))
+                            .build());
+        }
+    }
+
+    private void validateGraphThreshold(Double threshold) {
+        if (threshold < 0.0 || threshold > 1.0) {
+            throw new jakarta.ws.rs.BadRequestException(
+                    jakarta.ws.rs.core.Response.status(400)
+                            .entity(Map.of("errorCode", "INVALID_HEADER",
+                                    "message", "X-Graph-Threshold must be between 0.0 and 1.0, got: " + threshold))
+                            .build());
+        }
     }
 }
