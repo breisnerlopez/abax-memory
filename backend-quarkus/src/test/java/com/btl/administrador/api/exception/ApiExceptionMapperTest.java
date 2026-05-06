@@ -39,7 +39,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("INVALID_JSON", body.code());
+        assertEquals("INVALID_JSON", body.errorCode());
         assertEquals("Invalid JSON format", body.message());
     }
 
@@ -54,7 +54,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("INVALID_JSON", body.code());
+        assertEquals("INVALID_JSON", body.errorCode());
         assertEquals("Invalid JSON format", body.message());
     }
 
@@ -68,7 +68,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("INVALID_JSON", body.code());
+        assertEquals("INVALID_JSON", body.errorCode());
     }
 
     @Test
@@ -79,7 +79,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("UNEXPECTED_ERROR", body.code());
+        assertEquals("UNEXPECTED_ERROR", body.errorCode());
     }
 
     @Test
@@ -111,7 +111,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("UNSUPPORTED_MEDIA_TYPE", body.code());
+        assertEquals("UNSUPPORTED_MEDIA_TYPE", body.errorCode());
         assertEquals("Unsupported Content-Type", body.message());
     }
 
@@ -124,7 +124,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("UNSUPPORTED_MEDIA_TYPE", body.code());
+        assertEquals("UNSUPPORTED_MEDIA_TYPE", body.errorCode());
     }
 
     @Test
@@ -135,7 +135,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("INVALID_REQUEST_BODY", body.code());
+        assertEquals("INVALID_REQUEST_BODY", body.errorCode());
         assertEquals("Request body is missing or unreadable", body.message());
     }
 
@@ -147,7 +147,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("INVALID_REQUEST_BODY", body.code());
+        assertEquals("INVALID_REQUEST_BODY", body.errorCode());
         assertEquals("Request body is missing or unreadable", body.message());
     }
 
@@ -176,7 +176,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.SERVICE_UNAVAILABLE.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("DATABASE_UNAVAILABLE", body.code());
+        assertEquals("DATABASE_UNAVAILABLE", body.errorCode());
         assertEquals("Database is temporarily unavailable. Please retry later.", body.message());
     }
 
@@ -189,7 +189,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.SERVICE_UNAVAILABLE.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("DATABASE_UNAVAILABLE", body.code());
+        assertEquals("DATABASE_UNAVAILABLE", body.errorCode());
     }
 
     @Test
@@ -200,7 +200,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.SERVICE_UNAVAILABLE.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("DATABASE_UNAVAILABLE", body.code());
+        assertEquals("DATABASE_UNAVAILABLE", body.errorCode());
     }
 
     @Test
@@ -213,7 +213,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("UNEXPECTED_ERROR", body.code());
+        assertEquals("UNEXPECTED_ERROR", body.errorCode());
     }
 
     @Test
@@ -226,7 +226,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.SERVICE_UNAVAILABLE.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("DATABASE_UNAVAILABLE", body.code());
+        assertEquals("DATABASE_UNAVAILABLE", body.errorCode());
     }
 
     @Test
@@ -250,7 +250,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.SERVICE_UNAVAILABLE.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("DATABASE_UNAVAILABLE", body.code());
+        assertEquals("DATABASE_UNAVAILABLE", body.errorCode());
     }
 
     @Test
@@ -270,7 +270,7 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.SERVICE_UNAVAILABLE.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("DATABASE_UNAVAILABLE", body.code());
+        assertEquals("DATABASE_UNAVAILABLE", body.errorCode());
     }
 
     @Test
@@ -281,6 +281,6 @@ class ApiExceptionMapperTest {
 
         assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
         ApiErrorResponse body = (ApiErrorResponse) response.getEntity();
-        assertEquals("UNEXPECTED_ERROR", body.code());
+        assertEquals("UNEXPECTED_ERROR", body.errorCode());
     }
 }

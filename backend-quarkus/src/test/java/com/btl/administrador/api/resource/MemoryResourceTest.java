@@ -74,7 +74,7 @@ class MemoryResourceTest {
                 .then()
                 .statusCode(400)
                 .header("X-Correlation-Id", equalTo("corr-validation-001"))
-                .body("code", equalTo("VALIDATION_ERROR"))
+                .body("errorCode", equalTo("VALIDATION_ERROR"))
                 .body("message", equalTo("Validation failed"))
                 .body("correlationId", equalTo("corr-validation-001"));
     }
@@ -93,7 +93,7 @@ class MemoryResourceTest {
                 .post("/api/memorias")
                 .then()
                 .statusCode(400)
-                .body("code", equalTo("INVALID_FRONTMATTER"));
+                .body("errorCode", equalTo("INVALID_FRONTMATTER"));
     }
 
     @Test
@@ -107,7 +107,7 @@ class MemoryResourceTest {
                 .post("/api/memorias")
                 .then()
                 .statusCode(400)
-                .body("code", equalTo("INVALID_MEMORY_TYPE"));
+                .body("errorCode", equalTo("INVALID_MEMORY_TYPE"));
     }
 
     @Test
@@ -127,7 +127,7 @@ class MemoryResourceTest {
                 .post("/api/memorias/desde-caso")
                 .then()
                 .statusCode(404)
-                .body("code", equalTo("CASE_NOT_FOUND"));
+                .body("errorCode", equalTo("CASE_NOT_FOUND"));
     }
 
     @Test
@@ -391,7 +391,7 @@ class MemoryResourceTest {
                 .then()
                 .statusCode(400)
                 .header("X-Correlation-Id", equalTo("corr-filter-001"))
-                .body("code", equalTo("INVALID_FILTER"))
+                .body("errorCode", equalTo("INVALID_FILTER"))
                 .body("correlationId", equalTo("corr-filter-001"));
     }
 
@@ -489,7 +489,7 @@ class MemoryResourceTest {
                 .post("/api/memorias")
                 .then()
                 .statusCode(503)
-                .body("code", equalTo("GIT_PERSISTENCE_FAILED"));
+                .body("errorCode", equalTo("GIT_PERSISTENCE_FAILED"));
     }
 
     @Test
@@ -502,7 +502,7 @@ class MemoryResourceTest {
                 .post("/api/busquedas/semantica")
                 .then()
                 .statusCode(400)
-                .body("code", equalTo("INVALID_TOPK"));
+                .body("errorCode", equalTo("INVALID_TOPK"));
     }
 
     @Test
@@ -561,7 +561,7 @@ class MemoryResourceTest {
                 .get("/api/memorias/MEM-404")
                 .then()
                 .statusCode(404)
-                .body("code", equalTo("MEMORY_NOT_FOUND"));
+                .body("errorCode", equalTo("MEMORY_NOT_FOUND"));
     }
 
     // ISSUE #9: api-consumer role filtering
@@ -608,7 +608,7 @@ class MemoryResourceTest {
                 .get("/api/memorias/MEM-404")
                 .then()
                 .statusCode(404)
-                .body("code", equalTo("MEMORY_NOT_FOUND"));
+                .body("errorCode", equalTo("MEMORY_NOT_FOUND"));
     }
 
     @SuppressWarnings("unchecked")
