@@ -1,11 +1,14 @@
 package com.abax.memory.infrastructure.service;
 
 import com.abax.memory.domain.enums.RelationType;
+import com.abax.memory.domain.model.GraphMutatedEvent;
 import com.abax.memory.domain.model.Relation;
 import com.abax.memory.domain.service.RelationService;
 import com.abax.memory.infrastructure.persistence.MemoryFragmentEntity;
 import com.abax.memory.infrastructure.persistence.RelationEntity;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import org.jboss.logging.Logger;
@@ -28,6 +31,9 @@ import java.util.UUID;
 public class RelationServiceImpl implements RelationService {
 
     private static final Logger LOG = Logger.getLogger(RelationServiceImpl.class);
+
+    @Inject
+    Event<GraphMutatedEvent> graphMutationEvent;
 
     // ── Domain-model methods ─────────────────────────────────────────
 
@@ -101,6 +107,9 @@ public class RelationServiceImpl implements RelationService {
         entity.setTenantId(tenantId);
         entity.persist();
 
+        // FT-V21-002.1: Fire graph mutation event for cache invalidation
+        graphMutationEvent.fireAsync(new GraphMutatedEvent(sourceId, targetId, "CREATE"));
+
         LOG.infov("Relation created via API v2: id={0}, source={1}, target={2}, type={3}, tenant={4}",
                 entity.getId(), sourceId, targetId, type, tenantId);
         return toDomain(entity);
@@ -119,7 +128,13 @@ public class RelationServiceImpl implements RelationService {
             throw new NotFoundException("Relation not found: " + relationId);
         }
 
+        UUID sourceId = entity.getSourceId();
+        UUID targetId = entity.getTargetId();
         entity.delete();
+
+        // FT-V21-002.1: Fire graph mutation event for cache invalidation
+        graphMutationEvent.fireAsync(new GraphMutatedEvent(sourceId, targetId, "DELETE"));
+
         LOG.infov("Relation deleted via API v2: id={0}, tenant={1}", relationId, tenantId);
     }
 

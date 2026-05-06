@@ -11,10 +11,12 @@ import com.abax.memory.api.dto.v2.UnifiedSearchResponse;
 import com.abax.memory.domain.enums.LifecycleState;
 import com.abax.memory.domain.enums.MemoryKind;
 import com.abax.memory.domain.enums.SensitivityLevel;
+import com.abax.memory.domain.model.GraphExpansionResult;
 import com.abax.memory.domain.model.InferredRelation;
 import com.abax.memory.domain.model.MemoryFragment;
 import com.abax.memory.domain.model.RerankedHit;
 import com.abax.memory.domain.service.CrossEncoderService;
+import com.abax.memory.domain.service.GraphCacheService;
 import com.abax.memory.domain.service.LlmService;
 import com.abax.memory.domain.service.RelationService;
 import com.abax.memory.domain.service.SearchService;
@@ -88,6 +90,9 @@ public class SearchServiceImpl implements SearchService {
 
     @Inject
     CrossEncoderService crossEncoderService;
+
+    @Inject
+    GraphCacheService graphCacheService;
 
     @ConfigProperty(name = "abax.v2.search.default-topk", defaultValue = "10")
     int defaultTopK;
@@ -300,6 +305,7 @@ public class SearchServiceImpl implements SearchService {
         int graphContributions = 0;
         int totalExpandedNodes = 0;
         int maxDepth = 0;
+        boolean graphCacheHit = false;
         List<String> entryPointIds = List.of();
         String entryPointSource = null;
         int entryPointCount = 0;
@@ -343,16 +349,37 @@ public class SearchServiceImpl implements SearchService {
                         .collect(Collectors.toMap(MemoryResponse::id,
                                 r -> r.score() != null ? r.score() : 0.7));
 
-                try {
-                    GraphExpansionResult expanded = expandGraphConsolidated(
-                            seeds, seedScores, request.getGraphDepth(), tenantId);
+                com.abax.memory.domain.model.GraphExpansionResult cachedGraphResult = null;
 
-                    for (var entry : expanded.nodes().entrySet()) {
+                try {
+                    // FT-V21-002.1: Check graph cache before BFS expansion
+                    Set<String> includeKinds = request.getKinds() != null
+                            ? request.getKinds().stream().map(Enum::name).collect(Collectors.toSet())
+                            : null;
+                    String cacheKey = graphCacheService.buildKey(seeds, request.getGraphDepth(), includeKinds);
+                    cachedGraphResult = graphCacheService.get(cacheKey);
+
+                    com.abax.memory.domain.model.GraphExpansionResult expanded;
+                    if (cachedGraphResult != null) {
+                        graphCacheHit = true;
+                        expanded = cachedGraphResult;
+                        LOG.debugv("Graph cache HIT: key={0}, nodes={1}", cacheKey, expanded.getNodes().size());
+                    } else {
+                        // Cache miss — run BFS and store result
+                        var legacyResult = expandGraphConsolidated(
+                                seeds, seedScores, request.getGraphDepth(), tenantId);
+                        expanded = new com.abax.memory.domain.model.GraphExpansionResult(
+                                legacyResult.nodes(), legacyResult.entityMap());
+                        graphCacheService.put(cacheKey, expanded);
+                        LOG.debugv("Graph cache MISS: key={0}, stored {1} nodes", cacheKey, legacyResult.nodes().size());
+                    }
+
+                    for (var entry : expanded.getNodes().entrySet()) {
                         UUID nodeId = entry.getKey();
                         if (seenIds.add(nodeId)) {
                             double graphScore = entry.getValue();
                             MemoryResponse scoredNode = withScore(
-                                    MemoryResponse.from(expanded.entityMap().get(nodeId)), graphScore);
+                                    MemoryResponse.from(expanded.getEntityMap().get(nodeId)), graphScore);
                             Map<String, Double> graphComponents = new LinkedHashMap<>();
                             graphComponents.put("graph", graphScore);
                             unified.add(new ScoredMemory(scoredNode, "graph", graphComponents,
@@ -360,7 +387,7 @@ public class SearchServiceImpl implements SearchService {
                             graphContributions++;
                         }
                     }
-                    totalExpandedNodes = expanded.nodes().size();
+                    totalExpandedNodes = expanded.getNodes().size();
                     maxDepth = request.getGraphDepth();
                 } catch (Exception e) {
                     LOG.debugv("Graph expansion failed for unified search: {0}", e.getMessage());
@@ -391,7 +418,7 @@ public class SearchServiceImpl implements SearchService {
                 pipelineStages, crossEncoderApplied, denseCandidates, graphExpanded,
                 graphExpanded ? new UnifiedSearchResponse.GraphExpandedNodes(
                         entryPointIds, entryPointCount, entryPointSource,
-                        totalExpandedNodes, maxDepth, false) : null
+                        totalExpandedNodes, maxDepth, graphCacheHit) : null
         );
 
         long queryTimeMs = System.currentTimeMillis() - startTime;
