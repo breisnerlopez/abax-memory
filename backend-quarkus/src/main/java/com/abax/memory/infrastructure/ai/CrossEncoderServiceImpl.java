@@ -19,23 +19,24 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * OpenAI-backed implementation of {@link CrossEncoderService} — v2.1.0.
  *
  * <p>Uses the same {@link ChatLanguageModel} CDI bean as
  * {@link OpenAiLlmService} (gpt-4o-mini) to evaluate entailment for
- * each (query, document) pair in a single batch prompt. A 2-second
- * timeout guards the pipeline; on timeout or failure the service
- * degrades gracefully by returning empty results, which signals
- * {@link com.abax.memory.infrastructure.service.SearchServiceImpl}
+ * each (query, document) pair in a single batch prompt. A configurable
+ * timeout (default 5s, was 2s in v2.1.0) guards the pipeline; on timeout
+ * or failure the service degrades gracefully by returning empty results,
+ * which signals {@link com.abax.memory.infrastructure.service.SearchServiceImpl}
  * to fall back to dense-only ordering.</p>
  *
  * <h3>Graceful Degradation</h3>
  * <ul>
  *   <li><b>Unavailable</b>: if {@code ChatLanguageModel} is not resolvable,
  *       returns empty list — caller uses dense-only.</li>
- *   <li><b>Timeout > 2s</b>: cancels, logs {@code WARN CROSS_ENCODER_TIMEOUT},
+ *   <li><b>Timeout > configured</b>: cancels, logs {@code WARN CROSS_ENCODER_TIMEOUT},
  *       returns empty list.</li>
  *   <li><b>Malformed response</b>: logs {@code ERROR}, omits problematic
  *       candidates, returns best-effort partial results.</li>
@@ -47,14 +48,22 @@ public class CrossEncoderServiceImpl implements CrossEncoderService {
 
     private static final Logger LOG = Logger.getLogger(CrossEncoderServiceImpl.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private static final Duration TIMEOUT = Duration.ofSeconds(2);
     private static final int MAX_BATCH_SIZE = 20;
 
     private final ChatLanguageModel chatModel;
+    private final Duration timeout;
+    private final ExecutorService executor;
 
-    public CrossEncoderServiceImpl(ChatLanguageModel chatModel) {
+    public CrossEncoderServiceImpl(ChatLanguageModel chatModel, Duration timeout) {
         this.chatModel = chatModel;
-        LOG.infov("CrossEncoderServiceImpl initialized: chatModel={0}", chatModel);
+        this.timeout = timeout;
+        this.executor = Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r, "cross-encoder-worker");
+            t.setDaemon(true);
+            return t;
+        });
+        LOG.infov("CrossEncoderServiceImpl initialized: chatModel={0}, timeout={1}s",
+                chatModel, timeout.toSeconds());
     }
 
     @Override
@@ -108,7 +117,8 @@ public class CrossEncoderServiceImpl implements CrossEncoderService {
             return hits;
 
         } catch (TimeoutException e) {
-            LOG.warn("CROSS_ENCODER_TIMEOUT — reranker exceeded 2s budget, falling back to dense-only");
+            LOG.warnv("CROSS_ENCODER_TIMEOUT — reranker exceeded {0}s budget, falling back to dense-only",
+                    timeout.toSeconds());
             return List.of();
         } catch (Exception e) {
             LOG.errorv(e, "CROSS_ENCODER_UNAVAILABLE — reranker failed");
@@ -117,17 +127,15 @@ public class CrossEncoderServiceImpl implements CrossEncoderService {
     }
 
     /**
-     * Executes the prompt with a 2-second timeout using a separate thread.
+     * Executes the prompt with the configured timeout using a shared daemon thread.
      */
     private String executeWithTimeout(String prompt) throws Exception {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<String> future = executor.submit((Callable<String>) () -> chatModel.generate(prompt));
         try {
-            Future<String> future = executor.submit((Callable<String>) () -> chatModel.generate(prompt));
-            return future.get(TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+            return future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
+            future.cancel(true);
             throw e;
-        } finally {
-            executor.shutdownNow();
         }
     }
 

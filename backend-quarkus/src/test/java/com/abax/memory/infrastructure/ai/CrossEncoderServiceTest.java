@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +30,7 @@ class CrossEncoderServiceTest {
     @BeforeEach
     void setUp() {
         chatModel = mock(ChatLanguageModel.class);
-        service = new CrossEncoderServiceImpl(chatModel);
+        service = new CrossEncoderServiceImpl(chatModel, Duration.ofSeconds(3));
     }
 
     @Test
@@ -71,9 +72,9 @@ class CrossEncoderServiceTest {
                 new CrossEncoderService.CandidateDocument("mem-001", "test content", 0.80)
         );
 
-        // Simulate timeout by making the mock sleep longer than 2s
+        // Simulate timeout by making the mock sleep longer than configured timeout
         when(chatModel.generate(anyString())).thenAnswer(invocation -> {
-            Thread.sleep(2500); // exceeds 2s timeout
+            Thread.sleep(4000); // exceeds 3s test timeout
             return "{}";
         });
 

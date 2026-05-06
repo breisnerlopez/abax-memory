@@ -244,15 +244,21 @@ public class InfrastructureConfig {
     @ConfigProperty(name = "abax.v2.reranker.enabled", defaultValue = "true")
     boolean rerankerEnabled;
 
+    @ConfigProperty(name = "abax.v2.reranker.timeout-seconds", defaultValue = "5")
+    int rerankerTimeoutSeconds;
+
     /**
      * Produces the {@link CrossEncoderService} bean — v2.1.0.
      *
      * <p>Resolution strategy:
      * <ol>
+     *   <li>If {@code abax.v2.llm.mock=true}, returns a stub (synchronized
+     *       with LLM mock mode for test environments).</li>
      *   <li>If {@code abax.v2.reranker.enabled=false}, returns a stub that
      *       always returns empty (degradation to dense-only).</li>
      *   <li>Otherwise, resolves {@link ChatLanguageModel} via CDI
-     *       and creates a real {@link CrossEncoderServiceImpl}.</li>
+     *       and creates a real {@link CrossEncoderServiceImpl} with the
+     *       configured timeout.</li>
      *   <li>If {@code ChatLanguageModel} is not resolvable, returns a stub
      *       with a {@code CROSS_ENCODER_UNAVAILABLE} warning.</li>
      * </ol>
@@ -261,6 +267,13 @@ public class InfrastructureConfig {
     @Produces
     @Singleton
     public CrossEncoderService crossEncoderService(Instance<ChatLanguageModel> chatModelInstance) {
+        // Synchronize with LLM mock mode: when the main LLM service is mocked,
+        // the cross-encoder must also be disabled to avoid real API calls.
+        if (llmMock) {
+            LOG.info("abax.v2.llm.mock=true — cross-encoder disabled (synchronized with LLM mock mode)");
+            return (query, candidates, topK) -> java.util.List.of();
+        }
+
         if (!rerankerEnabled) {
             LOG.info("abax.v2.reranker.enabled=false — cross-encoder disabled, all searches use dense-only");
             return (query, candidates, topK) -> java.util.List.of();
@@ -268,8 +281,10 @@ public class InfrastructureConfig {
 
         if (chatModelInstance.isResolvable()) {
             ChatLanguageModel chatModel = chatModelInstance.get();
-            LOG.infov("CrossEncoderService ACTIVE — model={0}, timeout=2s", llmChatModelName);
-            return new CrossEncoderServiceImpl(chatModel);
+            Duration timeout = Duration.ofSeconds(rerankerTimeoutSeconds);
+            LOG.infov("CrossEncoderService ACTIVE — model={0}, timeout={1}s",
+                    llmChatModelName, rerankerTimeoutSeconds);
+            return new CrossEncoderServiceImpl(chatModel, timeout);
         }
 
         LOG.warn("CROSS_ENCODER_UNAVAILABLE — ChatLanguageModel not resolvable. "
