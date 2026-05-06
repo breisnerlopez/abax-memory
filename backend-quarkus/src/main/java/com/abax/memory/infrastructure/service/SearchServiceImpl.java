@@ -118,8 +118,16 @@ public class SearchServiceImpl implements SearchService {
         Map<String, Object> qdrantFilters = SearchFilterBuilder.buildQdrantFilters(request, tenantId);
 
         // 3. Search Qdrant
+        long qdrantStart = System.nanoTime();
         List<QdrantClient.ScoredHit> hits = qdrantClient.search(
                 qdrantCollection, queryVector, qdrantFilters, topK);
+        long qdrantLatencyMs = (System.nanoTime() - qdrantStart) / 1_000_000;
+        if (qdrantLatencyMs > 500) {
+            LOG.warnv("Qdrant search slow: latency={0}ms, collection={1}, topK={2}",
+                    qdrantLatencyMs, qdrantCollection, topK);
+        } else {
+            LOG.debugv("Qdrant search: latency={0}ms, hits={1}", qdrantLatencyMs, hits.size());
+        }
 
         // 4. Load MemoryFragment entities for matched point IDs
         List<String> pointIds = hits.stream()
