@@ -48,6 +48,15 @@ public interface QdrantClient {
     boolean isHealthy();
 
     /**
+     * Deletes points matching the given payload filters — v2.1.0 FT-V21-004.3.
+     *
+     * @param collection collection name
+     * @param filters    payload key-value filters (AND semantics)
+     * @return number of points deleted
+     */
+    long deleteByFilter(String collection, Map<String, Object> filters);
+
+    /**
      * A single scored result from a Qdrant search.
      */
     record ScoredHit(String pointId, float score, Map<String, Object> payload) {

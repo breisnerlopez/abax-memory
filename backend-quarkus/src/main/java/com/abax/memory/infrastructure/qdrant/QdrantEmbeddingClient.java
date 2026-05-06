@@ -184,6 +184,47 @@ public class QdrantEmbeddingClient implements QdrantClient {
         return initialized && checkHealth();
     }
 
+    @Override
+    public long deleteByFilter(String collection, Map<String, Object> filters) {
+        if (!initialized) {
+            LOG.warn("Qdrant deleteByFilter skipped: client not initialized");
+            return 0;
+        }
+
+        try {
+            ObjectNode body = MAPPER.createObjectNode();
+            if (filters != null && !filters.isEmpty()) {
+                body.set("filter", buildQdrantFilter(filters));
+            }
+
+            String url = baseUrl + "/collections/" + collection + "/points/delete";
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Content-Type", "application/json")
+                    .timeout(REQUEST_TIMEOUT)
+                    .POST(HttpRequest.BodyPublishers.ofString(MAPPER.writeValueAsString(body)))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                JsonNode root = MAPPER.readTree(response.body());
+                JsonNode result = root.get("result");
+                if (result != null && result.has("deleted")) {
+                    long deleted = result.get("deleted").asLong();
+                    LOG.infov("Qdrant deleteByFilter: collection={0}, deleted={1}", collection, deleted);
+                    return deleted;
+                }
+            } else {
+                LOG.errorv("Qdrant deleteByFilter failed: HTTP {0} — {1}", response.statusCode(), response.body());
+            }
+            return 0;
+        } catch (Exception e) {
+            LOG.errorv(e, "Qdrant deleteByFilter error for collection={0}", collection);
+            return 0;
+        }
+    }
+
     // ── Private helpers ──────────────────────────────────────────────
 
     private boolean checkHealth() {

@@ -1,7 +1,6 @@
 package com.abax.memory.config;
 
 import com.abax.memory.domain.service.CrossEncoderService;
-import com.abax.memory.domain.service.GraphCacheService;
 import com.abax.memory.domain.service.LlmService;
 import com.abax.memory.infrastructure.ai.CrossEncoderServiceImpl;
 import com.abax.memory.infrastructure.ai.EmbeddingProvider;
@@ -9,7 +8,6 @@ import com.abax.memory.infrastructure.ai.InMemoryEmbeddingProvider;
 import com.abax.memory.infrastructure.ai.MockLlmService;
 import com.abax.memory.infrastructure.ai.OpenAIEmbeddingProvider;
 import com.abax.memory.infrastructure.ai.OpenAiLlmService;
-import com.abax.memory.infrastructure.cache.GraphCacheServiceImpl;
 import com.abax.memory.infrastructure.qdrant.InMemoryQdrantClient;
 import com.abax.memory.infrastructure.qdrant.QdrantClient;
 import com.abax.memory.infrastructure.qdrant.QdrantEmbeddingClient;
@@ -239,21 +237,6 @@ public class InfrastructureConfig {
                 + "Verify that OpenAiConfigProducer is on the classpath. "
                 + "Falling back to MockLlmService (REPLACE_BEFORE_PROD)");
         return new MockLlmService();
-    }
-
-    // ── Graph Cache Service configuration (v2.1.0 FT-V21-002.1) ───
-
-    @ConfigProperty(name = "abax.v2.graph-cache.ttl-seconds", defaultValue = "300")
-    long graphCacheTtlSeconds;
-
-    @ConfigProperty(name = "abax.v2.graph-cache.max-size", defaultValue = "1000")
-    long graphCacheMaxSize;
-
-    @Produces
-    @Singleton
-    public GraphCacheService graphCacheService() {
-        LOG.infov("GraphCacheService ACTIVE — ttl={0}s, maxSize={1}", graphCacheTtlSeconds, graphCacheMaxSize);
-        return new GraphCacheServiceImpl(graphCacheTtlSeconds, graphCacheMaxSize);
     }
 
     // ── Cross-Encoder Service configuration (v2.1.0) ──────────────
