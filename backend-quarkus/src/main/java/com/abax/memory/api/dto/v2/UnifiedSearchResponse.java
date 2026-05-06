@@ -108,17 +108,29 @@ public class UnifiedSearchResponse {
         private int denseRetrievalCandidates;
         private boolean graphExpanded;
         private GraphExpandedNodes graphExpandedNodes;
+        // FT-V21-004.2: search weights
+        private Double semanticWeight;
+        private Double lexicalWeight;
 
         public PipelineMetadata() {}
 
         public PipelineMetadata(List<String> stages, boolean crossEncoderApplied,
-                                 int denseRetrievalCandidates, boolean graphExpanded,
-                                 GraphExpandedNodes graphExpandedNodes) {
+                                  int denseRetrievalCandidates, boolean graphExpanded,
+                                  GraphExpandedNodes graphExpandedNodes) {
             this.stages = stages;
             this.crossEncoderApplied = crossEncoderApplied;
             this.denseRetrievalCandidates = denseRetrievalCandidates;
             this.graphExpanded = graphExpanded;
             this.graphExpandedNodes = graphExpandedNodes;
+        }
+
+        public PipelineMetadata(List<String> stages, boolean crossEncoderApplied,
+                                  int denseRetrievalCandidates, boolean graphExpanded,
+                                  GraphExpandedNodes graphExpandedNodes,
+                                  double semanticWeight, double lexicalWeight) {
+            this(stages, crossEncoderApplied, denseRetrievalCandidates, graphExpanded, graphExpandedNodes);
+            this.semanticWeight = semanticWeight;
+            this.lexicalWeight = lexicalWeight;
         }
 
         public List<String> getStages() { return stages; }
@@ -135,6 +147,11 @@ public class UnifiedSearchResponse {
 
         public GraphExpandedNodes getGraphExpandedNodes() { return graphExpandedNodes; }
         public void setGraphExpandedNodes(GraphExpandedNodes graphExpandedNodes) { this.graphExpandedNodes = graphExpandedNodes; }
+
+        public Double getSemanticWeight() { return semanticWeight; }
+        public void setSemanticWeight(Double semanticWeight) { this.semanticWeight = semanticWeight; }
+        public Double getLexicalWeight() { return lexicalWeight; }
+        public void setLexicalWeight(Double lexicalWeight) { this.lexicalWeight = lexicalWeight; }
     }
 
     /**

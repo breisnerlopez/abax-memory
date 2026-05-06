@@ -44,6 +44,9 @@ public class UnifiedSearchRequest {
     private boolean rerank = true;
     // FT-V21-001.3: explicit entry points for graph expansion (bypass semantic).
     private List<String> entryPoints;
+    // FT-V21-004.2: semantic and lexical weights for hybrid search unification.
+    private double semanticWeight = 1.0;
+    private double lexicalWeight = 0.0;
 
     public UnifiedSearchRequest() {
     }
@@ -105,4 +108,10 @@ public class UnifiedSearchRequest {
 
     public List<String> getEntryPoints() { return entryPoints; }
     public void setEntryPoints(List<String> entryPoints) { this.entryPoints = entryPoints; }
+
+    public double getSemanticWeight() { return semanticWeight; }
+    public void setSemanticWeight(double semanticWeight) { this.semanticWeight = semanticWeight; }
+
+    public double getLexicalWeight() { return lexicalWeight; }
+    public void setLexicalWeight(double lexicalWeight) { this.lexicalWeight = lexicalWeight; }
 }

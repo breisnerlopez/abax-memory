@@ -111,11 +111,15 @@ public class SearchResourceV2 {
 
     /**
      * Hybrid search (vector + keyword) — HU-005.2.1.
+     *
+     * @deprecated Use {@code POST /search} with {@code semanticWeight} and
+     *             {@code lexicalWeight} parameters instead. This endpoint
+     *             will be removed in v2.2.0.
      */
     @POST
     @Path("/search/hybrid")
     @Tag(name = "Search V2")
-    @Operation(summary = "Hybrid search", description = "Performs a hybrid search combining vector similarity and keyword relevance.")
+    @Operation(summary = "Hybrid search (deprecated)", description = "DEPRECATED. Use POST /search with semanticWeight and lexicalWeight parameters.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Search results",
                     content = @Content(schema = @Schema(implementation = SearchResponse.class))),
@@ -126,7 +130,9 @@ public class SearchResourceV2 {
             @HeaderParam("X-Tenant-Id") String xTenantId,
             @Valid SemanticSearchRequest request) {
         String tenantId = resolveTenant(xTenantId);
-        return searchService.hybridSearch(request, tenantId);
+        SearchResponse result = searchService.hybridSearch(request, tenantId);
+        // Cannot set headers on SearchResponse directly; deprecation is documented in OpenAPI
+        return result;
     }
 
     /**

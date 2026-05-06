@@ -448,7 +448,8 @@ public class SearchServiceImpl implements SearchService {
                 pipelineStages, crossEncoderApplied, denseCandidates, graphExpanded,
                 graphExpanded ? new UnifiedSearchResponse.GraphExpandedNodes(
                         entryPointIds, entryPointCount, entryPointSource,
-                        totalExpandedNodes, maxDepth, graphCacheHit) : null
+                        totalExpandedNodes, maxDepth, graphCacheHit) : null,
+                request.getSemanticWeight(), request.getLexicalWeight()
         );
 
         long queryTimeMs = System.currentTimeMillis() - startTime;
