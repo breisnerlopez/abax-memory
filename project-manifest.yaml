@@ -185,3 +185,75 @@ warnings:
   - developer-frontend funciona mejor con ux-designer (no incluido)
 generated_at: 2026-05-04T00:11:14.214Z
 generated_by: abax-swarm v0.1.0
+
+# ============================================================================
+# Schema extensions (added 2026-05-05 — abax-swarm v0.1.40 contract)
+# ============================================================================
+# Below are project-level overlays for the 5 generic mechanisms shipped in
+# v0.1.40. Each block merges with the baseline in
+# /srv/repos/Abax-Swarm/data/rules/{task-contracts,secret-patterns,runaway-limits}.yaml
+# by `id` (lists) or field-by-field (scalars). Empty blocks are equivalent
+# to "use baseline as-is".
+#
+# All blocks are OPTIONAL. Removing them falls back to defaults.
+
+# ---- 1. Task atomicity overlay -------------------------------------------
+# Adds project-specific forbidden combinations beyond the baseline.
+# Justification for the extra combo: the v2.0.4 → v2.0.9 hotfix loop showed
+# that "fix issue + close GitHub issue" was repeatedly bundled in one Task
+# (e.g. session ses_207d34f00ffe...). Forbidding the combo at this project
+# is more aggressive than the baseline which only flags the actions list.
+task_contracts_override:
+  forbidden_combinations:
+    - id: build-merge-deploy-changelog
+      actions: [build, push, write-doc, deploy]
+      reason: |
+        En el ciclo Abax-Memory este combo era la firma de "publicar
+        v2.0.X": build container + merge a main + actualizar CHANGELOG
+        + redeploy GHCR. Cuatro responsabilidades distintas en una
+        Task. Dividir en 4 Tasks: build (devops), merge (devops con
+        approval PM), changelog (tech-writer / project-manager),
+        deploy (devops con sponsor approval).
+
+# ---- 2. Secret patterns: project additions --------------------------------
+# Concatenated with baseline. Empty here because the baseline already
+# covers OpenAI / Anthropic / AWS / GitHub / GCP / SSH / JWT / bearer.
+# Add project-internal token shapes if any (e.g. internal microservice
+# tokens with a known prefix).
+secret_patterns_extra: []
+
+# ---- 3. Runaway limits overlay --------------------------------------------
+# Tighter than baseline because in the v2 implementation the Quarkus
+# build+test loop legitimately took up to 60 minutes (e.g. session
+# `playful-pixel` had 698 parts implementing missing features). We lift
+# the developer-backend ceiling but cap qa-functional tighter — repeated
+# "re-execute UAT" sessions were a smell that QA was looping.
+runaway_limits_override:
+  by_role:
+    developer-backend:
+      parts_max: 700
+      duration_min_max: 90
+      tokens_max: 600000
+    qa-functional:
+      parts_max: 250
+      duration_min_max: 30
+
+# ---- 4. Per-role explicit model assignment --------------------------------
+# Escape hatch over the cognitive_tier+reasoning lookup. Justification:
+# the entire v2 implementation ran on `deepseek-v4-pro` for ALL 130
+# sub-sessions including the orchestrator, and 6 of 8 strict orchestrator
+# protocols were ignored (see session report). Lifting the orchestrator
+# alone to Claude Opus is high-leverage (low volume role, biggest blast
+# radius). devops also goes to Claude because deploy/rollback decisions
+# warrant strong adherence to checklists. Developers stay on deepseek
+# (volume + cost).
+model_overrides_explicit:
+  orchestrator:
+    provider: anthropic
+    model: claude-opus-4-7
+    reasoning_effort: high
+  devops:
+    provider: anthropic
+    model: claude-sonnet-4-6
+    reasoning_effort: medium
+

@@ -1,9 +1,10 @@
 # Iteration Log — Abax-Memory
 
-- **Fase**: v2.0.0 — Inception (pre-F0)
+- **Fase**: v2.1.0 — Inception (pre-F0)
 - **Responsable**: project-manager (registro) / orquestador + usuario (decisión)
-- **Fecha**: 2026-05-03
-- **Estado**: Iteración mayor iniciada — Estrategia documentada
+- **Fecha**: 2026-05-05 (última entrada)
+- **Estado**: Iteración v2.1.0 iniciada — Estrategia documentada
+- **Iteraciones registradas**: v2.0.0, v2.1.0
 
 ---
 
@@ -201,12 +202,13 @@ Cada release (`v1`, `v2`, …) es un proyecto autocontenido con su propio ciclo 
 
 ```
 ¿Qué necesito consultar?
-├── Estado general del producto → docs/bitacora.md (ambas releases)
-├── Registro de entregables → docs/registro-entregables.md (ambas releases)
+├── Estado general del producto → docs/bitacora.md (todas las releases)
+├── Registro de entregables → docs/registro-entregables.md (todas las releases)
 ├── Decisiones de iteración → docs/iteration-log.md (este archivo)
 ├── Relación v1 ↔ v2 → docs/release-mapping.md
 ├── Documentación v1 (PMOA IT Ops) → docs/entregables/v1/
-└── Documentación v2 (motor multi-dominio) → docs/entregables/v2/
+├── Documentación v2.0 (motor multi-dominio) → docs/entregables/v2/
+└── Documentación v2.1 (mejoras benchmark) → docs/entregables/v2.1/
 ```
 
 ### Anti-patrones explícitamente prohibidos
@@ -238,6 +240,208 @@ Cada release (`v1`, `v2`, …) es un proyecto autocontenido con su propio ciclo 
 | **Documentación v1** | Preservada intacta en `docs/entregables/v1/` (42 entregables, 9 fases) |
 | **Documentación v2** | Nueva en `docs/entregables/v2/` — Fase 0 en curso |
 | **Fase actual v2** | Pre-F0 — Documentación de iteración completada |
+| **Estado actual** | v2.0.9 CERRADO (9/9 fases completadas, 7 hotfixes post-cierre) |
+
+### v2.1.0 — Iniciada 2026-05-05
+
+| Campo | Valor |
+|---|---|
+| **Versión** | 2.1.0 |
+| **Fecha de decisión** | 2026-05-05 |
+| **Estrategia** | A — Folder por release |
+| **Decidida por** | Usuario (sponsor) |
+| **Orquestador** | project-manager |
+| **Alcance** | 16 mejoras en 4 categorías (Precisión, Velocidad, Eficiencia, API/DX) |
+| **Stack base** | Mismo que v2.0.x (Quarkus + PostgreSQL + Qdrant + Keycloak + OpenAI) con mejoras focalizadas |
+| **Cambios clave vs v2.0.9** | Reranker cross-encoder; ajuste search/semantic/hybrid; expansión grafo top-3; cache JWT; unificación colecciones Qdrant; endpoint DELETE namespace; header X-Graph-Strategy; fix POST /extract |
+| **Documentación v2.0.x** | Preservada intacta en `docs/entregables/v2/` |
+| **Documentación v2.1** | Nueva en `docs/entregables/v2.1/` — Por iniciar |
+| **Fase actual v2.1** | Pre-F0 — Documentación de iteración en curso |
+
+---
+
+## 7. Decisión de Iteración v2.1.0
+
+### Contexto del Proyecto v2.0.9
+
+| Indicador | Valor |
+|---|---|
+| Versión | v2.0.9 |
+| Estado | **CERRADO** (2026-05-05) |
+| Fases completadas | 9/9 (F0 — Descubrimiento a F9 — Cierre) |
+| Hotfixes post-cierre | 7 (aplicados sobre v2.0.x) |
+| Producto | Abax-Memory — Motor de memoria multi-dominio |
+| Stack | Backend Quarkus + PostgreSQL + Qdrant + Keycloak + OpenAI |
+| Documentación v2.0.x | `docs/entregables/v2/` (completa, preservada) |
+
+### Gatilladores de Iteration Strategy para v2.1
+
+La skill `iteration-strategy` fue activada por las siguientes condiciones simultáneas:
+
+#### Condición 1 — Proyecto con historia previa (v2.0.x cerrado)
+
+| Señal | Evidencia |
+|---|---|
+| `docs/entregables/v2/fase-9-cierre/` existe | ✅ — Informe de cierre v2.0.9 |
+| Fase 9 completada | ✅ — Gate CERRADO |
+| `docs/bitacora.md` registra cierre v2.0.9 | ✅ |
+| 7 hotfixes post-cierre aplicados | ✅ |
+
+#### Condición 2 — Nueva iteración de alcance significativo
+
+| Señal | Evidencia |
+|---|---|
+| Usuario sponsor propone 16 mejoras | ✅ — Basadas en benchmarks y pruebas de performance |
+| Cambios afectan 4 áreas del sistema | ✅ — Precisión, Velocidad, Eficiencia, API/DX |
+| Cambios requieren modificar lógica core | ✅ — Reranker, ajuste de search, unificación colecciones |
+| Esfuerzo estimado comparable a fase completa | ✅ — Cascada F0 a F9 |
+
+#### Naturaleza de la iteración
+
+v2.1.0 es un **refinamiento de performance y precisión** sobre la base multi-dominio de v2.0.x. No cambia el dominio, la audiencia ni la arquitectura general — mejora componentes existentes con evidencia cuantitativa de benchmarks. Se mantiene dentro del mismo stack tecnológico.
+
+### Decisión Tomada
+
+#### Estrategia seleccionada: **A — Folder por release**
+
+| Campo | Valor |
+|---|---|
+| Estrategia | A — Folder por release |
+| Decidida por | Usuario (sponsor del proyecto) |
+| Fecha de decisión | 2026-05-05 |
+| Registrada por | project-manager (orquestador) |
+| Aplica a | Toda la iteración v2.1.0 |
+
+#### Justificación
+
+1. **Separación clara de releases**: Aunque v2.1 es un refinamiento sobre v2.0 (no un cambio de dominio como lo fue v1→v2), la cantidad de cambios (16 ítems en 4 categorías) y su naturaleza transversal (afectan search, embeddings, graph, API, JWT) justifican un folder independiente para trazabilidad completa.
+
+2. **Preservación de v2.0.9 como baseline**: v2.0.9 es la release cerrada y estable. Mantener su documentación intacta permite comparar comportamiento antes/después de cada mejora — crítico cuando los cambios se basan en benchmarks.
+
+3. **Consistencia con la disciplina del proyecto**: Habiendo adoptado Estrategia A para v1→v2, mantener la misma para v2→v2.1 evita fragmentación. La regla R1 (folder por release) se extiende naturalmente.
+
+4. **Cascada completa**: El sponsor confirmó explícitamente ejecutar todas las fases (F0 a F9) en orden, sin saltos. Esto requiere un espacio documental limpio donde cada fase tenga sus entregables sin mezclarse con los de v2.0.x.
+
+#### Estrategias descartadas
+
+| Estrategia | Motivo del descarte |
+|---|---|
+| B — Bloque "## Cambios v2.1" | 16 cambios en 4 categorías generarían bloques extensos en múltiples archivos. La trazabilidad de cada mejora a su benchmark de origen sería confusa en formato diff. |
+| C — Archivar y reescribir | v2.0.x es la baseline de comparación. Archivarla ocultaría el punto de referencia para validar que las mejoras realmente funcionan. |
+| D — Branch git | No es experimental. El sponsor confirmó el compromiso con las 16 mejoras como release planificada, no como prototipo. |
+
+### Estructura de Folders v2.1
+
+```
+docs/
+├── bitacora.md                              # Mantiene histórico v1 + v2.0 + registra inicio v2.1
+├── registro-entregables.md                  # Mantiene histórico v1 + v2.0 + registrará v2.1
+├── iteration-log.md                         # ESTE ARCHIVO — bitácora de decisiones de iteración
+├── release-mapping.md                       # Relación v1 ↔ v2.0 ↔ v2.1
+├── design-system/
+├── index.html
+└── entregables/
+    ├── v1/                                  # v1.0.0 — solo-lectura
+    │   └── ...
+    ├── v2/                                  # v2.0.x — solo-lectura (cerrado, preservado)
+    │   └── ...
+    └── v2.1/                                # ← NUEVO — entregables de v2.1.0
+        ├── README.md                        # Placeholder: "v2.1 — En curso"
+        └── ...                              # Fases F0 a F9 conforme avancen
+```
+
+### Scope de v2.1.0: 16 Mejoras en 4 Categorías
+
+#### Categoría 1 — Precisión (Accuracy)
+
+| # | Mejora | Descripción |
+|---|---|---|
+| 1 | Reranker cross-encoder | Agregar etapa de re-ranking con modelo cross-encoder para mejorar la precisión de resultados semánticos |
+| 2 | Ajuste de pesos search/semantic/hybrid | Recalibrar la combinación de scores léxicos, semánticos e híbridos basado en benchmarks |
+| 3 | Expansión de grafo top-3 | Expandir el grafo de conocimiento recuperando los 3 nodos más relevantes en lugar de solo el mejor match |
+| 4 | Thresholds de similitud ajustables por dominio | Permitir que cada perfil de dominio defina sus propios umbrales de similitud |
+
+#### Categoría 2 — Velocidad (Speed)
+
+| # | Mejora | Descripción |
+|---|---|---|
+| 5 | Cache JWT | Implementar caché de tokens JWT validados para reducir latencia de autenticación en requests repetidos |
+| 6 | Optimización de queries Qdrant | Reducir round-trips a Qdrant consolidando filtros y payload retrieval |
+| 7 | Lazy loading de embeddings | Cargar embeddings bajo demanda en lugar de pre-cargar todo el espacio vectorial |
+| 8 | Paralelización de extracción | Ejecutar extractores de entidades en paralelo cuando no hay dependencias entre ellos |
+
+#### Categoría 3 — Eficiencia (Efficiency)
+
+| # | Mejora | Descripción |
+|---|---|---|
+| 9 | Unificación de colecciones Qdrant | Consolidar múltiples colecciones en una sola con filtros por namespace para reducir overhead |
+| 10 | Compresión de payload en Qdrant | Reducir tamaño de payload almacenado en vectors points |
+| 11 | Reuso de conexiones PostgreSQL | Implementar connection pooling optimizado para reducir overhead de conexiones |
+| 12 | Limpieza de embeddings huérfanos | Job programado para eliminar embeddings sin entidad asociada |
+
+#### Categoría 4 — API / Developer Experience
+
+| # | Mejora | Descripción |
+|---|---|---|
+| 13 | Endpoint DELETE namespace | Nuevo endpoint para eliminar todos los recursos de un namespace en una sola operación |
+| 14 | Header X-Graph-Strategy | Permitir al cliente especificar estrategia de expansión de grafo vía header HTTP |
+| 15 | Fix POST /extract | Corrección de bug en el endpoint de extracción que causaba pérdida de entidades en ciertas condiciones |
+| 16 | Rate limiting por API key | Implementar rate limiting configurable por clave de API para proteger el servicio |
+
+### Extensión de Reglas de Coexistencia para v2.1
+
+Las reglas R1-R7 definidas en la sección 5 se extienden a la tercera release:
+
+| Regla | Extensión para v2.1 |
+|---|---|
+| **R1 — Folder por release** | Todo entregable v2.1 se escribe en `docs/entregables/v2.1/<fase>/<entregable>.md`. Nunca en `docs/entregables/v2/`. |
+| **R2 — Solo-lectura** | `docs/entregables/v1/` y `docs/entregables/v2/` son solo-lectura. Correcciones retrospectivas se documentan aquí. |
+| **R3 — Documentos transversales** | `docs/bitacora.md`, `docs/registro-entregables.md` e `iteration-log.md` se actualizan con bloques para v2.1. |
+| **R5 — Prefijo de commits** | Los commits de v2.1 usan el prefijo `v2.1:` (ej. `v2.1: F0 — Visión de Mejoras`). |
+| **R6 — Aprobaciones independientes** | Los gates de fase de v2.1 son independientes de v2.0.9. Se requiere pasar cada gate (F4, F5, F6, F7, F8, F9). |
+| **R7 — English-Only** | Se mantiene la convención English-Only heredada de v2.0.x para todos los identificadores. |
+
+### Orden de Ejecución
+
+El sponsor confirmó **cascada completa** para v2.1.0:
+
+```
+F0 — Inception (visión de mejoras, priorización)
+F1 — Functional Analysis (especificación de cada mejora)
+F2 — Technical Design (diseño de solución para cada categoría)
+F3 — Construction (implementación de las 16 mejoras)
+F4 — QA Testing (validación contra benchmarks originales)
+F5 — UAT (validación del sponsor sobre resultados)
+F6 — Deployment (despliegue planificado con rollback)
+F7 — Stabilization (monitoreo post-deploy, ajustes)
+F8 — Closure (validación final, lecciones aprendidas)
+```
+
+> **Nota**: Las fases siguen la numeración estándar del ciclo cascada (F0-F9). La nomenclatura de directorios bajo `docs/entregables/v2.1/` usará los nombres canónicos de fase definidos en `project-documentation-structure`.
+
+### Hitos Clave v2.1.0
+
+```mermaid
+gantt
+    title Cronograma v2.1.0 — Abax-Memory
+    dateFormat  YYYY-MM-DD
+    axisFormat  %d/%m
+    section Inicio
+    Decisión de iteración    :done,    mil1, 2026-05-05, 1d
+    F0 - Inception           :active,  f0,   2026-05-05, 1d
+    section Análisis y Diseño
+    F1 - Functional Analysis :         f1,   after f0,   1d
+    F2 - Technical Design    :         f2,   after f1,   1d
+    section Construcción
+    F3 - Construction        :         f3,   after f2,   2d
+    section Validación
+    F4 - QA Testing          :         f4,   after f3,   1d
+    F5 - UAT                 :         f5,   after f4,   1d
+    section Entrega
+    F6 - Deployment          :         f6,   after f5,   1d
+    F7 - Stabilization       :         f7,   after f6,   1d
+    F8 - Closure             :         f8,   after f7,   1d
+```
 
 ---
 
@@ -249,3 +453,4 @@ Cada release (`v1`, `v2`, …) es un proyecto autocontenido con su propio ciclo 
 - **UAT**: User Acceptance Testing — fase 6 del ciclo cascada donde el Product Owner valida que el producto cumple los criterios de aceptación.
 - **RBAC**: Role-Based Access Control — control de acceso basado en roles implementado con Keycloak (OIDC).
 - **RTO / RPO**: Recovery Time Objective (tiempo máximo para recuperar el servicio) / Recovery Point Objective (cantidad máxima de datos que se tolera perder).
+- **Cross-encoder**: Modelo de reranking que procesa pares (consulta, documento) simultáneamente para calcular relevancia precisa, a diferencia de los bi-encoders que codifican consulta y documento por separado.
