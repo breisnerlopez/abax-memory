@@ -1,5 +1,7 @@
 package com.abax.memory.domain.service;
 
+import com.abax.memory.api.dto.v2.PatchRelationRequest;
+import com.abax.memory.api.dto.v2.UpdateRelationRequest;
 import com.abax.memory.domain.enums.RelationType;
 import com.abax.memory.domain.model.Relation;
 
@@ -12,7 +14,10 @@ import java.util.UUID;
  * <p>New in EP-005: tenant-aware methods for REST API v2
  * (createRelation, deleteRelation, getRelations).</p>
  *
- * <p>References: EP-001, EP-005, FT-001.03, HU-001.8.1, HU-001.8.2</p>
+ * <p>New in v2.1.0: added {@code updateRelation} and {@code patchRelation}
+ * for CP-V21-024 (Relation modification API).</p>
+ *
+ * <p>References: EP-001, EP-005, FT-001.03, HU-001.8.1, HU-001.8.2, CP-V21-024</p>
  */
 public interface RelationService {
 
@@ -61,4 +66,31 @@ public interface RelationService {
      * @return list of relations
      */
     List<Relation> getRelations(UUID fragmentId, String direction, String tenantId);
+
+    // ── v2.1.0: Update and patch methods (CP-V21-024) ────────────
+
+    /**
+     * Fully updates an existing relationship (replaces all fields).
+     *
+     * @param relationId UUID of the relation to update
+     * @param request    full update payload (all fields required)
+     * @param tenantId   tenant scope identifier
+     * @param actorId    identity of the user performing the update
+     * @return the updated relation
+     * @throws NotFoundException if relation not found or cross-tenant
+     */
+    Relation updateRelation(UUID relationId, UpdateRelationRequest request, String tenantId, String actorId);
+
+    /**
+     * Partially updates an existing relationship (only non-null fields).
+     *
+     * @param relationId UUID of the relation to update
+     * @param request    partial update payload (at least one non-null field)
+     * @param tenantId   tenant scope identifier
+     * @param actorId    identity of the user performing the update
+     * @return the updated relation
+     * @throws NotFoundException if relation not found or cross-tenant
+     * @throws IllegalArgumentException if all fields are null
+     */
+    Relation patchRelation(UUID relationId, PatchRelationRequest request, String tenantId, String actorId);
 }

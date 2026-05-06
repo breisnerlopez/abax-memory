@@ -4,10 +4,12 @@ import com.abax.memory.api.dto.v2.CreateRelationRequest;
 import com.abax.memory.api.dto.v2.ErrorResponse;
 import com.abax.memory.api.dto.v2.GraphResponse;
 import com.abax.memory.api.dto.v2.MemoryResponse;
+import com.abax.memory.api.dto.v2.PatchRelationRequest;
 import com.abax.memory.api.dto.v2.SearchResponse;
 import com.abax.memory.api.dto.v2.SemanticSearchRequest;
 import com.abax.memory.api.dto.v2.UnifiedSearchRequest;
 import com.abax.memory.api.dto.v2.UnifiedSearchResponse;
+import com.abax.memory.api.dto.v2.UpdateRelationRequest;
 import com.abax.memory.domain.enums.GraphEntryStrategy;
 import com.abax.memory.domain.model.DeleteNamespaceResult;
 import com.abax.memory.domain.model.GraphStrategyOverride;
@@ -23,7 +25,9 @@ import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -103,6 +107,35 @@ public class SearchResourceV2 {
         // REPLACE_BEFORE_PROD with JWT claim extraction.
         tenantContext.resolveFromHeader(headerValue);
         return tenantContext.getCurrentTenantId();
+    }
+
+    /**
+     * Resolves the current actor identity.
+     *
+     * <p>MOCK: Uses tenant ID as actor — no OIDC user identity available.
+     * REPLACE_BEFORE_PROD with JWT preferred_username or sub claim.</p>
+     */
+    // MOCK: tenant-as-actor identity resolution.
+    // REPLACE_BEFORE_PROD
+    private String resolveActorId() {
+        return tenantContext.getCurrentTenantId();
+    }
+
+    /**
+     * Converts a {@link Relation} domain model to a JSON-compatible map.
+     */
+    private static Map<String, Object> toRelationMap(Relation r) {
+        return Map.of(
+                "id", r.getId().toString(),
+                "sourceId", r.getSourceId().toString(),
+                "targetId", r.getTargetId().toString(),
+                "relationType", r.getType().name(),
+                "weight", r.getWeight() != null ? r.getWeight() : 1.0,
+                "metadata", r.getMetadata() != null ? r.getMetadata() : Map.of(),
+                "tenantId", r.getTenantId(),
+                "createdAt", r.getCreatedAt() != null ? r.getCreatedAt().toString() : null,
+                "updatedAt", r.getUpdatedAt() != null ? r.getUpdatedAt().toString() : null
+        );
     }
 
     // ── Search Endpoints ─────────────────────────────────────────────
@@ -268,14 +301,7 @@ public class SearchResourceV2 {
                 request.sourceId(), request.targetId(), request.relationType(), tenantId);
 
         return Response.created(URI.create("/api/v2/relations/" + relation.getId()))
-                .entity(Map.of(
-                        "id", relation.getId().toString(),
-                        "sourceId", relation.getSourceId().toString(),
-                        "targetId", relation.getTargetId().toString(),
-                        "relationType", relation.getType().name(),
-                        "tenantId", relation.getTenantId(),
-                        "createdAt", relation.getCreatedAt().toString()
-                ))
+                .entity(toRelationMap(relation))
                 .build();
     }
 
@@ -322,15 +348,64 @@ public class SearchResourceV2 {
         List<Relation> relations = relationService.getRelations(id, direction, tenantId);
 
         return relations.stream()
-                .map(r -> Map.<String, Object>of(
-                        "id", r.getId().toString(),
-                        "sourceId", r.getSourceId().toString(),
-                        "targetId", r.getTargetId().toString(),
-                        "relationType", r.getType().name(),
-                        "tenantId", r.getTenantId(),
-                        "createdAt", r.getCreatedAt() != null ? r.getCreatedAt().toString() : null
-                ))
+                .map(SearchResourceV2::toRelationMap)
                 .toList();
+    }
+
+    /**
+     * Fully update a relationship — CP-V21-024 (Gap 1).
+     *
+     * <p>Replaces all updatable fields (type, weight, metadata).
+     * Records the change in the audit trail.</p>
+     */
+    @PUT
+    @Path("/relations/{id}")
+    @Tag(name = "Relations V2")
+    @Operation(summary = "Update a relationship", description = "Fully updates an existing relationship. Replaces type, weight, and metadata. The change is recorded in the audit trail.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Relation updated successfully"),
+            @APIResponse(responseCode = "400", description = "Validation error"),
+            @APIResponse(responseCode = "404", description = "Relation not found or cross-tenant"),
+            @APIResponse(responseCode = "403", description = "Forbidden")
+    })
+    public Response updateRelation(
+            @HeaderParam("X-Tenant-Id") String xTenantId,
+            @Parameter(description = "Relation UUID", required = true)
+            @PathParam("id") UUID id,
+            @Valid UpdateRelationRequest request) {
+        String tenantId = resolveTenant(xTenantId);
+        String actorId = resolveActorId();
+        Relation relation = relationService.updateRelation(id, request, tenantId, actorId);
+
+        return Response.ok(toRelationMap(relation)).build();
+    }
+
+    /**
+     * Partially update a relationship — CP-V21-024 (Gap 1).
+     *
+     * <p>Only non-null fields are applied. At least one field must be
+     * provided. The change is recorded in the audit trail.</p>
+     */
+    @PATCH
+    @Path("/relations/{id}")
+    @Tag(name = "Relations V2")
+    @Operation(summary = "Partially update a relationship", description = "Partially updates an existing relationship. Only non-null fields are applied. The change is recorded in the audit trail.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Relation patched successfully"),
+            @APIResponse(responseCode = "400", description = "Validation error or no fields provided"),
+            @APIResponse(responseCode = "404", description = "Relation not found or cross-tenant"),
+            @APIResponse(responseCode = "403", description = "Forbidden")
+    })
+    public Response patchRelation(
+            @HeaderParam("X-Tenant-Id") String xTenantId,
+            @Parameter(description = "Relation UUID", required = true)
+            @PathParam("id") UUID id,
+            @Valid PatchRelationRequest request) {
+        String tenantId = resolveTenant(xTenantId);
+        String actorId = resolveActorId();
+        Relation relation = relationService.patchRelation(id, request, tenantId, actorId);
+
+        return Response.ok(toRelationMap(relation)).build();
     }
 
     // ── Admin Endpoints ──────────────────────────────────────────────

@@ -9,8 +9,11 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -22,7 +25,10 @@ import java.util.UUID;
  * <p>Uses Panache active-record pattern ({@link PanacheEntityBase})
  * for concise repository operations.</p>
  *
- * <p>References: EP-005, Flyway V3, DDL §4.1.3 of architecture document.</p>
+ * <p>New in v2.1.0: added {@code weight}, {@code metadata} (JSONB),
+ * and {@code updated_at} columns for CP-V21-024.</p>
+ *
+ * <p>References: EP-005, Flyway V3, Flyway V14, DDL §4.1.3 of architecture document, CP-V21-024</p>
  */
 @Entity
 @Table(name = "relations", indexes = {
@@ -49,11 +55,21 @@ public class RelationEntity extends PanacheEntityBase {
     @Column(name = "relation_type", nullable = false, length = 30)
     private RelationType relationType;
 
+    @Column(name = "weight")
+    private Double weight = 1.0;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "metadata", columnDefinition = "JSONB")
+    private String metadata = "{}";
+
     @Column(name = "tenant_id", nullable = false, length = 100)
     private String tenantId;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 
     // ─── Panache-required default constructor ────────────────────────
 
@@ -64,10 +80,17 @@ public class RelationEntity extends PanacheEntityBase {
 
     @PrePersist
     void onCreate() {
+        var now = Instant.now();
         if (this.id == null) {
             this.id = UUID.randomUUID();
         }
-        this.createdAt = (this.createdAt != null) ? this.createdAt : Instant.now();
+        this.createdAt = (this.createdAt != null) ? this.createdAt : now;
+        this.updatedAt = now;
+    }
+
+    @PreUpdate
+    void onUpdate() {
+        this.updatedAt = Instant.now();
     }
 
     // ─── Getters / Setters ───────────────────────────────────────────
@@ -84,9 +107,18 @@ public class RelationEntity extends PanacheEntityBase {
     public RelationType getRelationType() { return relationType; }
     public void setRelationType(RelationType relationType) { this.relationType = relationType; }
 
+    public Double getWeight() { return weight; }
+    public void setWeight(Double weight) { this.weight = weight; }
+
+    public String getMetadata() { return metadata; }
+    public void setMetadata(String metadata) { this.metadata = metadata; }
+
     public String getTenantId() { return tenantId; }
     public void setTenantId(String tenantId) { this.tenantId = tenantId; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public Instant getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 }
