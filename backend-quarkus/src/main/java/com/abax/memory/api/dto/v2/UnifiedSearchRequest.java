@@ -4,7 +4,10 @@ import com.abax.memory.domain.enums.LifecycleState;
 import com.abax.memory.domain.enums.MemoryKind;
 import com.abax.memory.domain.enums.SensitivityLevel;
 import io.quarkus.runtime.annotations.RegisterForReflection;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
@@ -37,12 +40,15 @@ public class UnifiedSearchRequest {
     // When false, the search is pure semantic (dense + cross-encoder)
     // with zero graph contributions.
     private boolean expandGraph = false;
+    @Min(value = 1, message = "graphDepth must be between 1 and 5")
+    @Max(value = 5, message = "graphDepth must be between 1 and 5")
     private int graphDepth = 2;
     // FT-V21-001.3: graphTopK default changed from 5 → 3 for multi-origin expansion.
     private int graphTopK = 3;
     // FT-V21-001.1: enables/disables the cross-encoder reranker stage.
     private boolean rerank = true;
     // FT-V21-001.3: explicit entry points for graph expansion (bypass semantic).
+    @Size(max = 10, message = "entryPoints must have at most 10 entries")
     private List<String> entryPoints;
     // FT-V21-004.2: semantic and lexical weights for hybrid search unification.
     private double semanticWeight = 1.0;

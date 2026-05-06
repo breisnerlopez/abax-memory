@@ -335,18 +335,26 @@ public class SearchServiceImpl implements SearchService {
             if (request.getEntryPoints() != null && !request.getEntryPoints().isEmpty()) {
                 // Client-provided explicit entry points
                 seeds = new LinkedHashSet<>();
+                int originalCount = request.getEntryPoints().size();
+                int invalidCount = 0;
                 for (String ep : request.getEntryPoints()) {
                     try {
                         seeds.add(UUID.fromString(ep));
                     } catch (IllegalArgumentException e) {
-                        LOG.warnv("ENTRY_POINT_NOT_FOUND: invalid UUID {0}", ep);
+                        invalidCount++;
+                        LOG.warnv("ENTRY_POINT_NOT_FOUND: invalid UUID {0} — silently excluded", ep);
                     }
                 }
-                // Validate existence
+                // Validate existence — silently exclude non-existent entries
                 Map<UUID, MemoryFragmentEntity> validSeeds = loadEntitiesBatch(seeds, tenantId);
+                int notFoundCount = seeds.size() - validSeeds.size();
                 seeds.retainAll(validSeeds.keySet());
                 entryPointSource = "client-provided";
                 entryPointCount = seeds.size();
+                if (invalidCount > 0 || notFoundCount > 0) {
+                    LOG.infov("Entry points processed: provided={0}, invalidUUIDs={1}, notFound={2}, valid={3}",
+                            originalCount, invalidCount, notFoundCount, entryPointCount);
+                }
             } else if (strategyOverride != null && strategyOverride.getStrategy() == GraphEntryStrategy.SINGLE_BEST) {
                 // FT-V21-004.1: X-Graph-Strategy: single → single-best entry point
                 seeds = new LinkedHashSet<>();
