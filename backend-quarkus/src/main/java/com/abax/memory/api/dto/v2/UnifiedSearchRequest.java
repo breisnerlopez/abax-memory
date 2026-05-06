@@ -33,9 +33,17 @@ public class UnifiedSearchRequest {
     private int page = 0;
     private int size = 20;
 
-    private boolean expandGraph = true;
+    // FT-V21-001.2: expandGraph default changed from true → false.
+    // When false, the search is pure semantic (dense + cross-encoder)
+    // with zero graph contributions.
+    private boolean expandGraph = false;
     private int graphDepth = 2;
-    private int graphTopK = 5;
+    // FT-V21-001.3: graphTopK default changed from 5 → 3 for multi-origin expansion.
+    private int graphTopK = 3;
+    // FT-V21-001.1: enables/disables the cross-encoder reranker stage.
+    private boolean rerank = true;
+    // FT-V21-001.3: explicit entry points for graph expansion (bypass semantic).
+    private List<String> entryPoints;
 
     public UnifiedSearchRequest() {
     }
@@ -91,4 +99,10 @@ public class UnifiedSearchRequest {
 
     public int getGraphTopK() { return graphTopK; }
     public void setGraphTopK(int graphTopK) { this.graphTopK = graphTopK; }
+
+    public boolean isRerank() { return rerank; }
+    public void setRerank(boolean rerank) { this.rerank = rerank; }
+
+    public List<String> getEntryPoints() { return entryPoints; }
+    public void setEntryPoints(List<String> entryPoints) { this.entryPoints = entryPoints; }
 }

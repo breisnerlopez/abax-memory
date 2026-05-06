@@ -13,6 +13,8 @@ import com.abax.memory.domain.enums.MemoryKind;
 import com.abax.memory.domain.enums.SensitivityLevel;
 import com.abax.memory.domain.model.InferredRelation;
 import com.abax.memory.domain.model.MemoryFragment;
+import com.abax.memory.domain.model.RerankedHit;
+import com.abax.memory.domain.service.CrossEncoderService;
 import com.abax.memory.domain.service.LlmService;
 import com.abax.memory.domain.service.RelationService;
 import com.abax.memory.domain.service.SearchService;
@@ -66,10 +68,6 @@ public class SearchServiceImpl implements SearchService {
 
     private static final Logger LOG = Logger.getLogger(SearchServiceImpl.class);
 
-    // MOCK: Collection name hardcoded — Qdrant server not available.
-    // REPLACE_BEFORE_PROD with configurable collection per tenant.
-    private static final String QDRANT_COLLECTION = "abax-memories-v2";
-
     private static final int MAX_SIMILAR_LIMIT = 50;
     private static final int MAX_GRAPH_DEPTH = 5;
 
@@ -88,8 +86,17 @@ public class SearchServiceImpl implements SearchService {
     @Inject
     TenantContext tenantContext;
 
+    @Inject
+    CrossEncoderService crossEncoderService;
+
     @ConfigProperty(name = "abax.v2.search.default-topk", defaultValue = "10")
     int defaultTopK;
+
+    @ConfigProperty(name = "abax.v2.reranker.enabled", defaultValue = "true")
+    boolean rerankerEnabled;
+
+    @ConfigProperty(name = "abax.v2.qdrant.collection", defaultValue = "abax-memories")
+    String qdrantCollection;
 
     // ── Semantic Search ──────────────────────────────────────────────
 
@@ -107,7 +114,7 @@ public class SearchServiceImpl implements SearchService {
 
         // 3. Search Qdrant
         List<QdrantClient.ScoredHit> hits = qdrantClient.search(
-                QDRANT_COLLECTION, queryVector, qdrantFilters, topK);
+                qdrantCollection, queryVector, qdrantFilters, topK);
 
         // 4. Load MemoryFragment entities for matched point IDs
         List<String> pointIds = hits.stream()
@@ -152,7 +159,7 @@ public class SearchServiceImpl implements SearchService {
 
         // Retrieve 2x topK for hybrid re-ranking
         List<QdrantClient.ScoredHit> semanticHits = qdrantClient.search(
-                QDRANT_COLLECTION, queryVector, qdrantFilters, Math.max(topK * 2, 20));
+                qdrantCollection, queryVector, qdrantFilters, Math.max(topK * 2, 20));
 
         // 2. Load entities
         List<String> pointIds = semanticHits.stream()
@@ -194,101 +201,228 @@ public class SearchServiceImpl implements SearchService {
         return new SearchResponse(pageItems, allResults.size(), page, size, facets);
     }
 
-    // ── Unified Search ───────────────────────────────────────────────
+    // ── Unified Search (v2.1.0 two-stage pipeline) ──────────────────
 
     @Override
     public UnifiedSearchResponse unifiedSearch(UnifiedSearchRequest request, String tenantId) {
+        long startTime = System.currentTimeMillis();
         int page = Math.max(0, request.getPage());
         int size = Math.max(1, Math.min(100, request.getSize()));
+        int denseTopK = Math.max(size, 20); // retrieve at least 20 for reranker
 
-        // Step 1: hybrid search (vector + keyword) — retrieve 2x size for richer merge pool
+        // ── Stage 1: Dense retrieval (pure semantic, no keyword mixing) ──
         SemanticSearchRequest semiRequest = new SemanticSearchRequest(
                 request.getQuery(),
                 request.getKinds(),
                 request.getLifecycleStates(),
                 request.getSensitivityMax(),
                 request.getScopeIds(),
-                null, // fromDate — not used in unified search v1
-                null, // toDate
-                0,    // page 0 — we paginate after merge
-                Math.max(size * 2, 40), // wider retrieval
-                10    // topK not relevant at this stage
+                null, null,
+                0, denseTopK, 10
         );
-        SearchResponse vectorResults = hybridSearch(semiRequest, tenantId);
+        SearchResponse denseResults = semanticSearch(semiRequest, tenantId);
 
-        Set<UUID> seenIds = new HashSet<>();
-        List<ScoredMemory> unified = new ArrayList<>();
-        int graphContributions = 0;
+        int denseCandidates = denseResults.items().size();
+        List<String> pipelineStages = new ArrayList<>();
+        pipelineStages.add("dense-retrieval");
+        boolean crossEncoderApplied = false;
 
-        // Step 2: add vector (hybrid) results — assign score from hybrid ranking
-        // Note: hybridSearch already sorted results by hybrid score; we preserve the
-        // original order for relative ranking but normalize scores for graph blending.
-        for (int i = 0; i < vectorResults.items().size(); i++) {
-            MemoryResponse item = vectorResults.items().get(i);
-            seenIds.add(item.id());
-            // Normalize positional score: top result gets ~1.0, decaying linearly
-            double normalizedScore = 1.0 - ((double) i / Math.max(vectorResults.items().size(), 1)) * 0.3;
-            MemoryResponse scoredItem = withScore(item, normalizedScore);
-            unified.add(new ScoredMemory(scoredItem, "vector"));
-        }
-
-        // Step 3: expand graph from top-K results — consolidated multi-seed BFS
-        // Fix 1: Single batch expansion instead of expandGraph() per seed.
-        // This eliminates redundant traversal of shared graph regions and
-        // reduces queries from O(topK × nodes × 2) to O(nodes × 2).
-        if (request.isExpandGraph() && !vectorResults.items().isEmpty()) {
-            int topK = Math.max(1, Math.min(request.getGraphTopK(), vectorResults.items().size()));
-            List<MemoryResponse> topKResults = vectorResults.items().subList(0, topK);
-
-            // Collect all seed IDs and pre-compute seed scores for weighted graph scoring
-            Set<UUID> seedIds = topKResults.stream()
-                    .map(MemoryResponse::id)
-                    .collect(Collectors.toSet());
-            Map<UUID, Double> seedScores = topKResults.stream()
-                    .collect(Collectors.toMap(MemoryResponse::id, r -> r.score() != null ? r.score() : 0.7));
-
+        // ── Stage 2: Cross-encoder reranker (optional, graceful degradation) ──
+        List<MemoryResponse> rankedResults = denseResults.items();
+        Map<String, Double> crossScores = new HashMap<>();
+        if (request.isRerank() && rerankerEnabled && !denseResults.items().isEmpty()) {
             try {
-                // Single consolidated BFS from all seeds simultaneously
-                GraphExpansionResult expanded = expandGraphConsolidated(
-                        seedIds, seedScores, request.getGraphDepth(), tenantId);
+                // Build candidate documents for the cross-encoder
+                List<CrossEncoderService.CandidateDocument> candidates = new ArrayList<>();
+                for (MemoryResponse item : denseResults.items()) {
+                    String content = extractContentForReranking(item);
+                    candidates.add(new CrossEncoderService.CandidateDocument(
+                            item.id().toString(), content,
+                            item.score() != null ? item.score() : 0.5));
+                }
 
-                for (var entry : expanded.nodes().entrySet()) {
-                    UUID nodeId = entry.getKey();
-                    if (!seenIds.contains(nodeId)) {
-                        seenIds.add(nodeId);
-                        double graphScore = entry.getValue(); // pre-computed graph score
-                        MemoryResponse scoredNode = withScore(
-                                MemoryResponse.from(expanded.entityMap().get(nodeId)), graphScore);
-                        unified.add(new ScoredMemory(scoredNode, "graph"));
-                        graphContributions++;
+                List<RerankedHit> reranked = crossEncoderService.rerank(
+                        request.getQuery(), candidates, Math.min(size, 20));
+
+                if (!reranked.isEmpty()) {
+                    crossEncoderApplied = true;
+                    pipelineStages.add("cross-encoder-reranker");
+
+                    // Rebuild ranked results in cross-encoder order
+                    Map<String, MemoryResponse> itemMap = new HashMap<>();
+                    for (MemoryResponse item : denseResults.items()) {
+                        itemMap.put(item.id().toString(), item);
                     }
+
+                    List<MemoryResponse> reordered = new ArrayList<>();
+                    for (RerankedHit hit : reranked) {
+                        MemoryResponse item = itemMap.get(hit.memoryId());
+                        if (item != null) {
+                            reordered.add(withScore(item, hit.finalScore()));
+                            crossScores.put(hit.memoryId(), hit.crossEncoderScore());
+                        }
+                    }
+                    // Append any candidates not scored by reranker at the bottom
+                    Set<String> scored = reranked.stream().map(RerankedHit::memoryId).collect(Collectors.toSet());
+                    for (MemoryResponse item : denseResults.items()) {
+                        if (!scored.contains(item.id().toString()) && reordered.size() < denseTopK) {
+                            reordered.add(item);
+                        }
+                    }
+                    rankedResults = reordered;
+                } else {
+                    LOG.debug("Cross-encoder returned empty — using dense-only ordering");
                 }
             } catch (Exception e) {
-                LOG.debugv("Graph expansion failed for unified search: {0}", e.getMessage());
-                // Non-blocking: graph expansion errors don't fail the search
+                LOG.warnv(e, "Cross-encoder unavailable for this query — using dense-only ordering");
+                // Graceful degradation: continue with dense-only results
             }
         }
 
-        // Step 4: sort by score descending
-        unified.sort((a, b) -> Double.compare(b.getScore(), a.getScore()));
+        // ── Build semantic results (before graph) ──
+        Set<UUID> seenIds = new HashSet<>();
+        List<ScoredMemory> unified = new ArrayList<>();
 
-        // Step 5: paginate
+        for (MemoryResponse item : rankedResults) {
+            if (seenIds.add(item.id())) {
+                Map<String, Double> scoreComponents = new LinkedHashMap<>();
+                scoreComponents.put("semantic", item.score() != null ? item.score() : 0.0);
+                if (crossScores.containsKey(item.id().toString())) {
+                    scoreComponents.put("crossEncoder", crossScores.get(item.id().toString()));
+                }
+                String pipeLabel = crossEncoderApplied ? "two-stage" : "dense-only";
+                unified.add(new ScoredMemory(item, "vector", scoreComponents, pipeLabel, false));
+            }
+        }
+
+        // ── Graph expansion (only when expandGraph=true, isolated from semantic) ──
+        boolean graphExpanded = false;
+        int graphContributions = 0;
+        int totalExpandedNodes = 0;
+        int maxDepth = 0;
+        List<String> entryPointIds = List.of();
+        String entryPointSource = null;
+        int entryPointCount = 0;
+
+        if (request.isExpandGraph() && !rankedResults.isEmpty()) {
+            graphExpanded = true;
+            pipelineStages.add("graph-expansion");
+
+            // Resolve entry points: explicit > semantic top-K
+            Set<UUID> seeds;
+            if (request.getEntryPoints() != null && !request.getEntryPoints().isEmpty()) {
+                // Client-provided explicit entry points
+                seeds = new LinkedHashSet<>();
+                for (String ep : request.getEntryPoints()) {
+                    try {
+                        seeds.add(UUID.fromString(ep));
+                    } catch (IllegalArgumentException e) {
+                        LOG.warnv("ENTRY_POINT_NOT_FOUND: invalid UUID {0}", ep);
+                    }
+                }
+                // Validate existence
+                Map<UUID, MemoryFragmentEntity> validSeeds = loadEntitiesBatch(seeds, tenantId);
+                seeds.retainAll(validSeeds.keySet());
+                entryPointSource = "client-provided";
+                entryPointCount = seeds.size();
+            } else {
+                // Auto-select from semantic top-K
+                int topK = Math.max(1, Math.min(request.getGraphTopK(), rankedResults.size()));
+                seeds = rankedResults.subList(0, topK).stream()
+                        .map(MemoryResponse::id)
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
+                entryPointSource = "dense-retrieval-top-" + topK;
+                entryPointCount = topK;
+            }
+
+            entryPointIds = seeds.stream().map(UUID::toString).toList();
+
+            if (!seeds.isEmpty()) {
+                Map<UUID, Double> seedScores = rankedResults.stream()
+                        .filter(r -> seeds.contains(r.id()))
+                        .collect(Collectors.toMap(MemoryResponse::id,
+                                r -> r.score() != null ? r.score() : 0.7));
+
+                try {
+                    GraphExpansionResult expanded = expandGraphConsolidated(
+                            seeds, seedScores, request.getGraphDepth(), tenantId);
+
+                    for (var entry : expanded.nodes().entrySet()) {
+                        UUID nodeId = entry.getKey();
+                        if (seenIds.add(nodeId)) {
+                            double graphScore = entry.getValue();
+                            MemoryResponse scoredNode = withScore(
+                                    MemoryResponse.from(expanded.entityMap().get(nodeId)), graphScore);
+                            Map<String, Double> graphComponents = new LinkedHashMap<>();
+                            graphComponents.put("graph", graphScore);
+                            unified.add(new ScoredMemory(scoredNode, "graph", graphComponents,
+                                    "graph-expansion", true));
+                            graphContributions++;
+                        }
+                    }
+                    totalExpandedNodes = expanded.nodes().size();
+                    maxDepth = request.getGraphDepth();
+                } catch (Exception e) {
+                    LOG.debugv("Graph expansion failed for unified search: {0}", e.getMessage());
+                }
+            }
+        }
+
+        // ── Sort by score descending ──
+        unified.sort((a, b) -> Double.compare(
+                b.getScore() != null ? b.getScore() : 0.0,
+                a.getScore() != null ? a.getScore() : 0.0));
+
+        // ── Paginate ──
         int fromIndex = page * size;
         int toIndex = Math.min(fromIndex + size, unified.size());
         List<ScoredMemory> pageItems = fromIndex < unified.size()
                 ? unified.subList(fromIndex, toIndex)
                 : List.of();
 
-        // Step 6: build facets from the full unified result set
+        // ── Build facets ──
         List<MemoryResponse> allResponses = unified.stream()
                 .map(ScoredMemory::getMemory)
                 .toList();
         Map<String, Map<String, Long>> facets = buildResultFacets(allResponses);
 
+        // ── Build pipeline metadata ──
+        UnifiedSearchResponse.PipelineMetadata pipelineMeta = new UnifiedSearchResponse.PipelineMetadata(
+                pipelineStages, crossEncoderApplied, denseCandidates, graphExpanded,
+                graphExpanded ? new UnifiedSearchResponse.GraphExpandedNodes(
+                        entryPointIds, entryPointCount, entryPointSource,
+                        totalExpandedNodes, maxDepth, false) : null
+        );
+
+        long queryTimeMs = System.currentTimeMillis() - startTime;
+
         return new UnifiedSearchResponse(
                 pageItems, unified.size(), page, size,
-                request.isExpandGraph(), graphContributions, facets
+                graphExpanded, graphContributions, facets,
+                queryTimeMs, pipelineMeta
         );
+    }
+
+    /**
+     * Extracts content text from a MemoryResponse for cross-encoder evaluation.
+     * Combines title, summary, and content (truncated to 1500 chars).
+     */
+    private String extractContentForReranking(MemoryResponse item) {
+        StringBuilder sb = new StringBuilder();
+        if (item.title() != null && !item.title().isBlank()) {
+            sb.append(item.title()).append(". ");
+        }
+        if (item.summary() != null && !item.summary().isBlank()) {
+            sb.append(item.summary()).append(". ");
+        }
+        if (item.content() != null) {
+            String content = item.content();
+            if (content.length() > 1500) {
+                content = content.substring(0, 1497) + "...";
+            }
+            sb.append(content);
+        }
+        return sb.toString();
     }
 
     // ── Find Similar ─────────────────────────────────────────────────
@@ -306,7 +440,7 @@ public class SearchServiceImpl implements SearchService {
         // 3. Search Qdrant — exclude source itself, retrieve extra for filtering
         Map<String, Object> filters = Map.of("tenant_id", tenantId);
         List<QdrantClient.ScoredHit> hits = qdrantClient.search(
-                QDRANT_COLLECTION, sourceVector, filters, effectiveLimit + 1);
+                qdrantCollection, sourceVector, filters, effectiveLimit + 1);
 
         // 4. Batch-load all matched entities (Fix 2: single query instead of N+1)
         List<String> hitPointIds = hits.stream()
@@ -510,7 +644,7 @@ public class SearchServiceImpl implements SearchService {
                     entity.getScopeId()
             );
 
-            qdrantClient.upsert(QDRANT_COLLECTION, entity.getId().toString(), vector, payload);
+            qdrantClient.upsert(qdrantCollection, entity.getId().toString(), vector, payload);
             // Issue #17: write embedding_id back to PostgreSQL so semantic search
             // can return non-null scores for newly indexed memories.
             entity.setEmbeddingId(entity.getId().toString());
@@ -547,7 +681,7 @@ public class SearchServiceImpl implements SearchService {
                         entity.getSensitivityLevel() != null ? entity.getSensitivityLevel().name() : null,
                         entity.getScopeId()
                 );
-                qdrantClient.upsert(QDRANT_COLLECTION, entity.getId().toString(), vector, payload);
+                qdrantClient.upsert(qdrantCollection, entity.getId().toString(), vector, payload);
                 // Issue #17: write embedding_id back to PostgreSQL.
                 ((MemoryFragmentEntity) entity).setEmbeddingId(entity.getId().toString());
                 ((MemoryFragmentEntity) entity).persist();
