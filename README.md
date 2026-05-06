@@ -271,7 +271,7 @@ OpenAPI spec: `http://localhost:8080/q/openapi`
 
 | Modo | Endpoint | Una línea |
 |---|---|---|
-| **Búsqueda unificada** ⭐ | `POST /api/v2/search` | Vector + keyword + grafo en una sola respuesta. `expandGraph: true` recomendado. |
+| **Búsqueda unificada** ⭐ | `POST /api/v2/search` | Vector + keyword + grafo. Usa `expandGraph: true` solo para queries relacionales (dependencia, causalidad, impacto). |
 | **Búsqueda semántica** | `POST /api/v2/search/semantic` | Similitud vectorial pura sobre Qdrant (3072 dims). Ideal para "encuentra documentos parecidos a este". |
 | **Búsqueda híbrida** | `POST /api/v2/search/hybrid` | Vector + full-text PostgreSQL. Para queries con IDs, códigos de error o términos exactos. |
 | **Exploración de grafo** | `GET /api/v2/graph/{id}?depth=2` | Navega relaciones BFS desde una memoria. Descubre conexiones estructurales. |
@@ -307,7 +307,7 @@ curl -s -X POST "$BASE/search" \
 
 | # | Recomendación | Por qué |
 |---|---|---|
-| 1 | **`expandGraph: true` siempre** | +17pp uplift en recall. El grafo recupera lo que el vector no alcanza. |
+| 1 | **`expandGraph: true` según tipo de consulta** | +33pp en queries 1-hop, +20pp cross-dominio, +0pp en directas. Usar solo para dependencia/causalidad/impacto. Para búsquedas factuales usar semantic. |
 | 2 | **Relaciona toda memoria nueva** | El grafo es el diferenciador. Sin relaciones, Abax-Memory es solo un vector store. |
 | 3 | **Aprueba antes de buscar** | Solo memorias `ACTIVE` son visibles. Usa `PUT /review` con `APPROVE` para indexar. |
 
@@ -363,7 +363,7 @@ Durante la fase de Estabilización (F8) se ejecutaron **7 benchmarks** independi
 |---|---|---|---|---|
 | **v2.0.7** | 2026-05-05 | Patch | Fix #17: `embedding_id` persistido en PostgreSQL tras upsert Qdrant | `v2.0.7`, `latest` |
 | **v2.0.6** | 2026-05-05 | Patch | Fix #16: `approveReview()` indexa automáticamente en Qdrant | `v2.0.6` |
-| **v2.0.5** | 2026-05-05 | Patch | Fix #15: acción SUBMIT en ReviewAction (140 tests) | `v2.0.5` |
+| **v2.0.5** | 2026-05-05 | Patch | Fix #15: acción REQUEST (antes SUBMIT) en ReviewAction (140 tests) | `v2.0.5` |
 | **v2.0.4** | 2026-05-05 | Patch | Fix #13 (CDI `Instance<T>`) + Fix #14 (Qdrant host config) | `v2.0.4` |
 | **v2.0.3** | 2026-05-05 | Patch | Fix #12 (langchain4j-openai) + Fix #11 (columna `next_retry_at`) + UBI9/JRE | `v2.0.3` |
 | **v1.0.0** | 2026-05-02 | Major (MVP) | Release inicial: 13 endpoints, 54 tests, 61/61 CA | `v1.0.0` |
@@ -483,3 +483,20 @@ Software propietario. Todos los derechos reservados. Consulte los términos de l
 - Entidades `Caso`, `MemoriaOperativa` — reemplazadas por `MemoryFragment`.
 - Convención de identificadores en español — migrada a English-Only.
 - Dominio fijo IT Operations — reemplazado por perfiles configurables.
+
+---
+
+## Cambios v2.0.8 — 2026-05-05 (corrección de documentación)
+
+### Qué cambia
+
+- **Sección "Guía de Uso"**: corregida recomendación de `expandGraph: true` de "siempre" a condicional (solo para queries relacionales), con benchmarks reales segmentados (+33pp 1-hop, +20pp cross-dominio, +0pp directas).
+- **Sección "Guía de Uso"**: actualizada descripción de búsqueda unificada para reflejar uso condicional de `expandGraph`.
+- **Release v2.0.5**: changelog actualizado para reflejar renombre `SUBMIT` → `REQUEST`.
+
+### Consistencia con docs/guia-uso.md
+
+Ambos documentos ahora son coherentes respecto a:
+- Flujo de revisión: `REQUEST` → `PENDING`, `APPROVE` → `ACTIVE`.
+- Uso de `expandGraph`: condicional, no absoluto.
+- Benchmarks: uplift segmentado real v2.0.8, no "+17pp siempre".

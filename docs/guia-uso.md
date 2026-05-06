@@ -1,9 +1,9 @@
-# Guía de Uso — Abax-Memory v2.0.0
+# Guía de Uso — Abax-Memory v2.0.8
 
 - **Fase**: Estabilización (F8)
 - **Responsable**: business-analyst
 - **Fecha**: 2026-05-05
-- **Release**: v2.0.0
+- **Release**: v2.0.8
 - **Estado**: Completado
 - **Fuentes**:
   - API REST v2 (19 endpoints, SearchResourceV2 + MemoryResourceV2)
@@ -35,7 +35,19 @@ Abax-Memory v2.0.0 expone **5 modos de interacción** principales a través de s
 
 **Endpoint**: `POST /api/v2/search`
 
-Combina búsqueda vectorial, keyword matching y expansión de grafo de relaciones en una sola respuesta ordenada. Es **el modo recomendado para el 90% de los casos** porque el consumidor no necesita saber si un resultado vino de similitud semántica o del grafo — recibe una lista unificada con metadata de procedencia (`source: "vector" | "graph"`).
+Combina búsqueda vectorial, keyword matching y expansión de grafo de relaciones en una sola respuesta ordenada.
+
+> **Tabla de decisión**: ¿Qué endpoint usar?
+>
+> | Tipo de consulta | Endpoint recomendado | expandGraph |
+> |---|---|---|
+> | Lookup directo ("qué puerto usa SSH") | `/api/v2/search/semantic` | false |
+> | Términos exactos + semántica | `/api/v2/search/hybrid` | false |
+> | Dependencia/causalidad ("si cae X, qué se afecta") | `/api/v2/search` | true |
+> | Contexto multi-hop | `/api/v2/search` | true |
+> | Explorar conexiones | `GET /api/v2/graph/{id}` | N/A |
+
+El consumidor recibe una lista unificada con metadata de procedencia (`source: "vector" | "graph"`).
 
 | Parámetro | Tipo | Default | Descripción |
 |---|---|---|---|
@@ -112,7 +124,7 @@ Gestión individual del ciclo de vida completo de fragmentos de memoria:
 | `GET` | `/api/v2/memories/{id}` | Obtener por ID |
 | `PUT` | `/api/v2/memories/{id}` | Actualización parcial (`title`, `content`, `summary`, `lifecycleState`, `sensitivityLevel`, `confidence`) |
 | `DELETE` | `/api/v2/memories/{id}` | Soft-delete |
-| `PUT` | `/api/v2/memories/{id}/review` | Ciclo de revisión (`action`: `SUBMIT`, `APPROVE`, `REJECT`) |
+| `PUT` | `/api/v2/memories/{id}/review` | Ciclo de revisión (`action`: `REQUEST`, `APPROVE`, `REJECT`) |
 | `GET` | `/api/v2/memories/{id}/audit` | Traza de auditoría |
 | `POST` | `/api/v2/memories/extract` | Extraer entidades con LLM (`{"content": "..."}`) |
 
@@ -128,6 +140,18 @@ Gestión individual del ciclo de vida completo de fragmentos de memoria:
 | `metadata` | object | No | Key-value libre (ej. `{"affectedService": "payment-api"}`) |
 | `sourceType` | string | No | Origen: `conversation`, `document`, `api`, `workflow`, `manual`, `case` |
 | `sourceRef` | string | No | ID externo de referencia |
+
+---
+
+### 1.6 Cuándo usar grafo — regla práctica
+
+Si la consulta contiene ideas como:
+- "depende de", "afecta a", "proviene de"
+- "qué pasó después"
+- "qué está conectado con"
+- "causa", "impacto", "relación"
+
+→ usa `expandGraph: true`. Si no, déjalo en `false`.
 
 ---
 
@@ -584,7 +608,7 @@ curl -s -X POST "$BASE/search" \
 
 | # | Recomendación | Por Qué | Evidencia |
 |---|---|---|---|
-| 1 | **Usar `expandGraph: true` siempre** | +17pp uplift promedio en recall sobre búsqueda vectorial pura. El grafo recupera documentos semánticamente distantes pero estructuralmente conectados. | Benchmark ABM-UNIFIED-01: 93% cobertura con grafo activado. |
+| 1 | **Usar `expandGraph: true` solo para queries relacionales** (dependencia, causalidad, impacto). Para búsquedas factuales directas usar semantic sin grafo. | El grafo recupera documentos semánticamente distantes pero estructuralmente conectados. En queries directas no ayuda y puede introducir ruido. | Uplift real del grafo (benchmarks v2.0.8):<br>• Queries directas: +0pp (no ayuda, puede introducir ruido)<br>• Queries 1-hop: +33pp<br>• Queries 2-hop: mejora MRR/NDCG<br>• Cross-dominio: +20pp<br>• Cobertura unificada: 93% (ABM-UNIFIED-01) |
 | 2 | **Títulos descriptivos y concretos** | El título se incluye en el embedding junto con el contenido. Títulos vagos ("Nota reunión") reducen la precisión semántica. Usar "Reunión arquitectura 2026-05-01: decisión sobre PostgreSQL particionamiento". | Similitud coseno: títulos descriptivos mejoran el score top-1 en ~12%. |
 | 3 | **Usar el `kind` correcto al crear** | Los filtros por `kind` en la búsqueda reducen el espacio de resultados y mejoran la precisión. `FACT` para hechos, `DECISION` para decisiones, `EVENT` para incidentes. | Búsquedas con filtro `kinds` reducen falsos positivos en 40% vs sin filtro. |
 | 4 | **Relacionar documentos relacionados** | El grafo es el diferenciador competitivo de Abax-Memory. Memorias sin relaciones son islas de información. Cada memoria debería tener al menos 1–3 relaciones. | Benchmark ABM-GRAPH-01: completitud 100% de recuperación con grafo. |
@@ -643,7 +667,7 @@ curl -s -X POST "http://localhost:8080/api/v2/memories" \
 | 2 | **Usar `graphDepth: 5`** | A profundidad 5, el grafo captura prácticamente el tenant entero. La precisión colapsa y la latencia se dispara (BFS exponencial). | Usar `depth: 2` como máximo. Si necesitas más contexto, hacer una segunda búsqueda focalizada. |
 | 3 | **Usar solo búsqueda semántica para queries estructurales** | "¿Qué contratos tiene Acme Corp?" no se responde bien con similitud vectorial. Necesitas el grafo (`BELONGS_TO`) y filtros por `kind`. | Usar siempre `POST /api/v2/search` con `expandGraph: true`. Solo usar `/search/semantic` para "encuentra documentos parecidos a este texto". |
 | 4 | **Mezclar dominios sin perfiles** | Si un tenant tiene incidentes IT, contratos legales y conversaciones de agentes sin clasificar por perfil, las búsquedas devuelven ruido inter-dominio. | Usar `metadata.profileId` al crear memorias y filtrar por `kinds` en las búsquedas según el perfil activo. |
-| 5 | **No aprobar memorias antes de buscar** | Las memorias en `DRAFT` o `PENDING` no aparecen en búsquedas por defecto (solo `ACTIVE`). Los usuarios se frustran al no encontrar lo que acaban de crear. | Ejecutar el ciclo de revisión: `PUT /review` con `action: "SUBMIT"` y luego `action: "APPROVE"`. |
+| 5 | **No aprobar memorias antes de buscar** | Las memorias en `DRAFT` o `PENDING` no aparecen en búsquedas por defecto (solo `ACTIVE`). Los usuarios se frustran al no encontrar lo que acaban de crear. | Ejecutar el ciclo de revisión: `PUT /review` con `action: "REQUEST"` y luego `action: "APPROVE"`. |
 | 6 | **Ignorar el `sensitivityLevel`** | Memorias marcadas como `INTERNAL` por defecto pueden contener información que debería ser `CONFIDENTIAL`. Esto expone datos sensibles en búsquedas. | Clasificar proactivamente: `PUBLIC` para documentación general, `INTERNAL` para operaciones, `CONFIDENTIAL` para contratos/datos de clientes, `SECRET` para credenciales. |
 | 7 | **Usar títulos genéricos** | "Nota", "Reunión", "Incidencia" no ayudan al embedding semántico. Dos documentos con títulos genéricos son indistinguibles para el vector. | Usar títulos específicos: "Nota reunión arquitectura 2026-05-01 — decisión PostgreSQL particionamiento". |
 | 8 | **Asumir que el CRUD indexa automáticamente** | Crear una memoria no garantiza que esté indexada en Qdrant. Solo las memorias en estado `ACTIVE` se indexan (tras `APPROVE` en el ciclo de revisión). | Verificar con `GET /api/v2/admin/health` que el índice está operativo. Si es necesario, ejecutar `POST /api/v2/admin/reindex`. |
@@ -655,7 +679,7 @@ curl -s -X POST "http://localhost:8080/api/v2/memories" \
 ```
   ┌──────────┐    ┌──────────────┐    ┌──────────┐    ┌───────────┐
   │  CREAR   │───▶│  RELACIONAR  │───▶│  REVISAR │───▶│  APROBAR  │
-  │ memoria  │    │  con otras   │    │ (SUBMIT) │    │ (APPROVE) │
+  │ memoria  │    │  con otras   │    │(REQUEST) │    │ (APPROVE) │
   └──────────┘    └──────────────┘    └──────────┘    └─────┬─────┘
        ↑                                                     │
        │              ┌──────────────────────┐               │
@@ -673,7 +697,7 @@ curl -s -X POST "http://localhost:8080/api/v2/memories" \
 
 1. **Crear**: `POST /api/v2/memories` con `title`, `content`, `kind` y `metadata` relevantes.
 2. **Relacionar**: `POST /api/v2/relations` conectando la nueva memoria con las existentes usando el tipo semántico correcto (`CAUSED_BY`, `DEPENDS_ON`, `MENTIONS`, etc.).
-3. **Revisar**: `PUT /api/v2/memories/{id}/review` con `{"action": "SUBMIT"}` para mover de `DRAFT` a `PENDING`.
+3. **Revisar**: `PUT /api/v2/memories/{id}/review` con `{"action": "REQUEST"}` para mover de `DRAFT` a `PENDING`.
 4. **Aprobar**: `PUT /api/v2/memories/{id}/review` con `{"action": "APPROVE"}` para activar la memoria. **Dispara la indexación automática en Qdrant.**
 5. **Indexación automática**: El sistema genera el embedding con OpenAI `text-embedding-3-large` y lo almacena en Qdrant. Solo memorias en estado `ACTIVE`.
 6. **Buscar con grafo**: `POST /api/v2/search` con `expandGraph: true` para recuperar la memoria junto con su contexto estructural.
@@ -730,3 +754,36 @@ curl -s "http://localhost:8080/api/v2/memories/$MEMORY_ID/audit" \
 - **SLA**: Service Level Agreement — acuerdo contractual de nivel de servicio (disponibilidad, tiempo de respuesta, etc.).
 - **Token**: Unidad de texto que el modelo de embedding procesa (~4 caracteres en inglés). `text-embedding-3-large` admite máximo 8191 tokens.
 - **Top-K**: Los K resultados más relevantes retornados por una búsqueda vectorial o híbrida.
+
+---
+
+## Cambios v2.0.8 — 2026-05-05
+
+### Qué cambia respecto a v2.0.0
+
+1. **Flujo de revisión corregido**: `SUBMIT` → `REQUEST`. El flujo correcto en v2.0.8 es `REQUEST` → `PENDING`, `APPROVE` → `ACTIVE`. Actualizadas todas las referencias en §1.5 (tabla CRUD), §5 (anti-patrón #5), §6 (diagrama de flujo y paso 3).
+
+2. **Recomendación `expandGraph` corregida**: de "usar siempre" a "usar solo para queries relacionales (dependencia, causalidad, impacto). Para búsquedas factuales directas usar semantic sin grafo." (§3, recomendación #1).
+
+3. **Tabla de decisión de endpoints**: reemplaza la recomendación absoluta "búsqueda unificada para el 90% de los casos" por una tabla que guía según el tipo de consulta: lookup directo → semantic, términos exactos → hybrid, dependencia/causalidad → search con expandGraph, exploración → graph por ID. (§1.1).
+
+4. **Referencia a scores eliminada**: no se encontró ninguna afirmación "la API no expone scores" en el documento original. La API v2.0.8 sí expone scores en los resultados de búsqueda. Las dos menciones existentes a "score" (§1.3 fusión de scores, §3 score top-1) son legítimas y se conservan.
+
+5. **Nueva sección "Cuándo usar grafo — regla práctica"** (§1.6): heurística basada en palabras clave ("depende de", "afecta a", "causa", "impacto") para decidir cuándo activar `expandGraph`.
+
+6. **Benchmarks actualizados**: reemplazado "+17pp uplift siempre" por uplift real segmentado del grafo en v2.0.8: queries directas +0pp, queries 1-hop +33pp, queries 2-hop mejora MRR/NDCG, cross-dominio +20pp. (§3, recomendación #1).
+
+### Qué se mantiene de v2.0.0
+
+- Los 5 casos de ejemplo curl (IT Ops, Legal, CRM, Agente IA, Multi-dominio).
+- Las 10 recomendaciones (solo la #1 cambia de redacción; las demás intactas).
+- Los 3 perfiles de dominio y sus metadatos.
+- Los 8 anti-patrones (solo el #5 ajusta SUBMIT→REQUEST).
+- El flujo completo recomendado y verificaciones de salud.
+- El glosario de 7 términos.
+
+### Qué se depreca
+
+- La acción `SUBMIT` en el endpoint `/api/v2/memories/{id}/review` — reemplazada por `REQUEST`.
+- La recomendación absoluta "usar `expandGraph: true` siempre" — reemplazada por guía condicional.
+- La recomendación absoluta "search unificada para 90% de casos" — reemplazada por tabla de decisión.
