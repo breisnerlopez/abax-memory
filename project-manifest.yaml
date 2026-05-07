@@ -162,6 +162,8 @@ skills:
   - id: verification-before-completion
     name: Verificacion Antes de Completar
 tools:
+  - id: attest-deliverable
+    name: Atestar Deliverable
   - id: create-dashboard
     name: Generador de Dashboards de Proyecto
   - id: create-document
@@ -174,8 +176,16 @@ tools:
     name: Generador de Diagramas
   - id: lint-code
     name: Analizador de Codigo
+  - id: phase-state
+    name: Estado de Fases del Proyecto
   - id: run-tests
     name: Ejecutor de Tests
+  - id: set-iteration-scope
+    name: Establecer Alcance de Iteración
+  - id: suggest-iteration-scope
+    name: Sugerir Alcance de Iteración
+  - id: verify-deliverable
+    name: Verificar Deliverable
 criteria_applied: []
 warnings:
   - project-manager funciona mejor con product-owner (no incluido)
@@ -183,5 +193,43 @@ warnings:
   - developer-backend funciona mejor con dba (no incluido)
   - qa-functional funciona mejor con qa-lead (no incluido)
   - developer-frontend funciona mejor con ux-designer (no incluido)
-generated_at: 2026-05-04T00:11:14.214Z
+generated_at: 2026-05-06T18:10:49.663Z
 generated_by: abax-swarm v0.1.0
+
+# ========================================================
+# Active policy overrides (from project-manifest.yaml input)
+# ========================================================
+task_contracts_override:
+  forbidden_combinations:
+    - id: build-merge-deploy-changelog
+      actions:
+        - build
+        - push
+        - write-doc
+        - deploy
+      reason: |
+        En el ciclo Abax-Memory este combo era la firma de "publicar
+        v2.0.X": build container + merge a main + actualizar CHANGELOG
+        + redeploy GHCR. Cuatro responsabilidades distintas en una
+        Task. Dividir en 4 Tasks: build (devops), merge (devops con
+        approval PM), changelog (tech-writer / project-manager),
+        deploy (devops con sponsor approval).
+secret_patterns_extra: []
+runaway_limits_override:
+  by_role:
+    developer-backend:
+      parts_max: 700
+      duration_min_max: 90
+      tokens_max: 600000
+    qa-functional:
+      parts_max: 250
+      duration_min_max: 30
+model_overrides_explicit:
+  orchestrator:
+    provider: anthropic
+    model: claude-opus-4-7
+    reasoning_effort: high
+  devops:
+    provider: anthropic
+    model: claude-sonnet-4-6
+    reasoning_effort: medium

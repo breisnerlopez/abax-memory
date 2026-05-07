@@ -6,6 +6,7 @@ import com.abax.memory.api.dto.v2.SearchResponse;
 import com.abax.memory.api.dto.v2.SemanticSearchRequest;
 import com.abax.memory.api.dto.v2.UnifiedSearchRequest;
 import com.abax.memory.api.dto.v2.UnifiedSearchResponse;
+import com.abax.memory.domain.model.GraphStrategyOverride;
 
 import java.util.List;
 import java.util.UUID;
@@ -92,4 +93,15 @@ public interface SearchService {
      * @return unified search response with merged vector and graph results
      */
     UnifiedSearchResponse unifiedSearch(UnifiedSearchRequest request, String tenantId);
+
+    /**
+     * Performs a unified search with graph strategy override from HTTP headers — v2.1.0.
+     *
+     * @param request          query text, filters, and graph-expansion controls
+     * @param tenantId         tenant scope identifier
+     * @param strategyOverride override from {@code X-Graph-*} headers, or {@code null}
+     * @return unified search response with merged vector and graph results
+     */
+    UnifiedSearchResponse unifiedSearch(UnifiedSearchRequest request, String tenantId,
+                                         GraphStrategyOverride strategyOverride);
 }

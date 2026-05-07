@@ -1,13 +1,20 @@
 package com.abax.memory.api.rest.v2;
 
 import com.abax.memory.api.dto.v2.CreateRelationRequest;
+import com.abax.memory.api.dto.v2.ErrorResponse;
 import com.abax.memory.api.dto.v2.GraphResponse;
 import com.abax.memory.api.dto.v2.MemoryResponse;
+import com.abax.memory.api.dto.v2.PatchRelationRequest;
 import com.abax.memory.api.dto.v2.SearchResponse;
 import com.abax.memory.api.dto.v2.SemanticSearchRequest;
 import com.abax.memory.api.dto.v2.UnifiedSearchRequest;
 import com.abax.memory.api.dto.v2.UnifiedSearchResponse;
+import com.abax.memory.api.dto.v2.UpdateRelationRequest;
+import com.abax.memory.domain.enums.GraphEntryStrategy;
+import com.abax.memory.domain.model.DeleteNamespaceResult;
+import com.abax.memory.domain.model.GraphStrategyOverride;
 import com.abax.memory.domain.model.Relation;
+import com.abax.memory.domain.service.NamespaceService;
 import com.abax.memory.domain.service.RelationService;
 import com.abax.memory.domain.service.SearchService;
 import com.abax.memory.infrastructure.security.TenantContext;
@@ -18,13 +25,17 @@ import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -32,6 +43,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.logging.Logger;
 
 import java.net.URI;
 import java.util.List;
@@ -61,6 +73,8 @@ import java.util.UUID;
 @Consumes(MediaType.APPLICATION_JSON)
 public class SearchResourceV2 {
 
+    private static final Logger LOG = Logger.getLogger(SearchResourceV2.class);
+
     @Inject
     SearchService searchService;
 
@@ -68,7 +82,20 @@ public class SearchResourceV2 {
     RelationService relationService;
 
     @Inject
+    NamespaceService namespaceService;
+
+    @Inject
     TenantContext tenantContext;
+
+    @Context
+    UriInfo uriInfo;
+
+    /**
+     * Returns the current request path for error responses.
+     */
+    private String requestPath() {
+        return uriInfo != null ? uriInfo.getRequestUri().getPath() : "/api/v2";
+    }
 
     // ── Tenant resolution ───────────────────────────────────────────
 
@@ -80,6 +107,35 @@ public class SearchResourceV2 {
         // REPLACE_BEFORE_PROD with JWT claim extraction.
         tenantContext.resolveFromHeader(headerValue);
         return tenantContext.getCurrentTenantId();
+    }
+
+    /**
+     * Resolves the current actor identity.
+     *
+     * <p>MOCK: Uses tenant ID as actor — no OIDC user identity available.
+     * REPLACE_BEFORE_PROD with JWT preferred_username or sub claim.</p>
+     */
+    // MOCK: tenant-as-actor identity resolution.
+    // REPLACE_BEFORE_PROD
+    private String resolveActorId() {
+        return tenantContext.getCurrentTenantId();
+    }
+
+    /**
+     * Converts a {@link Relation} domain model to a JSON-compatible map.
+     */
+    private static Map<String, Object> toRelationMap(Relation r) {
+        return Map.of(
+                "id", r.getId().toString(),
+                "sourceId", r.getSourceId().toString(),
+                "targetId", r.getTargetId().toString(),
+                "relationType", r.getType().name(),
+                "weight", r.getWeight() != null ? r.getWeight() : 1.0,
+                "metadata", r.getMetadata() != null ? r.getMetadata() : Map.of(),
+                "tenantId", r.getTenantId(),
+                "createdAt", r.getCreatedAt() != null ? r.getCreatedAt().toString() : null,
+                "updatedAt", r.getUpdatedAt() != null ? r.getUpdatedAt().toString() : null
+        );
     }
 
     // ── Search Endpoints ─────────────────────────────────────────────
@@ -106,22 +162,31 @@ public class SearchResourceV2 {
 
     /**
      * Hybrid search (vector + keyword) — HU-005.2.1.
+     *
+     * @deprecated Use {@code POST /search} with {@code semanticWeight} and
+     *             {@code lexicalWeight} parameters instead. This endpoint
+     *             will be removed in v2.2.0.
      */
     @POST
     @Path("/search/hybrid")
     @Tag(name = "Search V2")
-    @Operation(summary = "Hybrid search", description = "Performs a hybrid search combining vector similarity and keyword relevance.")
+    @Operation(summary = "Hybrid search (deprecated)", description = "DEPRECATED. Use POST /search with semanticWeight and lexicalWeight parameters.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Search results",
                     content = @Content(schema = @Schema(implementation = SearchResponse.class))),
             @APIResponse(responseCode = "400", description = "Validation error"),
             @APIResponse(responseCode = "403", description = "Forbidden")
     })
-    public SearchResponse hybridSearch(
+    public Response hybridSearch(
             @HeaderParam("X-Tenant-Id") String xTenantId,
             @Valid SemanticSearchRequest request) {
         String tenantId = resolveTenant(xTenantId);
-        return searchService.hybridSearch(request, tenantId);
+        SearchResponse result = searchService.hybridSearch(request, tenantId);
+        return Response.ok(result)
+                .header("Deprecation", "true")
+                .header("Sunset", "Sat, 01 Nov 2026 00:00:00 GMT")
+                .header("Warning", "299 - \"This endpoint is deprecated. Use POST /api/v2/search with semanticWeight and lexicalWeight instead.\"")
+                .build();
     }
 
     /**
@@ -135,7 +200,7 @@ public class SearchResourceV2 {
     @POST
     @Path("/search")
     @Tag(name = "Search V2")
-    @Operation(summary = "Unified search", description = "Performs a unified search combining vector similarity, keyword matching, and optional graph expansion into a single result set.")
+    @Operation(summary = "Unified search", description = "Performs a unified search combining vector similarity, keyword matching, and optional graph expansion into a single result set. Accepts optional X-Graph-Strategy, X-Graph-K, and X-Graph-Threshold headers for per-request graph control.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Search results",
                     content = @Content(schema = @Schema(implementation = UnifiedSearchResponse.class))),
@@ -144,9 +209,25 @@ public class SearchResourceV2 {
     })
     public UnifiedSearchResponse unifiedSearch(
             @HeaderParam("X-Tenant-Id") String xTenantId,
+            @HeaderParam("X-Graph-Strategy")
+            @Parameter(description = "Graph expansion strategy: auto, on, off, single, top-k, threshold. 'off' disables graph expansion entirely.",
+                       example = "auto")
+            String xGraphStrategy,
+            @HeaderParam("X-Graph-K")
+            @Parameter(description = "Number of entry points for top-k strategy (1-10). Required when X-Graph-Strategy=top-k.",
+                       example = "5")
+            Integer xGraphK,
+            @HeaderParam("X-Graph-Threshold")
+            @Parameter(description = "Score threshold for threshold strategy (0.0-1.0). Required when X-Graph-Strategy=threshold.",
+                       example = "0.85")
+            Double xGraphThreshold,
             @Valid UnifiedSearchRequest request) {
         String tenantId = resolveTenant(xTenantId);
-        return searchService.unifiedSearch(request, tenantId);
+
+        // FT-V21-004.1: Parse X-Graph-Strategy header
+        GraphStrategyOverride strategyOverride = parseGraphHeaders(request, xGraphStrategy, xGraphK, xGraphThreshold);
+
+        return searchService.unifiedSearch(request, tenantId, strategyOverride);
     }
 
     /**
@@ -220,14 +301,7 @@ public class SearchResourceV2 {
                 request.sourceId(), request.targetId(), request.relationType(), tenantId);
 
         return Response.created(URI.create("/api/v2/relations/" + relation.getId()))
-                .entity(Map.of(
-                        "id", relation.getId().toString(),
-                        "sourceId", relation.getSourceId().toString(),
-                        "targetId", relation.getTargetId().toString(),
-                        "relationType", relation.getType().name(),
-                        "tenantId", relation.getTenantId(),
-                        "createdAt", relation.getCreatedAt().toString()
-                ))
+                .entity(toRelationMap(relation))
                 .build();
     }
 
@@ -274,15 +348,64 @@ public class SearchResourceV2 {
         List<Relation> relations = relationService.getRelations(id, direction, tenantId);
 
         return relations.stream()
-                .map(r -> Map.<String, Object>of(
-                        "id", r.getId().toString(),
-                        "sourceId", r.getSourceId().toString(),
-                        "targetId", r.getTargetId().toString(),
-                        "relationType", r.getType().name(),
-                        "tenantId", r.getTenantId(),
-                        "createdAt", r.getCreatedAt() != null ? r.getCreatedAt().toString() : null
-                ))
+                .map(SearchResourceV2::toRelationMap)
                 .toList();
+    }
+
+    /**
+     * Fully update a relationship — CP-V21-024 (Gap 1).
+     *
+     * <p>Replaces all updatable fields (type, weight, metadata).
+     * Records the change in the audit trail.</p>
+     */
+    @PUT
+    @Path("/relations/{id}")
+    @Tag(name = "Relations V2")
+    @Operation(summary = "Update a relationship", description = "Fully updates an existing relationship. Replaces type, weight, and metadata. The change is recorded in the audit trail.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Relation updated successfully"),
+            @APIResponse(responseCode = "400", description = "Validation error"),
+            @APIResponse(responseCode = "404", description = "Relation not found or cross-tenant"),
+            @APIResponse(responseCode = "403", description = "Forbidden")
+    })
+    public Response updateRelation(
+            @HeaderParam("X-Tenant-Id") String xTenantId,
+            @Parameter(description = "Relation UUID", required = true)
+            @PathParam("id") UUID id,
+            @Valid UpdateRelationRequest request) {
+        String tenantId = resolveTenant(xTenantId);
+        String actorId = resolveActorId();
+        Relation relation = relationService.updateRelation(id, request, tenantId, actorId);
+
+        return Response.ok(toRelationMap(relation)).build();
+    }
+
+    /**
+     * Partially update a relationship — CP-V21-024 (Gap 1).
+     *
+     * <p>Only non-null fields are applied. At least one field must be
+     * provided. The change is recorded in the audit trail.</p>
+     */
+    @PATCH
+    @Path("/relations/{id}")
+    @Tag(name = "Relations V2")
+    @Operation(summary = "Partially update a relationship", description = "Partially updates an existing relationship. Only non-null fields are applied. The change is recorded in the audit trail.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Relation patched successfully"),
+            @APIResponse(responseCode = "400", description = "Validation error or no fields provided"),
+            @APIResponse(responseCode = "404", description = "Relation not found or cross-tenant"),
+            @APIResponse(responseCode = "403", description = "Forbidden")
+    })
+    public Response patchRelation(
+            @HeaderParam("X-Tenant-Id") String xTenantId,
+            @Parameter(description = "Relation UUID", required = true)
+            @PathParam("id") UUID id,
+            @Valid PatchRelationRequest request) {
+        String tenantId = resolveTenant(xTenantId);
+        String actorId = resolveActorId();
+        Relation relation = relationService.patchRelation(id, request, tenantId, actorId);
+
+        return Response.ok(toRelationMap(relation)).build();
     }
 
     // ── Admin Endpoints ──────────────────────────────────────────────
@@ -306,10 +429,9 @@ public class SearchResourceV2 {
         // REPLACE_BEFORE_PROD with OIDC role claim validation.
         if (xRole == null || !"admin".equalsIgnoreCase(xRole.trim())) {
             return Response.status(Response.Status.FORBIDDEN)
-                    .entity(Map.of(
-                            "errorCode", "FORBIDDEN",
-                            "message", "Admin role required for re-index operation"
-                    ))
+                    .entity(ErrorResponse.of("FORBIDDEN",
+                            "Admin role required for re-index operation",
+                            requestPath()))
                     .build();
         }
 
@@ -378,5 +500,155 @@ public class SearchResourceV2 {
                 "status", "OK",
                 "timestamp", java.time.Instant.now().toString()
         )).build();
+    }
+
+    /**
+     * Delete a namespace and all its resources atomically — FT-V21-004.3.
+     *
+     * <p>Migrated from {@code AdminResourceV2} to consolidate admin endpoints
+     * and fix DEF-V21-001 (RESTEasy Reactive path resolution conflict).</p>
+     *
+     * <p>Requires:
+     * <ul>
+     *   <li>Role: {@code memory-admin}</li>
+     *   <li>Header: {@code X-Confirm-Delete: true}</li>
+     * </ul>
+     * </p>
+     */
+    @DELETE
+    @Path("/admin/namespaces/{name}")
+    @Tag(name = "Admin V2")
+    @Operation(summary = "Delete namespace", description = "Atomically deletes all memories, relations, and Qdrant points for a namespace. Requires memory-admin role and X-Confirm-Delete header.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Namespace deleted successfully",
+                    content = @Content(schema = @Schema(implementation = DeleteNamespaceResult.class))),
+            @APIResponse(responseCode = "400", description = "Missing X-Confirm-Delete header"),
+            @APIResponse(responseCode = "403", description = "Forbidden — admin role required"),
+            @APIResponse(responseCode = "404", description = "Namespace not found"),
+            @APIResponse(responseCode = "500", description = "Internal server error (Qdrant cleanup failed)")
+    })
+    public Response deleteNamespace(
+            @HeaderParam("X-Tenant-Id") String xTenantId,
+            @HeaderParam("X-Role") String xRole,
+            @HeaderParam("X-Confirm-Delete") String xConfirmDelete,
+            @Parameter(description = "Namespace name to delete", required = true, example = "production-incidents")
+            @PathParam("name") String namespace) {
+
+        // Role check — memory-admin required
+        if (xRole == null || !"memory-admin".equalsIgnoreCase(xRole.trim())) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(ErrorResponse.of("FORBIDDEN",
+                            "Admin role (memory-admin) required for namespace deletion",
+                            requestPath()))
+                    .build();
+        }
+
+        // Confirmation header required
+        if (!"true".equalsIgnoreCase(xConfirmDelete)) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(ErrorResponse.of("CONFIRMATION_REQUIRED",
+                            "X-Confirm-Delete: true header required for namespace deletion",
+                            requestPath()))
+                    .build();
+        }
+
+        String tenantId = resolveTenant(xTenantId);
+
+        try {
+            DeleteNamespaceResult result = namespaceService.deleteNamespace(namespace, tenantId);
+            return Response.ok(result).build();
+        } catch (jakarta.ws.rs.NotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            LOG.errorv(e, "Namespace deletion failed: namespace={0}, tenant={1}", namespace, tenantId);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(ErrorResponse.of("NAMESPACE_DELETE_FAILED",
+                            "Namespace deletion failed: " + e.getMessage(),
+                            requestPath()))
+                    .build();
+        }
+    }
+
+    // ── Private helpers ─────────────────────────────────────────────
+
+    /**
+     * Parses X-Graph-* headers into a {@link GraphStrategyOverride} — FT-V21-004.1.
+     *
+     * <p>Accepted values:
+     * <ul>
+     *   <li>{@code auto} or null → no override (use domain profile strategy)</li>
+     *   <li>{@code on} → force graph expansion with default top-K</li>
+     *   <li>{@code off} → disable graph expansion (sets expandGraph=false)</li>
+     *   <li>{@code single} → single-best entry point</li>
+     *   <li>{@code top-k} → top-K entry points (use X-Graph-K)</li>
+     *   <li>{@code threshold} → threshold-based (use X-Graph-Threshold)</li>
+     * </ul>
+     * </p>
+     */
+    private GraphStrategyOverride parseGraphHeaders(UnifiedSearchRequest request,
+                                                       String xGraphStrategy,
+                                                       Integer xGraphK,
+                                                       Double xGraphThreshold) {
+        if (xGraphStrategy == null || xGraphStrategy.isBlank()) {
+            return null; // no override
+        }
+
+        String normalized = xGraphStrategy.trim().toLowerCase();
+
+        switch (normalized) {
+            case "auto":
+                return null; // use profile defaults
+            case "off":
+                // Force-disable graph expansion
+                request.setExpandGraph(false);
+                return null;
+            case "on":
+                // Force-enable graph expansion with defaults
+                request.setExpandGraph(true);
+                if (xGraphK != null) {
+                    validateGraphK(xGraphK);
+                    request.setGraphTopK(xGraphK);
+                }
+                return null;
+            case "single":
+                return new GraphStrategyOverride(GraphEntryStrategy.SINGLE_BEST, null, null);
+            case "top-k":
+                if (xGraphK != null) validateGraphK(xGraphK);
+                return new GraphStrategyOverride(GraphEntryStrategy.TOP_K, xGraphK, null);
+            case "threshold":
+                if (xGraphThreshold != null) validateGraphThreshold(xGraphThreshold);
+                return new GraphStrategyOverride(GraphEntryStrategy.THRESHOLD, null, xGraphThreshold);
+            default:
+                LOG.warnv("Invalid X-Graph-Strategy header value: {0}. Valid: auto, on, off, single, top-k, threshold", xGraphStrategy);
+                throw new jakarta.ws.rs.BadRequestException(
+                        jakarta.ws.rs.core.Response.status(400)
+                                .entity(ErrorResponse.of("INVALID_HEADER",
+                                        "Invalid X-Graph-Strategy: " + xGraphStrategy
+                                                + ". Valid: auto, on, off, single, top-k, threshold",
+                                        requestPath()))
+                                .build());
+        }
+    }
+
+    private void validateGraphK(Integer k) {
+        if (k < 1 || k > 10) {
+            throw new jakarta.ws.rs.BadRequestException(
+                    jakarta.ws.rs.core.Response.status(400)
+                            .entity(ErrorResponse.of("INVALID_HEADER",
+                                    "X-Graph-K must be between 1 and 10, got: " + k,
+                                    requestPath()))
+                            .build());
+        }
+    }
+
+    private void validateGraphThreshold(Double threshold) {
+        if (threshold < 0.0 || threshold > 1.0) {
+            throw new jakarta.ws.rs.BadRequestException(
+                    jakarta.ws.rs.core.Response.status(400)
+                            .entity(ErrorResponse.of("INVALID_HEADER",
+                                    "X-Graph-Threshold must be between 0.0 and 1.0, got: " + threshold,
+                                    requestPath()))
+                            .build());
+        }
     }
 }

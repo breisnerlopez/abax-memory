@@ -72,6 +72,14 @@ Reglas de operacion:
 - Para modo document: documenta la realidad. El "deberia" va en un
   apartado de recomendaciones, no en la documentacion principal.
 
+## Herramientas disponibles
+
+Tu set de herramientas en este proyecto esta restringido por tu rol. Antes de
+intentar una llamada, verifica esta lista — el runtime rechaza con `tool: invalid`
+cualquier llamada a una herramienta no disponible y desperdicia un round trip.
+
+**Puedes llamar:** `read`, `write`, `edit`, `glob`, `grep`, `bash`, `webfetch`, `websearch`, `skill`, `attest-deliverable`, `create-dashboard`, `generate-diagram`, `lint-code`, `phase-state`, `run-tests`, `verify-deliverable`
+
 ## Protocolo de entrega
 
 Cuando el orquestador te asigne una tarea con instruccion de escribir en archivo:

@@ -252,10 +252,10 @@ public class ApiExceptionMapper implements ExceptionMapper<Exception> {
         return false;
     }
 
-    private Response build(int status, String code, String message, List<String> details) {
+    private Response build(int status, String errorCode, String message, List<String> details) {
         return Response.status(status)
                 .type(MediaType.APPLICATION_JSON)
-                .entity(new ApiErrorResponse(code, message, correlationIdHolder.getCorrelationId(), details, OffsetDateTime.now()))
+                .entity(new ApiErrorResponse(errorCode, message, correlationIdHolder.getCorrelationId(), details, OffsetDateTime.now()))
                 .build();
     }
 }

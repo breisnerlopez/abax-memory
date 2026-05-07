@@ -65,7 +65,7 @@ class CaseResourceTest {
                 .post("/api/casos")
                 .then()
                 .statusCode(400)
-                .body("code", equalTo("VALIDATION_ERROR"));
+                .body("errorCode", equalTo("VALIDATION_ERROR"));
     }
 
     @Test
@@ -101,7 +101,7 @@ class CaseResourceTest {
                 .post("/api/casos/" + caseId + "/cerrar")
                 .then()
                 .statusCode(400)
-                .body("code", equalTo("VALIDATION_ERROR"));
+                .body("errorCode", equalTo("VALIDATION_ERROR"));
 
         given()
                 .when()
@@ -119,7 +119,7 @@ class CaseResourceTest {
                 .get("/api/casos/CASO-404")
                 .then()
                 .statusCode(404)
-                .body("code", equalTo("CASE_NOT_FOUND"));
+                .body("errorCode", equalTo("CASE_NOT_FOUND"));
     }
 
     private Map<String, Object> validCasePayload() {

@@ -316,6 +316,8 @@ Procedimiento:
 Entregables obligatorios:
 - [ ] Documento de Arquitectura → delegar via Task a @solution-architect
 - [ ] Presentacion de Arquitectura → delegar via Task a @solution-architect
+- [ ] Modelo de Datos → delegar via Task a @tech-lead
+- [ ] Estrategia de Pruebas → delegar via Task a @qa-functional
 - [ ] Descomposicion Tecnica de Tareas → delegar via Task a @tech-lead
 
 Procedimiento:
@@ -332,6 +334,8 @@ Entregables obligatorios:
 - [ ] Verificacion de entorno y dependencias → delegar via Task a @devops
 - [ ] Codigo Fuente Implementado → delegar via Task a @developer-backend
 - [ ] Pruebas Unitarias → delegar via Task a @developer-backend
+- [ ] README del Proyecto → delegar via Task a @tech-lead
+- [ ] Esqueleto de docs/ → delegar via Task a @tech-lead
 - [ ] Presentacion de Avance → delegar via Task a @project-manager
 - [ ] Reporte de Revision de Codigo → delegar via Task a @tech-lead
 - [ ] Verificacion de cumplimiento Feature vs Especificacion → delegar via Task a @business-analyst
@@ -350,6 +354,8 @@ Entregables obligatorios:
 - [ ] Casos de Prueba → delegar via Task a @qa-functional
 - [ ] Reporte de Ejecucion de Pruebas → delegar via Task a @qa-functional
 - [ ] Reporte de Defectos → delegar via Task a @qa-functional
+- [ ] Presentacion de Resultados QA → delegar via Task a @qa-functional
+- [ ] Reporte de Regresion → delegar via Task a @qa-functional
 
 Procedimiento:
 1. Usa Task para delegar CADA entregable al agente responsable
@@ -381,6 +387,8 @@ Entregables obligatorios:
 - [ ] Plan de Despliegue → delegar via Task a @devops
 - [ ] Plan de Rollback → delegar via Task a @devops
 - [ ] Presentacion Go-Live Readiness → delegar via Task a @project-manager
+- [ ] Plan de Comunicacion → delegar via Task a @project-manager
+- [ ] Runbook Operativo → delegar via Task a @tech-lead
 
 Procedimiento:
 1. Usa Task para delegar CADA entregable al agente responsable
@@ -411,6 +419,7 @@ Entregables obligatorios:
 - [ ] Informe de Cierre del Proyecto → delegar via Task a @project-manager
 - [ ] Lecciones Aprendidas → delegar via Task a @project-manager
 - [ ] Presentacion de Cierre → delegar via Task a @project-manager
+- [ ] Documentacion Final del Proyecto → delegar via Task a @project-manager
 
 Procedimiento:
 1. Usa Task para delegar CADA entregable al agente responsable

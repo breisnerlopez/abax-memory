@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abax-Memory v2.1.0 — Propuesta Funcional</title>
+<style>
+  /* ==========================================================
+     RESET + BASE (from design-system template)
+     ========================================================== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #FFFFFF;
+    color: #1a1a2e;
+    line-height: 1.5;
+  }
+  h1, h2, h3 { font-weight: 800; line-height: 1.1; }
+
+  /* Corporate Minimal palette */
+  :root {
+    --bg: #FFFFFF;
+    --bg-alt: #F5F5F7;
+    --text: #1a1a2e;
+    --text-muted: #4a4a5e;
+    --accent: #0066cc;
+    --accent-strong: #e94560;
+    --border: #d8d8e0;
+  }
+
+  /* ==========================================================
+     LAYOUT: SLIDE
+     ========================================================== */
+  .slide {
+    min-height: 100vh;
+    padding: 8vh 10vw;
+    display: grid;
+    align-content: start;
+    gap: 1.25rem;
+    page-break-after: always;
+    border-bottom: 1px solid var(--border);
+  }
+  .slide:last-child { border-bottom: none; }
+
+  .slide-eyebrow {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .slide h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
+  .slide h2 { font-size: clamp(2rem, 4vw, 3rem); }
+  .slide h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); color: var(--text-muted); font-weight: 600; }
+  .slide p, .slide li { font-size: clamp(1rem, 1.5vw, 1.125rem); max-width: 70ch; }
+
+  ul, ol { padding-left: 1.5rem; display: grid; gap: 0.5rem; }
+  ul li::marker, ol li::marker { color: var(--accent); }
+
+  table { border-collapse: collapse; width: 100%; max-width: 60rem; }
+  th, td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); }
+  th { font-weight: 700; color: var(--accent-strong); font-size: 0.95rem; }
+  td { font-size: 0.95rem; }
+
+  .card {
+    background: var(--bg-alt);
+    padding: 1.5rem 2rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    max-width: 42rem;
+  }
+
+  .cta {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 2.5rem 3rem;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 1rem;
+  }
+  .cta-question { font-size: clamp(1.25rem, 2.5vw, 1.75rem); font-weight: 700; }
+
+  /* checklist style */
+  .checklist { list-style: none; padding-left: 0; }
+  .checklist li { padding-left: 0; }
+  .checklist .done { color: #28a745; }
+  .checklist .pending { color: var(--accent-strong); font-weight: 700; }
+
+  /* two-column layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+  .two-col-wide { display: grid; grid-template-columns: 1.3fr 1fr; gap: 2rem; align-items: start; }
+
+  /* summary badge */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+  .stat-num { font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; color: var(--accent); line-height: 1; }
+  .stat-label { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* compact code-block style */
+  .flow-block {
+    background: var(--bg-alt);
+    padding: 1rem 1.5rem;
+    border-radius: 4px;
+    font-family: "SF Mono", "Cascadia Code", "Consolas", monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    border: 1px solid var(--border);
+    max-width: 52rem;
+    white-space: pre;
+  }
+
+  /* Print */
+  @media print {
+    .slide { min-height: auto; page-break-after: always; padding: 4vh 6vw; }
+  }
+
+  /* Page counter */
+  @media print {
+    .slide::after {
+      content: counter(page);
+      position: absolute;
+      bottom: 2vh;
+      right: 6vw;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SLIDE 1 — PORTADA
+     ============================================================ -->
+<section class="slide">
+  <span class="slide-eyebrow">Análisis Funcional — Fase 2</span>
+  <h1>Abax-Memory v2.1.0<br>Propuesta Funcional</h1>
+  <h3>Hardening y Optimización del Motor de Memoria Multi-Dominio</h3>
+  <p style="margin-top: 2rem; color: var(--text-muted);">
+    Business Analyst · Mayo 2026 · Stakeholders de Negocio<br>
+    Gate Fase 2 → Fase 3 (Diseño Técnico)
+  </p>
+</section>
+
+<!-- ============================================================
+     SLIDE 2 — AGENDA
+     ============================================================ -->
+<section class="slide">
+  <span class="slide-eyebrow">Agenda</span>
+  <h2>Qué cubre esta propuesta funcional</h2>
+  <ul>
+    <li><strong>Especificación Funcional</strong> — 4 épicas × 13 features con comportamientos, entradas/salidas y casos de borde</li>
+    <li><strong>Reglas de Negocio</strong> — 13 reglas formalizadas con clasificación, dependencias y matriz de trazabilidad</li>
+    <li><strong>Diagramas de Proceso</strong> — 8 flujos AS-IS/TO-BE con puntos de decisión y manejo de errores</li>
+    <li><strong>Criterios de Aceptación</strong> — 64 CAs verificables (54 feature + 10 transversales)</li>
+    <li><strong>Compatibilidad</strong> — Cambios aditivos y correctivos respecto a v2.0.9</li>
+    <li><strong>Próximos pasos</strong> — Gate Fase 2 → Fase 3</li>
+  </ul>
+</section>
+
+<!-- ============================================================
+     SLIDE 3 — RESUMEN EJECUTIVO
+     ============================================================ -->
+<section class="slide">
+  <span class="slide-eyebrow">Resumen Ejecutivo</span>
+  <h2>4 Épicas × 13 Features</h2>
+
+  <div class="stat-grid" style="margin-bottom: 1rem;">
+    <div><div class="stat-num">4</div><div class="stat-label">Épicas</div></div>
+    <div><div class="stat-num">13</div><div class="stat-label">Features</div></div>
+    <div><div class="stat-num">16</div><div class="stat-label">Historias</div></div>
+    <div><div class="stat-num">64</div><div class="stat-label">Criterios</div></div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Épica</th><th>Features</th><th>Prioridad</th><th>Meta</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>EP-001 · Precisión</strong></td><td>FT-001.1 a .4</td><td>1–6</td><td>Top-1 ≥ 0.90, NDCG@10 ≥ 0.85</td></tr>
+      <tr><td><strong>EP-002 · Velocidad</strong></td><td>FT-002.1 a .3</td><td>4, 7–8</td><td>p95 ≤ 500ms estable</td></tr>
+      <tr><td><strong>EP-003 · Eficiencia</strong></td><td>FT-003.1 a .3</td><td>5, 9–10</td><td>1 colección Qdrant, worker resuelto</td></tr>
+      <tr><td><strong>EP-004 · API / DX</strong></td><td>FT-004.1 a .3</td><td>11–13</td><td>API unificada, X-Graph-Strategy, DELETE namespace</td></tr>
+    </tbody>
+  </table>
+  <p style="color: var(--text-muted); margin-top: 0.5rem;">
+    Cobertura: 16 historias de usuario · 10/10 criterios de éxito · 64 criterios de aceptación
+  </p>
+</section>
+
+<!-- ============================================================
+     SLIDE 4 — ÉPICA 1: PRECISIÓN
+     ============================================================ -->
+<section class="slide">
+  <span class="slide-eyebrow">Épica 1 — Precisión del Motor de Búsqueda</span>
+  <h2>4 Features · Meta: Top-1 ≥ 0.90</h2>
+
+  <div class="two-col">
+    <div>
+      <h3>FT-001.1 Reranker Cross-Encoder <span style="color:var(--accent-strong); font-size:0.8rem;">P1 — Máxima</span></h3>
+      <ul>
+        <li>Pipeline two-stage: dense retrieval top-20 → cross-encoder → top-5 final</li>
+        <li>Score desglosado: <code>scoreComponents: {semantic, crossEncoder}</code></li>
+        <li>Degradación graceful a dense-only si cross-encoder no disponible</li>
+      </ul>
+
+      <h3 style="margin-top:0.75rem;">FT-001.2 Búsqueda Semántica Pura <span style="color:var(--accent-strong); font-size:0.8rem;">P2 — Alta</span></h3>
+      <ul>
+        <li><code>expandGraph: false</code> (o ausente) → cero contribuciones del grafo</li>
+        <li>Corrige ambigüedad de v2.0.9</li>
+      </ul>
+    </div>
+    <div>
+      <h3>FT-001.3 Grafo Multi-Origen <span style="color:var(--accent-strong); font-size:0.8rem;">P3 — Alta</span></h3>
+      <ul>
+        <li>Expansión desde top-3 (no solo mejor match como v2.0.9)</li>
+        <li>Estrategias: single-best, top-k (default K=3), threshold, none</li>
+        <li><code>entryPoints</code> explícitos con precedencia absoluta</li>
+      </ul>
+
+      <h3 style="margin-top:0.75rem;">FT-001.4 /extract con OpenAI <span style="color:var(--accent-strong); font-size:0.8rem;">P6 — Media-Alta</span></h3>
+      <ul>
+        <li>OpenAI gpt-4o-mini reemplaza MockLlmService (regex)</li>
+        <li>Entidades con name, type, confidence + source en respuesta</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 5 — ÉPICA 2: VELOCIDAD
+     ============================================================ -->
+<section class="slide">
+  <span class="slide-eyebrow">Épica 2 — Velocidad y Latencia</span>
+  <h2>3 Features · Meta: p95 ≤ 500ms</h2>
+
+  <div class="two-col-wide">
+    <div>
+      <h3>FT-002.1 Cache de Grafo <span style="color:var(--accent-strong); font-size:0.8rem;">P7 — Media</span></h3>
+      <ul>
+        <li>Preservación de batch fetching N+1 con top-3</li>
+        <li>Caché Caffeine: TTL 60s, LRU, max 1000 entradas</li>
+        <li>Invalidación automática ante mutaciones del grafo</li>
+      </ul>
+
+      <h3 style="margin-top:0.75rem;">FT-002.2 Cold Start Qdrant <span style="color:var(--accent-strong); font-size:0.8rem;">P8 — Media</span></h3>
+      <ul>
+        <li>Diagnóstico de spikes ~2s y mitigación</li>
+        <li>p95 ≤ 500ms en cold start, steady state y bajo escritura concurrente</li>
+      </ul>
+
+      <h3 style="margin-top:0.75rem;">FT-002.3 Cache JWT <span style="color:var(--accent-strong); font-size:0.8rem;">P4 — Alta</span></h3>
+      <ul>
+        <li>Cache con TTL = exp − now (típicamente 1h)</li>
+        <li>100 requests: 1 validación Keycloak + 99 cache hits (≤ 5ms)</li>
+        <li>Resiliencia: Keycloak caído → tokens cacheados siguen funcionando</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p style="font-weight:700; margin-bottom:0.5rem;">Métricas objetivo</p>
+      <ul>
+        <li><strong>p95 búsqueda</strong>: ≤ 500ms</li>
+        <li><strong>p95 con grafo</strong>: ≤ 500ms</li>
+        <li><strong>Cache hit JWT</strong>: ≥ 90%</li>
+        <li><strong>Cache hit grafo</strong>: 2ª+ query idéntica ≥ 50% más rápida</li>
+        <li><strong>Cold start</strong>: 1ª query ≤ 1s, convergencia en ≤ 10 queries</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 6 — ÉPICA 3: EFICIENCIA OPERATIVA
+     ============================================================ -->
+<section class="slide">
+  <span class="slide-eyebrow">Épica 3 — Eficiencia Operativa</span>
+  <h2>3 Features · Meta: Una sola colección, worker resuelto, estrategia configurable</h2>
+
+  <div class="two-col-wide">
+    <div>
+      <h3>FT-003.1 Worker Inactivo <span style="color:var(--accent-strong); font-size:0.8rem;">P9</span></h3>
+      <ul>
+        <li>Worker con Claimed=0 diagnosticado y resuelto</li>
+        <li>Escenario A: innecesario → eliminado</li>
+        <li>Escenario B: roto → reparado (cola, polling)</li>
+        <li>POST /memories funciona en ambos escenarios</li>
+      </ul>
+
+      <h3 style="margin-top:0.75rem;">FT-003.3 graphEntryStrategy Configurable <span style="color:var(--accent-strong); font-size:0.8rem;">P10</span></h3>
+      <ul>
+        <li>Strategy por perfil de dominio: single-best, top-k, threshold</li>
+        <li>Cambio en caliente sin reinicio</li>
+        <li>Sobrescribible por request vía X-Graph-Strategy</li>
+      </ul>
+    </div>
+    <div class="card">
+      <p style="font-weight:700; margin-bottom:0.5rem;">FT-003.2 Unificación Qdrant <span style="color:var(--accent-strong); font-size:0.8rem;">P5 — Alta</span></p>
+      <table style="margin-bottom:0.5rem;">
+        <thead><tr><th></th><th>v2.0.9</th><th>v2.1.0</th></tr></thead>
+        <tbody>
+          <tr><td>Colecciones</td><td>abax-memories-v1 + v2</td><td><strong>abax-memories</strong></td></tr>
+          <tr><td>Backups</td><td>2</td><td>1</td></tr>
+          <tr><td>Overhead</td><td>Duplicado</td><td>Unificado</td></tr>
+        </tbody>
+      </table>
+      <ul>
+        <li>Proceso offline pre-deploy con verificación, respaldo y rollback</li>
+        <li>Transparente para el consumidor de la API</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 7 — ÉPICA 4: API / DX
+     ============================================================ -->
+<section class="slide">
+  <span class="slide-eyebrow">Épica 4 — API y Developer Experience</span>
+  <h2>3 Features · Meta: API unificada, control granular, administración</h2>
+
+  <div>
+    <h3>FT-004.1 Header X-Graph-Strategy <span style="color:var(--accent-strong); font-size:0.8rem;">P11 — Media</span></h3>
+    <ul>
+      <li>Headers: <code>X-Graph-Strategy</code> (none | single | top-k | threshold), <code>X-Graph-K</code>, <code>X-Graph-Threshold</code></li>
+      <li><code>X-Graph-Strategy: none</code> desactiva el grafo incluso con expandGraph: true</li>
+      <li>Sobrescribe la estrategia del perfil por request individual</li>
+    </ul>
+
+    <h3 style="margin-top:0.75rem;">FT-004.2 Unificación search/hybrid <span style="color:var(--accent-strong); font-size:0.8rem;">P12 — Media</span></h3>
+    <ul>
+      <li>Un solo endpoint POST /memories/search con semanticWeight + lexicalWeight</li>
+      <li>5 modos: semántico puro, léxico puro, híbrido balanceado, híbrido legacy, + grafo</li>
+      <li>POST /memories/hybrid mantenido funcional con headers Deprecation + Warning</li>
+    </ul>
+
+    <h3 style="margin-top:0.75rem;">FT-004.3 DELETE /admin/namespaces/{name} <span style="color:var(--accent-strong); font-size:0.8rem;">P13 — Media</span></h3>
+    <ul>
+      <li>Eliminación atómica: memorias + relaciones + entidades + puntos Qdrant</li>
+      <li>Requiere rol memory-admin. Operación todo o nada con rollback ante fallo parcial</li>
+      <li>Respuesta con contadores: {memories, relations, entities, qdrantPoints}</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 8 — DIAGRAMAS CLAVE
+     ============================================================ -->
+<section class="slide">
+  <span class="slide-eyebrow">Diagramas Clave de Proceso</span>
+  <h2>3 flujos que definen v2.1.0</h2>
+
+  <h3>1. Pipeline Two-Stage con Reranker (FT-001.1)</h3>
+  <div class="flow-block">Cliente → Dense Retrieval (Qdrant top-20) → Cross-Encoder Reranker
+       → Reordenamiento por entailment → Top-5 final
+
+  Si cross-encoder no disponible: degradación graceful a dense-only
+  (WARN en logs, crossEncoderApplied: false, sin error HTTP)</div>
+
+  <h3 style="margin-top:0.75rem;">2. Expansión de Grafo Multi-Origen (FT-001.3)</h3>
+  <div class="flow-block">Cliente → ¿entryPoints explícitos en el body?
+    → Sí: validar (max 10, deduplicar) → BFS desde IDs del cliente
+    → No: dense retrieval + cross-encoder → aplicar estrategia
+         (top-k default K=3 | single-best | threshold | none)
+         → BFS desde entryPoints automáticos
+
+  → ¿Cache hit? (mismos entryPoints + depth + includeKinds)
+    → Sí: servir desde Caffeine (~85ms)
+    → No: BFS completo N+1 → almacenar en caché → fusionar resultados</div>
+
+  <h3 style="margin-top:0.75rem;">3. Unificación de Endpoints (FT-004.2)</h3>
+  <div class="flow-block">POST /memories/search (endpoint unificado)
+  ├─ semanticWeight: 1.0, lexicalWeight: 0.0 → Semántico puro
+  ├─ semanticWeight: 0.0, lexicalWeight: 1.0 → Léxico puro
+  ├─ semanticWeight: 0.6, lexicalWeight: 0.4 → Híbrido balanceado
+  └─ + expandGraph: true → Semántico + Grafo
+
+POST /memories/hybrid → Deprecation: true + Warning: 299
+                       → Delega a /search (0.5 / 0.5)</div>
+</section>
+
+<!-- ============================================================
+     SLIDE 9 — REGLAS DE NEGOCIO
+     ============================================================ -->
+<section class="slide">
+  <span class="slide-eyebrow">Reglas de Negocio</span>
+  <h2>13 reglas formalizadas · 4 tipos · dependencias documentadas</h2>
+
+  <table>
+    <thead>
+      <tr><th>Clasificación</th><th>#</th><th>Reglas</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Restricción</strong></td>
+        <td>5</td>
+        <td>BR-002 Aislamiento semántico · BR-004 Precedencia entryPoints · BR-010 Estrategia por perfil · BR-011 Header X-Graph · BR-012 Unificación endpoints</td>
+      </tr>
+      <tr>
+        <td><strong>Proceso</strong></td>
+        <td>4</td>
+        <td>BR-001 Pipeline two-stage · BR-005 Extracción IA real · BR-008 Worker inactivo · BR-013 DELETE namespace</td>
+      </tr>
+      <tr>
+        <td><strong>Cálculo</strong></td>
+        <td>2</td>
+        <td>BR-003 Expansión multi-origen · BR-006 Cache de grafo</td>
+      </tr>
+      <tr>
+        <td><strong>Seguridad</strong></td>
+        <td>2</td>
+        <td>BR-007 Cache JWT · BR-013 (autorización memory-admin)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card" style="margin-top:0.5rem;">
+    <p style="font-weight:700; margin-bottom:0.5rem;">Dependencias críticas entre reglas</p>
+    <ul>
+      <li><strong>BR-001 → BR-003</strong>: el reranker reordena los entry points antes de la expansión</li>
+      <li><strong>BR-010 → BR-011</strong>: el perfil define el default; el header lo sobrescribe por request</li>
+      <li><strong>BR-012 → BR-001 + BR-002</strong>: endpoint unificado donde operan el pipeline y el aislamiento</li>
+      <li><strong>BR-004 → BR-011</strong>: entryPoints explícitos tienen precedencia sobre cualquier header</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 10 — CRITERIOS DE ACEPTACIÓN
+     ============================================================ -->
+<section class="slide">
+  <span class="slide-eyebrow">Criterios de Aceptación</span>
+  <h2>64 CAs — 54 feature + 10 transversales</h2>
+
+  <div class="stat-grid" style="margin-bottom: 1rem;">
+    <div><div class="stat-num">16</div><div class="stat-label">Must</div></div>
+    <div><div class="stat-num">11</div><div class="stat-label">Should</div></div>
+    <div><div class="stat-num">27</div><div class="stat-label">Could</div></div>
+    <div><div class="stat-num">10</div><div class="stat-label">Transversales</div></div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Feature</th><th>CAs</th><th>Ejemplos de los más críticos</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>FT-001.1 Reranker</td><td>6</td><td>Top-1 ≥ 0.90 en suite multi-dominio · NDCG@10 ≥ 0.85 en SciFact · Recall@10 ≥ 0.90 sin degradación · Degradación graceful sin error HTTP</td></tr>
+      <tr><td>FT-001.2 Search Puro</td><td>3</td><td>Cero resultados del grafo con expandGraph: false · Activación del grafo solo con expandGraph: true</td></tr>
+      <tr><td>FT-001.3 Grafo Top-3</td><td>7</td><td>Expansión desde 3 entry points · Recall multi-dominio ≥ 85% · entryPoints explícitos con precedencia</td></tr>
+      <tr><td>FT-001.4 /extract</td><td>4</td><td>Extracción OpenAI real con tipos variados · HTTP 503 si API key no configurada</td></tr>
+      <tr><td>FT-004.2 Unificación</td><td>4</td><td>Deprecación de /hybrid con backward compatibility · Equivalencia funcional suite v2.0.9</td></tr>
+      <tr><td>FT-004.3 DELETE ns</td><td>4</td><td>Eliminación atómica con resumen · 403 sin memory-admin · 404 si namespace no existe</td></tr>
+    </tbody>
+  </table>
+
+  <p style="color: var(--text-muted); margin-top: 0.5rem;">
+    <strong>Transversales</strong>: backward compatibility v2.0.9 (CA-TRANS-01/02), códigos HTTP semánticos (CA-TRANS-04),
+    logs sin secretos (CA-TRANS-06), idempotencia (CA-TRANS-08/09), suite de regresión 100% (CA-TRANS-02)
+  </p>
+</section>
+
+<!-- ============================================================
+     SLIDE 11 — COMPATIBILIDAD
+     ============================================================ -->
+<section class="slide">
+  <span class="slide-eyebrow">Compatibilidad</span>
+  <h2>v2.0.9 → v2.1.0: qué cambia y qué se mantiene</h2>
+
+  <div class="two-col">
+    <div>
+      <h3>Cambios aditivos (8 reglas)</h3>
+      <p style="color: var(--text-muted); font-size:0.9rem; margin-bottom:0.5rem;">Sin impacto en consumidores existentes</p>
+      <ul>
+        <li>BR-001 Pipeline two-stage (dense-only como degradación)</li>
+        <li>BR-003 Expansión top-3 (mejor cobertura cross-dominio)</li>
+        <li>BR-004 entryPoints explícitos (nueva capacidad)</li>
+        <li>BR-006 Cache de grafo (transparente, solo latencia)</li>
+        <li>BR-007 Cache JWT (transparente, solo latencia)</li>
+        <li>BR-010 Estrategia por perfil (nueva configurabilidad)</li>
+        <li>BR-011 Header X-Graph-Strategy (opcional)</li>
+        <li>BR-013 DELETE namespace (nuevo endpoint admin)</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Cambios correctivos (5 reglas)</h3>
+      <p style="color: var(--text-muted); font-size:0.9rem; margin-bottom:0.5rem;">Mejora intencional de comportamiento</p>
+      <ul>
+        <li>BR-002 Aislamiento semántico (search sin expandGraph = 100% semántico)</li>
+        <li>BR-005 /extract con OpenAI real (reemplaza MockLlmService)</li>
+        <li>BR-008 Worker inactivo resuelto (deuda operativa)</li>
+        <li>BR-009 1 colección Qdrant (elimina overhead duplicado)</li>
+        <li>BR-012 Unificación endpoints (hybrid deprecado, funcional)</li>
+      </ul>
+
+      <div class="card" style="margin-top:1rem;">
+        <p style="font-weight:700; margin-bottom:0.25rem;">Garantías de no ruptura</p>
+        <ul>
+          <li>Stack, modelo de datos, roles RBAC: inalterados</li>
+          <li>Parámetros existentes: mismos nombres, tipos y defaults</li>
+          <li>Códigos de error v2.0.9: sin cambios</li>
+          <li>Suite multi-dominio: 100% equivalente o mejor</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 12 — PRÓXIMOS PASOS
+     ============================================================ -->
+<section class="slide">
+  <span class="slide-eyebrow">Próximos Pasos</span>
+  <h2>Gate Fase 2 → Fase 3 (Diseño Técnico)</h2>
+
+  <div class="card" style="margin-bottom:1rem;">
+    <p style="font-weight:700; margin-bottom:0.5rem;">Condiciones de avance</p>
+    <ul class="checklist">
+      <li><span class="done">✓</span> Especificación Funcional completada y validada</li>
+      <li><span class="done">✓</span> Reglas de Negocio formalizadas (13 reglas con dependencias)</li>
+      <li><span class="done">✓</span> Diagramas de Proceso documentados (8 flujos AS-IS/TO-BE)</li>
+      <li><span class="done">✓</span> Criterios de Aceptación definidos (64 CAs verificables)</li>
+      <li><span class="pending">□ Aprobación del Product Owner sobre esta propuesta funcional</span></li>
+    </ul>
+  </div>
+
+  <h3>Fase 3 — Diseño Técnico (responsables)</h3>
+  <ul>
+    <li><strong>Solution Architect</strong>: arquitectura del pipeline two-stage</li>
+    <li><strong>Tech Lead</strong>: ADRs para cross-encoder, estrategia de caché, unificación Qdrant</li>
+    <li><strong>DB Modeling</strong>: sin cambios en modelo de datos (restricción R-04)</li>
+    <li><strong>DevOps</strong>: plan de migración de colecciones Qdrant</li>
+  </ul>
+
+  <h3 style="margin-top:0.5rem;">Fases siguientes</h3>
+  <ul>
+    <li><strong>Fase 4 — Construcción</strong>: 13 features implementadas por developer-backend</li>
+    <li><strong>Fase 5 — QA Funcional</strong>: 64 CAs verificados por qa-functional</li>
+    <li><strong>Fase 6 — UAT</strong>: validación con Product Owner y stakeholders</li>
+  </ul>
+</section>
+
+<!-- ============================================================
+     SLIDE 13 — CIERRE
+     ============================================================ -->
+<section class="slide">
+  <span class="slide-eyebrow">Decisión Solicitada</span>
+  <h2>¿La propuesta funcional refleja correctamente lo que necesitas?</h2>
+
+  <p style="max-width: 60ch; margin-top:0.5rem;">
+    Aprobar esta especificación funcional como base contractual para el
+    <strong>Diseño Técnico (Fase 3)</strong> de Abax-Memory v2.1.0.
+  </p>
+
+  <div class="cta">
+    <span class="cta-question">Sí, la propuesta refleja correctamente las necesidades del hardening</span>
+  </div>
+
+  <p style="margin-top: 1rem; color: var(--text-muted);">
+    Alternativas: · Necesitamos ajustes (especificar en feedback) · Revisar en próxima sesión con el equipo completo
+  </p>
+</section>
+
+</body>
+</html>

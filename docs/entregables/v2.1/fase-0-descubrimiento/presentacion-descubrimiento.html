@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abax-Memory v2.1.0 — Discovery</title>
+<style>
+  /* ==========================================================
+     RESET + BASE (del Design System de Presentaciones)
+     ========================================================== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  h1, h2, h3 { font-weight: 800; line-height: 1.1; }
+
+  /* Corporate Minimal preset (default) */
+  body {
+    --bg: #FFFFFF;
+    --bg-alt: #F5F5F7;
+    --text: #1a1a2e;
+    --text-muted: #4a4a5e;
+    --accent: #0066cc;
+    --accent-strong: #e94560;
+    --border: #d8d8e0;
+  }
+
+  /* ==========================================================
+     LAYOUT: SLIDE
+     ========================================================== */
+  .slide {
+    min-height: 100vh;
+    padding: 6vh 8vw;
+    display: grid;
+    align-content: start;
+    gap: 1.25rem;
+    page-break-after: always;
+    border-bottom: 1px solid var(--border);
+  }
+  .slide:last-child { border-bottom: none; }
+
+  .slide-eyebrow {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .slide h1 { font-size: clamp(2.2rem, 4.5vw, 3.5rem); }
+  .slide h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); }
+  .slide h3 { font-size: clamp(1.15rem, 1.8vw, 1.4rem); color: var(--text-muted); font-weight: 600; }
+  .slide p, .slide li { font-size: clamp(0.95rem, 1.35vw, 1.1rem); max-width: 72ch; }
+  .slide strong { color: var(--accent-strong); }
+
+  ul, ol { padding-left: 1.5rem; display: grid; gap: 0.6rem; }
+  ul li::marker, ol li::marker { color: var(--accent); }
+
+  /* Table styling */
+  table { border-collapse: collapse; width: 100%; max-width: 64rem; }
+  th, td { text-align: left; padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--border); font-size: clamp(0.8rem, 1.15vw, 0.95rem); }
+  th { font-weight: 700; color: var(--accent-strong); background: var(--bg-alt); }
+  tr:nth-child(even) td { background: var(--bg-alt); }
+
+  /* Card */
+  .card {
+    background: var(--bg-alt);
+    padding: 1.75rem 2rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    max-width: 48rem;
+  }
+
+  /* CTA block */
+  .cta {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 2.5rem 3.5rem;
+    border-radius: 4px;
+    display: inline-block;
+    max-width: 48rem;
+  }
+  .cta-question { font-size: clamp(1.3rem, 2.5vw, 1.7rem); font-weight: 700; }
+
+  /* Badge / tag */
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: var(--accent-strong);
+    color: #fff;
+  }
+  .badge-green { background: #27ae60; }
+  .badge-orange { background: #e67e22; }
+  .badge-blue { background: var(--accent); }
+
+  /* Two-column grid */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+  /* Print */
+  @media print {
+    .slide { min-height: auto; page-break-after: always; padding: 3vh 5vw; }
+    .card, .cta { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===============================================================
+     SLIDE 1 — PORTADA
+     =============================================================== -->
+<section class="slide" aria-label="Portada" style="align-content: center; text-align: center; gap: 2rem;">
+  <span class="slide-eyebrow">Fase 0 — Descubrimiento</span>
+  <h1>Abax-Memory v2.1.0 — Discovery</h1>
+  <h3 style="max-width: 50ch; margin: 0 auto;">Hardening &amp; Optimización del Motor de Memoria Multi-Dominio</h3>
+  <p style="margin-top: 2rem; color: var(--text-muted);">
+    2026-05-05 · business-analyst · product-owner (pendiente de revisión)
+  </p>
+</section>
+
+<!-- ===============================================================
+     SLIDE 2 — AGENDA
+     =============================================================== -->
+<section class="slide" aria-label="Agenda">
+  <span class="slide-eyebrow">Agenda</span>
+  <h2>Qué vas a ver</h2>
+  <ul>
+    <li><strong>Visión del Producto</strong> — Gap analysis v2.0.9 → v2.1.0, 10 criterios de éxito, usuarios objetivo</li>
+    <li><strong>Épicas &amp; Features</strong> — 4 épicas, 13 features distribuidas, priorización del usuario (1-5)</li>
+    <li><strong>Historias de Usuario</strong> — 16 historias: 5 Must, 3 Should, 8 Could. Cobertura 13/13 features</li>
+    <li><strong>Backlog &amp; MVP</strong> — R1-MVP (7 historias core), R2 (9 historias de robustez), dependencias clave</li>
+    <li><strong>Próximos pasos</strong> — Validación sponsor → Fase 1 Inicio → Fase 2 Análisis Funcional → Fases 3-9</li>
+  </ul>
+</section>
+
+<!-- ===============================================================
+     SLIDE 3 — VISIÓN DEL PRODUCTO (3 partes)
+     =============================================================== -->
+<section class="slide" aria-label="Visión del Producto - Gap Analysis">
+  <span class="slide-eyebrow">Visión del Producto</span>
+  <h2>Gap Analysis: v2.0.9 → v2.1.0</h2>
+  <table>
+    <thead>
+      <tr><th>Gap</th><th>v2.0.9 (estado actual)</th><th>Meta v2.1.0</th><th>Origen</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Precisión top-1</strong></td>
+        <td>~0.75–0.80 (dense-only)</td>
+        <td><strong>≥ 0.90</strong></td>
+        <td>CE-01 NDCG@10 = 0.7771 (FAIL)</td>
+      </tr>
+      <tr>
+        <td><strong>Latencia p95</strong></td>
+        <td>~2s oscilante</td>
+        <td><strong>≤ 500ms</strong></td>
+        <td>Monitoreo post-deploy</td>
+      </tr>
+      <tr>
+        <td><strong>Dos colecciones Qdrant</strong></td>
+        <td>v1 + v2 coexistiendo</td>
+        <td><strong>1 colección</strong></td>
+        <td>F8v2-ISS-002</td>
+      </tr>
+      <tr>
+        <td><strong>API/DX confusa</strong></td>
+        <td>search/hybrid redundantes, sin control grafo, sin DELETE ns</td>
+        <td><strong>API unificada + control granular</strong></td>
+        <td>F8v2-ISS-001, UAT-S08</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top: 0.5rem; color: var(--text-muted);">
+    <strong>Decisión del sponsor:</strong> v2.1.0 es hardening + optimización, no re-arquitectura. Stack inalterado. Backward compatibility.
+  </p>
+</section>
+
+<section class="slide" aria-label="Visión del Producto - Criterios de Éxito">
+  <span class="slide-eyebrow">Visión del Producto</span>
+  <h2>10 Criterios de Éxito Medibles</h2>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Criterio</th><th>Línea Base</th><th>Meta</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>CE-01</td><td>Precisión top-1</td><td>~0.78</td><td><strong>≥ 0.90</strong> ⭐</td></tr>
+      <tr><td>CE-02</td><td>Latencia p95 búsqueda</td><td>~2s</td><td><strong>≤ 500ms</strong> ⭐</td></tr>
+      <tr><td>CE-03</td><td>NDCG@10 SciFact</td><td>0.7771 (FAIL)</td><td><strong>≥ 0.85</strong> ⭐</td></tr>
+      <tr><td>CE-04</td><td>Recall@10 SciFact</td><td>0.9006 (PASS)</td><td>≥ 0.90</td></tr>
+      <tr><td>CE-05</td><td>Colecciones Qdrant</td><td>2</td><td><strong>1</strong></td></tr>
+      <tr><td>CE-06</td><td>/extract funcional</td><td>MockLlmService</td><td>OpenAI real</td></tr>
+      <tr><td>CE-07</td><td>search = semantic puro</td><td>Ambiguo</td><td>0 grafo</td></tr>
+      <tr><td>CE-08</td><td>DELETE namespace</td><td>No existe</td><td>Operativo</td></tr>
+      <tr><td>CE-09</td><td>X-Graph-Strategy</td><td>No existe</td><td>Funcional</td></tr>
+      <tr><td>CE-10</td><td>Unificar search/hybrid</td><td>2 endpoints</td><td>1 + deprecated</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="slide" aria-label="Visión del Producto - Usuarios">
+  <span class="slide-eyebrow">Visión del Producto</span>
+  <h2>Usuarios Objetivo</h2>
+  <p>Los mismos 5 roles de v2.0.0. El <strong>principal beneficiario</strong> de v2.1.0 es el <strong>Desarrollador Consumidor de la API (Memory Consumer)</strong>.</p>
+  <table>
+    <thead>
+      <tr><th>Rol</th><th>Impacto de v2.1.0</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Memory Operator</strong></td><td>Mayor precisión (top-1 ≥ 0.90). Menor latencia (p95 ≤ 500ms).</td></tr>
+      <tr><td><strong>Memory Consumer</strong></td><td><strong>Principal beneficiario.</strong> API unificada, X-Graph-Strategy, DELETE namespace, /extract con OpenAI real.</td></tr>
+      <tr><td><strong>Memory Admin</strong></td><td>Eliminación de namespaces completos. Una sola colección Qdrant simplifica la administración.</td></tr>
+      <tr><td><strong>Memory Reviewer</strong></td><td>Sin cambios directos. Mejora de latencia beneficia el flujo de revisión.</td></tr>
+      <tr><td><strong>Memory Auditor</strong></td><td>Sin cambios directos. 100% de trazabilidad heredado de v2.0.0.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===============================================================
+     SLIDE 4 — ÉPICAS Y FEATURES
+     =============================================================== -->
+<section class="slide" aria-label="Épicas y Features">
+  <span class="slide-eyebrow">Épicas y Features</span>
+  <h2>4 Épicas · 13 Features</h2>
+  <table>
+    <thead>
+      <tr><th>Épica</th><th>Feature</th><th style="text-align:center">Prioridad</th></tr>
+    </thead>
+    <tbody>
+      <tr><td rowspan="4"><strong>EP-V21-001<br>Precisión</strong></td><td>FT-001.1 — Reranker Cross-Encoder</td><td style="text-align:center"><span class="badge">1</span></td></tr>
+      <tr><td>FT-001.2 — Búsqueda Semántica Pura (search sin grafo)</td><td style="text-align:center"><span class="badge">2</span></td></tr>
+      <tr><td>FT-001.3 — Expansión Grafo Top-3 + entryPoints</td><td style="text-align:center"><span class="badge">3</span></td></tr>
+      <tr><td>FT-001.4 — Fix POST /extract (OpenAI real)</td><td style="text-align:center"><span class="badge badge-orange">6</span></td></tr>
+      <tr><td rowspan="3"><strong>EP-V21-002<br>Velocidad</strong></td><td>FT-002.1 — Optimización N+1 + Cache de Grafo</td><td style="text-align:center"><span class="badge badge-orange">7</span></td></tr>
+      <tr><td>FT-002.2 — Cold Start / Lock Qdrant</td><td style="text-align:center"><span class="badge badge-orange">8</span></td></tr>
+      <tr><td>FT-002.3 — Cache JWT Cliente</td><td style="text-align:center"><span class="badge">4</span></td></tr>
+      <tr><td rowspan="3"><strong>EP-V21-003<br>Eficiencia</strong></td><td>FT-003.1 — Diagnóstico Worker (Claimed=0)</td><td style="text-align:center"><span class="badge badge-orange">9</span></td></tr>
+      <tr><td>FT-003.2 — Unificar Colecciones Qdrant</td><td style="text-align:center"><span class="badge">5</span></td></tr>
+      <tr><td>FT-003.3 — graphEntryStrategy Configurable</td><td style="text-align:center"><span class="badge badge-orange">10</span></td></tr>
+      <tr><td rowspan="3"><strong>EP-V21-004<br>API / DX</strong></td><td>FT-004.1 — Header X-Graph-Strategy</td><td style="text-align:center"><span class="badge badge-orange">11</span></td></tr>
+      <tr><td>FT-004.2 — Unificar search/hybrid</td><td style="text-align:center"><span class="badge badge-orange">12</span></td></tr>
+      <tr><td>FT-004.3 — DELETE /admin/namespaces/{name}</td><td style="text-align:center"><span class="badge badge-orange">13</span></td></tr>
+    </tbody>
+  </table>
+  <p style="color: var(--text-muted);">Cobertura: <strong>13/13 features</strong> cubren los <strong>10/10 criterios de éxito</strong>. Trazabilidad completa feature→CE en la matriz de trazabilidad del documento fuente.</p>
+</section>
+
+<!-- ===============================================================
+     SLIDE 5 — HISTORIAS DE USUARIO
+     =============================================================== -->
+<section class="slide" aria-label="Historias de Usuario">
+  <span class="slide-eyebrow">Historias de Usuario</span>
+  <h2>16 Historias · 5 Must · 3 Should · 8 Could</h2>
+  <table>
+    <thead>
+      <tr><th>Épica</th><th style="text-align:center">Historias</th><th style="text-align:center">Must</th><th style="text-align:center">Should</th><th style="text-align:center">Could</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>EP-V21-001: Precisión</td>
+        <td style="text-align:center"><strong>6</strong></td>
+        <td style="text-align:center"><span class="badge">5</span></td>
+        <td style="text-align:center">1</td>
+        <td style="text-align:center">0</td>
+      </tr>
+      <tr>
+        <td>EP-V21-002: Velocidad</td>
+        <td style="text-align:center"><strong>4</strong></td>
+        <td style="text-align:center">0</td>
+        <td style="text-align:center">1</td>
+        <td style="text-align:center"><span class="badge badge-orange">3</span></td>
+      </tr>
+      <tr>
+        <td>EP-V21-003: Eficiencia</td>
+        <td style="text-align:center"><strong>3</strong></td>
+        <td style="text-align:center">0</td>
+        <td style="text-align:center">1</td>
+        <td style="text-align:center"><span class="badge badge-orange">2</span></td>
+      </tr>
+      <tr>
+        <td>EP-V21-004: API / DX</td>
+        <td style="text-align:center"><strong>3</strong></td>
+        <td style="text-align:center">0</td>
+        <td style="text-align:center">0</td>
+        <td style="text-align:center"><span class="badge badge-orange">3</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="card" style="margin-top: 1rem; max-width: none;">
+    <p><strong>Must (5) — Bloqueantes para el éxito:</strong></p>
+    <ul>
+      <li>HU-V21-001: Integrar Cross-Encoder en Pipeline Two-Stage</li>
+      <li>HU-V21-002: Verificar Mejora con Benchmark SciFact</li>
+      <li>HU-V21-003: Aislar Búsqueda Semántica de la Expansión de Grafo</li>
+      <li>HU-V21-004 + HU-V21-005: Expandir Grafo Top-3 + Entry Points Explícitos</li>
+    </ul>
+  </div>
+  <p style="color: var(--text-muted);"><strong>Cobertura:</strong> 13/13 features cubiertas por al menos 1 historia. Trazabilidad completa historia → feature → criterio de éxito.</p>
+</section>
+
+<!-- ===============================================================
+     SLIDE 6 — BACKLOG & MVP
+     =============================================================== -->
+<section class="slide" aria-label="Backlog y MVP - Dashboard">
+  <span class="slide-eyebrow">Backlog &amp; MVP</span>
+  <h2>Dashboard Priorizado — Top 7 del MVP</h2>
+  <table>
+    <thead>
+      <tr><th>#</th><th>ID</th><th>Historia</th><th>Prioridad</th><th>Esfuerzo</th><th>Release</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>HU-V21-001</td><td>Cross-Encoder en Pipeline Two-Stage</td><td>Must</td><td>L</td><td><span class="badge">R1</span></td></tr>
+      <tr><td>2</td><td>HU-V21-002</td><td>Verificar Mejora Benchmark SciFact</td><td>Must</td><td>M</td><td><span class="badge">R1</span></td></tr>
+      <tr><td>3</td><td>HU-V21-003</td><td>Aislar Búsqueda Semántica del Grafo</td><td>Must</td><td>M</td><td><span class="badge">R1</span></td></tr>
+      <tr><td>4</td><td>HU-V21-004</td><td>Expandir Grafo desde Top-3 Nodos</td><td>Must</td><td>L</td><td><span class="badge">R1</span></td></tr>
+      <tr><td>5</td><td>HU-V21-005</td><td>Soportar Entry Points Explícitos</td><td>Must</td><td>M</td><td><span class="badge">R1</span></td></tr>
+      <tr><td>6</td><td>HU-V21-010</td><td>Cachear Validación JWT Backend</td><td>Should</td><td>S</td><td><span class="badge">R1</span></td></tr>
+      <tr><td>7</td><td>HU-V21-012</td><td>Unificar Colecciones Qdrant</td><td>Should</td><td>M</td><td><span class="badge">R1</span></td></tr>
+      <tr style="border-top: 2px solid var(--accent-strong);"><td>8</td><td>HU-V21-006</td><td>Extracción con OpenAI Real</td><td>Should</td><td>L</td><td><span class="badge badge-orange">R2</span></td></tr>
+      <tr><td>9</td><td>HU-V21-009</td><td>Mitigar Latencia Anómala Qdrant</td><td>Could</td><td>L</td><td><span class="badge badge-orange">R2</span></td></tr>
+      <tr><td>10-16</td><td>Varias</td><td>N+1, Cache grafo, Worker, Estrategias, Header, search/hybrid, DELETE ns</td><td>Could</td><td>S-M</td><td><span class="badge badge-orange">R2</span></td></tr>
+    </tbody>
+  </table>
+  <p style="color: var(--text-muted);">Esfuerzo total estimado: <strong>R1-MVP = 6 story points</strong> (2L + 4M + 1S) · <strong>R2 = 5.5 story points</strong> (2L + 5M + 2S)</p>
+</section>
+
+<section class="slide" aria-label="Backlog y MVP - Releases y Dependencias">
+  <span class="slide-eyebrow">Backlog &amp; MVP</span>
+  <h2>R1-MVP vs R2 · Dependencias Clave</h2>
+  <div class="two-col">
+    <div class="card">
+      <h3 style="margin-bottom: 0.5rem;">R1-MVP: Precisión Core + Quick Wins</h3>
+      <ul>
+        <li><strong>7 historias</strong>: 5 Must de Precisión + 2 Should</li>
+        <li>Cumple <strong>5/10</strong> criterios de éxito completamente, <strong>1 parcialmente</strong></li>
+        <li><strong>Gate:</strong> Verificar CE-01, CE-03, CE-05, CE-07 antes de R2</li>
+        <li>Si R1-MVP es exitoso, el sponsor decide si R2 sigue o se difiere a v2.2.0</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom: 0.5rem;">R2: Robustez, DX y Deuda Residual</h3>
+      <ul>
+        <li><strong>9 historias</strong>: Fix /extract, Qdrant, cache grafo, worker, estrategias, header, unificación, DELETE ns</li>
+        <li>Completa los <strong>4 criterios restantes</strong> (CE-06, CE-08, CE-09, CE-10) + CE-02 completo</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin-top: 1rem;">Dependencias fuertes</h3>
+  <table>
+    <thead><tr><th>Dependencia</th><th>Impacto en planificación</th></tr></thead>
+    <tbody>
+      <tr><td><strong>HU-002 → HU-001</strong></td><td>No se puede medir el benchmark sin el cross-encoder implementado. HU-001 debe ser la primera historia en construirse.</td></tr>
+      <tr><td><strong>HU-008 → HU-004</strong></td><td>El cache de grafo necesita saber qué entry points y depth cachear.</td></tr>
+      <tr><td><strong>HU-014 → HU-013</strong></td><td>El header HTTP es la interfaz; el backend debe entender las estrategias primero.</td></tr>
+      <tr><td><strong>HU-007 → HU-004</strong></td><td>La verificación N+1 debe ejecutarse sobre la nueva lógica de expansión.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===============================================================
+     SLIDE 7 — PRÓXIMOS PASOS
+     =============================================================== -->
+<section class="slide" aria-label="Próximos pasos">
+  <span class="slide-eyebrow">Próximos pasos</span>
+  <h2>Roadmap Cascada v2.1.0 (F0 → F9)</h2>
+
+  <table>
+    <thead>
+      <tr><th>Fase</th><th>Responsable</th><th>Entregables clave</th></tr>
+    </thead>
+    <tbody>
+      <tr style="background: var(--bg-alt);"><td><strong>F0 — Descubrimiento</strong></td><td>business-analyst</td><td>✅ Visión, Épicas/Features, Historias, Backlog, Presentación</td></tr>
+      <tr><td><strong>F1 — Inicio</strong></td><td>project-manager</td><td>Acta de Constitución, Matriz de Riesgos, Cronograma, Work Packages</td></tr>
+      <tr style="background: var(--bg-alt);"><td><strong>F2 — Análisis Funcional</strong></td><td>business-analyst</td><td>Especificación Funcional, Criterios de Aceptación Given/When/Then, Matriz de Trazabilidad</td></tr>
+      <tr><td><strong>F3 — Diseño Técnico</strong></td><td>solution-architect</td><td>Documento de Arquitectura, ADRs, Diseño de Componentes</td></tr>
+      <tr style="background: var(--bg-alt);"><td><strong>F4 — Construcción</strong></td><td>developers</td><td>Código fuente R1-MVP (7 historias) → Gate → R2 (9 historias)</td></tr>
+      <tr><td><strong>F5 — QA Funcional</strong></td><td>qa-lead</td><td>Casos de prueba, Ejecución, Reporte de defectos</td></tr>
+      <tr style="background: var(--bg-alt);"><td><strong>F6 — UAT</strong></td><td>qa-functional</td><td>Verificación 10 criterios de éxito, Benchmarks SciFact + Multi-dominio</td></tr>
+      <tr><td><strong>F7-9 — Cierre</strong></td><td>devops / pm</td><td>Estabilización, Despliegue, Informe de Cierre</td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top: 1.5rem; font-size: 1.05rem;">
+    <strong>Hito inmediato:</strong> <span style="color: var(--accent);">Validación del sponsor (HOY)</span> → si se aprueba, arranca F1-Inicio.
+  </p>
+</section>
+
+<!-- ===============================================================
+     SLIDE 8 — CIERRE / CTA
+     =============================================================== -->
+<section class="slide" aria-label="Cierre y decisión solicitada" style="align-content: center; gap: 2rem;">
+  <span class="slide-eyebrow">Decisión solicitada</span>
+  <h2>¿Refleja correctamente tu necesidad?</h2>
+
+  <div class="card" style="max-width: 52rem;">
+    <ul>
+      <li>¿Falta algo esencial en el alcance de las 4 épicas y 16 mejoras?</li>
+      <li>¿Sobra algo que no aporta valor al hardening del motor?</li>
+      <li>¿La priorización (Must/Should/Could + R1-MVP/R2) es la correcta?</li>
+      <li>¿Los 10 criterios de éxito son medibles y alcanzables con el stack actual?</li>
+    </ul>
+  </div>
+
+  <div class="cta">
+    <span class="cta-question">Aprobado — Avanzamos a Fase 1 · Necesito ajustes · Volver a discutir</span>
+  </div>
+
+  <p style="color: var(--text-muted); margin-top: 1.5rem;">
+    Abax-Memory v2.1.0 — Discovery · 2026-05-05 · business-analyst · <strong>docs/entregables/v2.1/fase-0-descubrimiento/</strong>
+  </p>
+</section>
+
+</body>
+</html>

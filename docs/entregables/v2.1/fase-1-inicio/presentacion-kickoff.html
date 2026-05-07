@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abax-Memory v2.1.0 — Kickoff</title>
+<style>
+  /* ==========================================================
+     RESET + BASE
+     ========================================================== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    font-family: var(--font-body, "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    transition: background 200ms ease, color 200ms ease;
+  }
+  h1, h2, h3 { font-family: var(--font-heading, var(--font-body)); font-weight: 800; line-height: 1.1; }
+
+  /* ==========================================================
+     PRESET: CORPORATE MINIMAL  (default)
+     Contraste verificado WCAG AA.
+     ========================================================== */
+  body[data-style="corporate-minimal"], body:not([data-style]) {
+    --bg: #FFFFFF;
+    --bg-alt: #F5F5F7;
+    --text: #1a1a2e;
+    --text-muted: #4a4a5e;
+    --accent: #0066cc;
+    --accent-strong: #e94560;
+    --border: #d8d8e0;
+    --font-heading: "Inter", "Segoe UI", sans-serif;
+  }
+
+  /* ==========================================================
+     PRESET: TECH EDITORIAL
+     ========================================================== */
+  body[data-style="tech-editorial"] {
+    --bg: #FFFFFF;
+    --bg-alt: #f0f0f3;
+    --text: #111118;
+    --text-muted: #44444c;
+    --accent: #FFCC00;
+    --accent-strong: #111118;
+    --border: #d0d0d8;
+    --font-heading: "Inter", "Segoe UI", sans-serif;
+  }
+
+  /* ==========================================================
+     PRESET: DARK PREMIUM
+     ========================================================== */
+  body[data-style="dark-premium"] {
+    --bg: #0d1117;
+    --bg-alt: #1a1a2e;
+    --text: #e6e6f0;
+    --text-muted: #a0a0b0;
+    --accent: #00d4ff;
+    --accent-strong: #00ff88;
+    --border: #2a2a3e;
+    --font-heading: "Inter", "Segoe UI", sans-serif;
+  }
+
+  /* ==========================================================
+     LAYOUT: SLIDE
+     ========================================================== */
+  .slide {
+    min-height: 100vh;
+    padding: 8vh 10vw;
+    display: grid;
+    align-content: start;
+    gap: 1.5rem;
+    page-break-after: always;
+    border-bottom: 1px solid var(--border);
+  }
+  .slide:last-child { border-bottom: none; }
+
+  .slide-eyebrow {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+  .slide h1 { font-size: clamp(2.5rem, 5vw, 4rem); }
+  .slide h2 { font-size: clamp(2rem, 4vw, 3rem); }
+  .slide h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); color: var(--text-muted); font-weight: 600; }
+  .slide p, .slide li { font-size: clamp(1rem, 1.5vw, 1.125rem); max-width: 70ch; }
+
+  /* KPI block */
+  .kpi {
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--accent-strong);
+    letter-spacing: -0.03em;
+  }
+  .kpi-label { font-size: 1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* List */
+  ul, ol { padding-left: 1.5rem; display: grid; gap: 0.75rem; }
+  ul li::marker, ol li::marker { color: var(--accent); }
+
+  /* Table */
+  table { border-collapse: collapse; width: 100%; max-width: 60rem; }
+  th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+  th { font-weight: 700; color: var(--accent-strong); }
+
+  /* Card */
+  .card {
+    background: var(--bg-alt);
+    padding: 2rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    max-width: 42rem;
+  }
+
+  /* CTA */
+  .cta {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 3rem 4rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  body[data-style="tech-editorial"] .cta { color: #111118; }
+  .cta-question { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; }
+
+  /* Utility */
+  .tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.25rem 0.75rem;
+    border-radius: 3px;
+  }
+  .tag-done    { background: #d4edda; color: #155724; }
+  .tag-active  { background: #cce5ff; color: #004085; }
+  .tag-pending { background: var(--bg-alt); color: var(--text-muted); }
+
+  /* OKR card row */
+  .okr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    max-width: 60rem;
+  }
+  .okr-card {
+    background: var(--bg-alt);
+    padding: 1.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .okr-card h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .okr-card .metric {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: var(--accent-strong);
+  }
+
+  /* Badge for priority */
+  .badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    background: var(--accent-strong);
+    color: #fff;
+  }
+
+  /* Phase timeline */
+  .phase-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    font-size: 0.95rem;
+  }
+  .phase-row strong { min-width: 4rem; }
+  .phase-row .phase-date { color: var(--text-muted); font-size: 0.85rem; min-width: 7rem; }
+
+  /* Print */
+  @media print {
+    .switcher { display: none; }
+    .slide { min-height: auto; page-break-after: always; padding: 4vh 6vw; }
+    .okr-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Style switcher */
+  .switcher {
+    position: fixed; top: 1rem; right: 1rem;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    padding: 0.5rem;
+    display: flex; gap: 0.25rem;
+    border-radius: 4px;
+    z-index: 100;
+  }
+  .switcher button {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid transparent;
+    padding: 0.5rem 0.875rem;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 150ms ease, border-color 150ms ease;
+  }
+  .switcher button:hover { background: var(--bg); border-color: var(--border); }
+  .switcher button[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  body[data-style="tech-editorial"] .switcher button[aria-pressed="true"] { color: #111118; }
+</style>
+</head>
+<body data-style="corporate-minimal">
+
+<nav class="switcher" aria-label="Cambiar preset visual">
+  <button type="button" data-set="corporate-minimal" aria-pressed="true">Corporate Minimal</button>
+  <button type="button" data-set="tech-editorial"   aria-pressed="false">Tech Editorial</button>
+  <button type="button" data-set="dark-premium"     aria-pressed="false">Dark Premium</button>
+</nav>
+
+<!-- ============================================================
+     SLIDE 1 — PORTADA
+     ============================================================ -->
+<section class="slide" aria-label="Portada">
+  <span class="slide-eyebrow">Abax-Memory v2.1.0 — Kickoff</span>
+  <h1>Hardening &amp;<br>Optimización</h1>
+  <h3>Motor de Memoria Multi-Dominio — Iteración quirúrgica basada en 7 benchmarks de v2.0.0</h3>
+  <p style="margin-top: 2rem; color: var(--text-muted);">
+    2026-05-05 · Project Manager · Equipo completo de 9 agentes · Clasificación: Interna
+  </p>
+</section>
+
+<!-- ============================================================
+     SLIDE 2 — AGENDA
+     ============================================================ -->
+<section class="slide" aria-label="Agenda">
+  <span class="slide-eyebrow">Agenda</span>
+  <h2>Qué vamos a cubrir</h2>
+  <ol>
+    <li><strong>Objetivo del proyecto</strong> — Los 4 OKR estratégicos y la justificación de negocio</li>
+    <li><strong>Alcance</strong> — 4 épicas, 13 features, MVP de 7 historias</li>
+    <li><strong>Equipo</strong> — 9 roles y matriz RACI resumida</li>
+    <li><strong>Cronograma</strong> — Fases F0→F9 con fechas e hitos clave</li>
+    <li><strong>Riesgos principales</strong> — Top 5 y sus planes de mitigación</li>
+    <li><strong>Próximos pasos</strong> — Fase 1 → Gate → Fase 2</li>
+  </ol>
+</section>
+
+<!-- ============================================================
+     SLIDE 3 — OBJETIVO DEL PROYECTO
+     ============================================================ -->
+<section class="slide" aria-label="Objetivo del proyecto">
+  <span class="slide-eyebrow">Objetivo del proyecto</span>
+  <h2>4 objetivos estratégicos (OKR)</h2>
+
+  <div class="okr-grid">
+    <div class="okr-card">
+      <h4>O1 · Precisión Competitiva</h4>
+      <div class="metric">≥ 0.90</div>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">
+        Top-1 en queries multi-dominio<br>
+        NDCG@10 ≥ 0.85 en SciFact<br>
+        Recall@10 ≥ 0.90 mantenido
+      </p>
+    </div>
+    <div class="okr-card">
+      <h4>O2 · Latencia Predecible</h4>
+      <div class="metric">≤ 500ms</div>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">
+        p95 en POST /memories/search<br>
+        Sin expandGraph<br>
+        Estable bajo carga
+      </p>
+    </div>
+    <div class="okr-card">
+      <h4>O3 · Infraestructura Simplificada</h4>
+      <div class="metric">1</div>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">
+        Colección Qdrant unificada<br>
+        Eliminar abax-memories-v1<br>
+        Menos overhead operativo
+      </p>
+    </div>
+    <div class="okr-card">
+      <h4>O4 · API de Clase Mundial</h4>
+      <div class="metric">1 endpoint</div>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">
+        search unificado sin redundancia<br>
+        POST /extract con OpenAI real<br>
+        Control granular vía headers
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 3b — JUSTIFICACIÓN DE NEGOCIO
+     ============================================================ -->
+<section class="slide" aria-label="Justificación de negocio">
+  <span class="slide-eyebrow">¿Por qué v2.1.0?</span>
+  <h2>Justificación de negocio</h2>
+  <div class="card">
+    <ul>
+      <li><strong>1. Cerrar brecha competitiva en precisión</strong><br>
+          Único benchmark fallido de v2.0.0 (NDCG@10 = 0.7771). Con cross-encoder, proyección 0.82–0.87.</li>
+      <li><strong>2. Eliminar deuda operativa antes de que sea técnica</strong><br>
+          2 colecciones Qdrant, worker inactivo, MockLlmService en producción. Hoy no bloquean; mañana sí.</li>
+      <li><strong>3. Mejorar Developer Experience (DX)</strong><br>
+          API unificada, control de grafo por header, DELETE namespace. Cada fricción frena adopción.</li>
+      <li><strong>4. Aprovechar inversión existente sin re-arquitectura</strong><br>
+          Mismo stack (Quarkus, PostgreSQL, Qdrant, Keycloak, OpenAI). Mejoras incrementales sobre componentes probados.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 4 — ALCANCE: 4 ÉPICAS
+     ============================================================ -->
+<section class="slide" aria-label="Alcance — Épicas">
+  <span class="slide-eyebrow">Alcance</span>
+  <h2>4 épicas · 13 features</h2>
+  <table>
+    <thead>
+      <tr><th>Épica</th><th>Features</th><th>Prioridad</th><th>Release</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>EP-V21-001<br>Precisión</strong></td>
+        <td>Cross-encoder · Semantic puro · Top-3 grafo · Fix /extract</td>
+        <td>Must (5)</td>
+        <td><span class="badge">R1-MVP</span></td>
+      </tr>
+      <tr>
+        <td><strong>EP-V21-002<br>Velocidad</strong></td>
+        <td>Cache JWT · Cold start Qdrant · Cache grafo + N+1</td>
+        <td>Should/Could</td>
+        <td>R1-MVP + R2</td>
+      </tr>
+      <tr>
+        <td><strong>EP-V21-003<br>Eficiencia</strong></td>
+        <td>Unificar Qdrant · Diagnosticar worker · graphEntryStrategy</td>
+        <td>Should/Could</td>
+        <td>R1-MVP + R2</td>
+      </tr>
+      <tr>
+        <td><strong>EP-V21-004<br>API / DX</strong></td>
+        <td>X-Graph-Strategy · Unificar search/hybrid · DELETE namespace</td>
+        <td>Could</td>
+        <td>R2</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================
+     SLIDE 4b — MVP
+     ============================================================ -->
+<section class="slide" aria-label="MVP — 7 historias">
+  <span class="slide-eyebrow">Definición de MVP</span>
+  <h2>R1-MVP: 7 historias core</h2>
+  <h3>Precisión demostrable + quick wins operativos. 5/10 criterios de éxito completos.</h3>
+
+  <table>
+    <thead>
+      <tr><th>#</th><th>Historia</th><th>Épica</th><th>Esfuerzo</th><th>CEs que ataca</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>Cross-Encoder en Pipeline Two-Stage</td><td>Precisión</td><td>L</td><td>CE-01, 03, 04</td></tr>
+      <tr><td>2</td><td>Verificar Mejora con Benchmark SciFact</td><td>Precisión</td><td>M</td><td>CE-01, 03</td></tr>
+      <tr><td>3</td><td>Aislar Búsqueda Semántica del Grafo</td><td>Precisión</td><td>M</td><td>CE-07</td></tr>
+      <tr><td>4</td><td>Expandir Grafo desde Top-3 Nodos</td><td>Precisión</td><td>L</td><td>CE-01</td></tr>
+      <tr><td>5</td><td>Soportar Entry Points Explícitos</td><td>Precisión</td><td>M</td><td>CE-01</td></tr>
+      <tr><td>6</td><td>Cachear Validación JWT en Backend</td><td>Velocidad</td><td>S</td><td>CE-02</td></tr>
+      <tr><td>7</td><td>Unificar Colecciones Qdrant</td><td>Eficiencia</td><td>M</td><td>CE-05</td></tr>
+    </tbody>
+  </table>
+
+  <p style="color: var(--text-muted); font-size: 0.9rem;">
+    R2 suma 9 historias adicionales (robustez, DX, deuda residual) → Fecha estimada: 2026-05-08
+  </p>
+</section>
+
+<!-- ============================================================
+     SLIDE 5 — EQUIPO
+     ============================================================ -->
+<section class="slide" aria-label="Equipo">
+  <span class="slide-eyebrow">Equipo</span>
+  <h2>9 roles — Matriz RACI resumida</h2>
+  <h3>Todos los agentes confirmados. Presupuesto de infraestructura: $0 adicional.</h3>
+
+  <table>
+    <thead>
+      <tr><th>Rol</th><th>Agente</th><th>Fases clave</th><th>Dedicación</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Sponsor / Product Owner</td><td>product-owner</td><td>F0, F6, F9 (gates)</td><td>Puntual</td></tr>
+      <tr><td>Project Manager</td><td>project-manager</td><td>F1–F9 (planif. y control)</td><td>100%</td></tr>
+      <tr><td>Business Analyst</td><td>business-analyst</td><td>F1 (análisis funcional)</td><td>100%</td></tr>
+      <tr><td>Tech Lead</td><td>tech-lead</td><td>F2–F5 (diseño y revisión)</td><td>100%</td></tr>
+      <tr><td>Solution Architect</td><td>solution-architect</td><td>F2, consultado F4/F7</td><td>100% F2</td></tr>
+      <tr><td>DevOps</td><td>devops</td><td>F7–F8 (despliegue y stab.)</td><td>100%</td></tr>
+      <tr><td>Developer Backend</td><td>developer-backend</td><td>F4 (13 features)</td><td>100%</td></tr>
+      <tr><td>QA Lead</td><td>qa-lead</td><td>F5 (testing y benchmarks)</td><td>100%</td></tr>
+      <tr><td>Developer Frontend</td><td>developer-frontend</td><td>F5–F6 (verif. no regresión)</td><td>Parcial</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================
+     SLIDE 6 — CRONOGRAMA
+     ============================================================ -->
+<section class="slide" aria-label="Cronograma">
+  <span class="slide-eyebrow">Cronograma</span>
+  <h2>Fases F0 → F9</h2>
+  <h3>5 días calendario (2026-05-05 al 2026-05-10). Cascada completa con gates formales.</h3>
+
+  <table>
+    <thead>
+      <tr><th>Fase</th><th>Nombre</th><th>Fecha</th><th>Hito</th><th>Estado</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>F0</td><td>Descubrimiento</td><td class="phase-date">05/05</td>
+        <td>Visión y backlog aprobados</td>
+        <td><span class="tag tag-done">✅ Completo</span></td>
+      </tr>
+      <tr>
+        <td>F1</td><td>Análisis Funcional</td><td class="phase-date">05/05</td>
+        <td>Acta de constitución · 13 especificaciones</td>
+        <td><span class="tag tag-active">🔵 En curso</span></td>
+      </tr>
+      <tr>
+        <td>F2</td><td>Diseño Técnico</td><td class="phase-date">06/05</td>
+        <td>ADRs · Arquitectura de solución</td>
+        <td><span class="tag tag-pending">⚪ Pendiente</span></td>
+      </tr>
+      <tr>
+        <td>F3</td><td>Planificación</td><td class="phase-date">06/05</td>
+        <td>WBS · Estimaciones · Asignaciones</td>
+        <td><span class="tag tag-pending">⚪ Pendiente</span></td>
+      </tr>
+      <tr>
+        <td>F4</td><td>Construcción</td><td class="phase-date">07–08/05</td>
+        <td>R1-MVP (7 stories) · R2 (6 stories)</td>
+        <td><span class="tag tag-pending">⚪ Pendiente</span></td>
+      </tr>
+      <tr>
+        <td>F5</td><td>QA Testing</td><td class="phase-date">08/05</td>
+        <td>Benchmarks · Carga · 10/10 CEs</td>
+        <td><span class="tag tag-pending">⚪ Pendiente</span></td>
+      </tr>
+      <tr>
+        <td>F6</td><td>UAT</td><td class="phase-date">09/05</td>
+        <td>Aceptación del sponsor</td>
+        <td><span class="tag tag-pending">⚪ Pendiente</span></td>
+      </tr>
+      <tr>
+        <td>F7</td><td>Despliegue</td><td class="phase-date">09/05</td>
+        <td>Deploy + verificación post-deploy</td>
+        <td><span class="tag tag-pending">⚪ Pendiente</span></td>
+      </tr>
+      <tr>
+        <td>F8</td><td>Estabilización</td><td class="phase-date">10/05</td>
+        <td>Monitoreo 24-48h · Benchmarks post</td>
+        <td><span class="tag tag-pending">⚪ Pendiente</span></td>
+      </tr>
+      <tr>
+        <td>F9</td><td>Cierre</td><td class="phase-date">10/05</td>
+        <td>Release v2.1.0 · Lec. aprendidas</td>
+        <td><span class="tag tag-pending">⚪ Pendiente</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================
+     SLIDE 7 — RIESGOS PRINCIPALES
+     ============================================================ -->
+<section class="slide" aria-label="Riesgos principales">
+  <span class="slide-eyebrow">Riesgos principales</span>
+  <h2>Top 5 riesgos identificados</h2>
+  <h3>Probabilidad × Impacto. Plan de mitigación definido para cada uno.</h3>
+
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Riesgo</th><th>Prob.</th><th>Impacto</th><th>Mitigación clave</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>RSK-01</strong></td>
+        <td>Cross-encoder no alcanza NDCG@10 ≥ 0.85</td>
+        <td>Media</td>
+        <td>Crítico</td>
+        <td>Degradación graceful a dense retrieval. Evaluar modelo alternativo (allenai/scifact).</td>
+      </tr>
+      <tr>
+        <td><strong>RSK-07</strong></td>
+        <td>Cache JWT introduce ventana de seguridad (token revocado aceptado)</td>
+        <td>Baja</td>
+        <td>Crítico</td>
+        <td>Invalidación activa vía Keycloak Admin Events. Tests de seguridad ≤ 5s tras revocación.</td>
+      </tr>
+      <tr>
+        <td><strong>RSK-02</strong></td>
+        <td>API key de OpenAI no disponible durante construcción</td>
+        <td>Media</td>
+        <td>Alto</td>
+        <td>HU-V21-006 difiere a R2 tardío o v2.2.0. Endpoint ya funciona con mock.</td>
+      </tr>
+      <tr>
+        <td><strong>RSK-03</strong></td>
+        <td>Colección Qdrant v1 contiene datos que deben preservarse</td>
+        <td>Baja</td>
+        <td>Alto</td>
+        <td>Verificación pre-migración antes de cualquier operación destructiva.</td>
+      </tr>
+      <tr>
+        <td><strong>RSK-06</strong></td>
+        <td>Unificación search/hybrid rompe backward compatibility</td>
+        <td>Baja</td>
+        <td>Alto</td>
+        <td>Suite de 100 test cases multi-dominio como regresión. Deprecation sin breaking.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="color: var(--text-muted); font-size: 0.85rem;">
+    Total de 8 riesgos en matriz completa. RSK-04, 05, 08 monitoreados con severidad media.
+    Revisión formal al inicio de cada fase.
+  </p>
+</section>
+
+<!-- ============================================================
+     SLIDE 8 — PRÓXIMOS PASOS
+     ============================================================ -->
+<section class="slide" aria-label="Próximos pasos">
+  <span class="slide-eyebrow">Próximos pasos</span>
+  <h2>Fase 1 — En curso hoy</h2>
+
+  <div class="card" style="max-width: 52rem;">
+    <h3 style="color: var(--accent); margin-bottom: 1rem;">Entregables pendientes en F1</h3>
+    <ul>
+      <li><strong>Completar Acta de Constitución</strong> — Firmas del Sponsor y PM</li>
+      <li><strong>Registro de Interesados</strong> — Matriz de stakeholders con expectativas</li>
+      <li><strong>Matriz de Riesgos completa</strong> — 8 riesgos con disparadores y escalamiento</li>
+      <li><strong>Cronograma detallado</strong> — WBS con dependencias finas entre las 16 historias</li>
+    </ul>
+  </div>
+
+  <div style="margin-top: 1.5rem;">
+    <p><strong>→ Gate F1:</strong> PM + Sponsor aprueban acta y especificaciones funcionales</p>
+    <p><strong>→ Arranque F2 (Diseño Técnico):</strong> 2026-05-06 · Responsable: tech-lead</p>
+  </div>
+
+  <div style="margin-top: 1rem;">
+    <span class="tag tag-active" style="font-size: 0.85rem;">🔵 F1 en curso</span>
+    <span style="margin-left: 1rem; color: var(--text-muted);">&rarr;</span>
+    <span class="tag tag-pending" style="font-size: 0.85rem; margin-left: 1rem;">⚪ Gate F1 pendiente</span>
+    <span style="margin-left: 1rem; color: var(--text-muted);">&rarr;</span>
+    <span class="tag tag-pending" style="font-size: 0.85rem; margin-left: 1rem;">⚪ F2 pendiente</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 9 — CIERRE
+     ============================================================ -->
+<section class="slide" aria-label="Cierre">
+  <span class="slide-eyebrow">Decisión solicitada</span>
+  <h2>¿Preguntas? ¿Ajustes antes de continuar?</h2>
+  <h3>El acta de constitución está lista para firma. Una vez aprobada, el equipo procede con el análisis funcional detallado de las 13 features y el arranque de F2 mañana.</h3>
+  <div class="cta">
+    <span class="cta-question">Aprobamos el kickoff · Necesitamos ajustes · Volver a revisar</span>
+  </div>
+  <p style="margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+    Documentación completa: <code>docs/entregables/v2.1/fase-1-inicio/</code> ·
+    Acta de constitución · Visión del producto · Backlog priorizado
+  </p>
+</section>
+
+<script>
+  document.querySelectorAll('.switcher button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const style = btn.dataset.set;
+      document.body.dataset.style = style;
+      document.querySelectorAll('.switcher button').forEach((b) => {
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

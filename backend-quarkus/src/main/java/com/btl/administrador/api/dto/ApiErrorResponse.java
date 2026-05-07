@@ -4,7 +4,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 public record ApiErrorResponse(
-        String code,
+        String errorCode,
         String message,
         String correlationId,
         List<String> details,

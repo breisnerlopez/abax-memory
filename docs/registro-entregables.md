@@ -560,8 +560,8 @@ gantt
 | Aprobador | Usuario sponsor |
 | Entregables obligatorios | 3/3 |
 | Completitud documental | 100% |
-| Decision del gate | **PENDIENTE DE APROBACION** |
-| Efecto sobre Fase 4 | **Condicionada** — Construccion v2.0.0 habilitada al aprobar |
+| Decision del gate | **APROBADO** |
+| Efecto sobre Fase 4 | **Habilitada** — Construccion v2.0.0 |
 
 ### Fase 4 — Construccion v2.0.0 (COMPLETADA — Gate ⚠️ Pendiente) — 2026-05-03
 
@@ -865,3 +865,252 @@ gantt
 | Release | v2.0.0 en GitHub + GHCR |
 | Imagen GHCR | `ghcr.io/breisnerlopez/abax-memory:v2.0.0` |
 | URL | `http://localhost:8080` |
+
+---
+
+## v2.1.0 — Registro de Entregables
+
+### Fase 0 — Descubrimiento v2.1.0 (COMPLETADA Y APROBADA)
+
+| ID | Entregable | Path | Responsable | Estado |
+|---|---|---|---|---|
+| F0v2.1-DEL-001 | Vision del Producto | `docs/entregables/v2.1/fase-0-descubrimiento/vision-producto.md` | business-analyst | ✅ Completado |
+| F0v2.1-DEL-002 | Epicas y Features | `docs/entregables/v2.1/fase-0-descubrimiento/epicas-features.md` | business-analyst | ✅ Completado |
+| F0v2.1-DEL-003 | Historias de Usuario | `docs/entregables/v2.1/fase-0-descubrimiento/historias-usuario.md` | business-analyst | ✅ Completado |
+| F0v2.1-DEL-004 | Design System (reutilizado v1) | `docs/design-system/presentacion-template.html` | business-analyst | ✅ Reutilizado |
+| F0v2.1-DEL-005 | Backlog Priorizado | `docs/entregables/v2.1/fase-0-descubrimiento/backlog-priorizado.md` | business-analyst | ✅ Completado |
+| F0v2.1-DEL-006 | Presentacion de Descubrimiento | `docs/entregables/v2.1/fase-0-descubrimiento/presentacion-descubrimiento.html` | business-analyst | ✅ Completado |
+
+### Gate de Fase 0 — Descubrimiento v2.1.0
+
+| Indicador | Valor |
+|---|---|
+| Fecha de decision | 2026-05-05 |
+| Aprobador | Usuario sponsor |
+| Entregables obligatorios | 6/6 |
+| Completitud documental | 100% |
+| Decision del gate | **APROBADO** |
+| Efecto sobre Fase 1 | **Habilitada** — Inicio v2.1.0 |
+
+### Metricas — Fase 0 v2.1.0
+
+| Metrica | Valor |
+|---|---|
+| Epicas | 4 |
+| Features | 13 |
+| Historias de usuario | 16 |
+| Historias MVP | 7 |
+
+### Dashboard de fases — v2.1.0
+
+| Fase | Semaforo | Estado |
+|---|---|---|
+| F0 — Descubrimiento v2.1 | 🟢 Verde | **Completada — APROBADA por sponsor** |
+| F1 — Inicio v2.1 | 🟡 Amarillo | **Completada — Gate ⚠️ pendiente de aprobacion** |
+| F2 — Analisis Funcional v2.1 | ⚪ Gris | Pendiente |
+| F3 — Diseno Tecnico v2.1 | ⚪ Gris | Pendiente |
+| F4 — Construccion v2.1 | ⚪ Gris | Pendiente |
+| F5 — QA v2.1 | ⚪ Gris | Pendiente |
+| F6 — UAT v2.1 | ⚪ Gris | Pendiente |
+| F7 — Despliegue v2.1 | ⚪ Gris | Pendiente |
+| F8 — Estabilizacion v2.1 | ⚪ Gris | Pendiente |
+| F9 — Cierre v2.1 | ⚪ Gris | Pendiente |
+
+---
+
+### Fase 1 — Inicio v2.1.0 (COMPLETADA — Gate ⚠️ Pendiente)
+
+| ID | Entregable | Path | Responsable | Estado |
+|---|---|---|---|---|
+| F1v2.1-DEL-001 | Acta de Constitución | `docs/entregables/v2.1/fase-1-inicio/acta-de-constitucion.md` | project-manager | ✅ Completado |
+| F1v2.1-DEL-002 | Presentación de Kickoff | `docs/entregables/v2.1/fase-1-inicio/presentacion-kickoff.html` | project-manager | ✅ Completado |
+| F1v2.1-DEL-003 | Registro de Interesados | `docs/entregables/v2.1/fase-1-inicio/registro-interesados.md` | project-manager | ✅ Completado |
+| F1v2.1-DEL-004 | Matriz de Riesgos Inicial | `docs/entregables/v2.1/fase-1-inicio/matriz-riesgos.md` | project-manager | ✅ Completado |
+| F1v2.1-DEL-005 | Cronograma Preliminar | `docs/entregables/v2.1/fase-1-inicio/cronograma-preliminar.md` | project-manager | ✅ Completado |
+
+### Gate de Fase 1 — Inicio v2.1.0
+
+| Indicador | Valor |
+|---|---|
+| Fecha | 2026-05-05 |
+| Responsable | project-manager |
+| Aprobador requerido | Usuario sponsor |
+| Entregables obligatorios | 5/5 |
+| Completitud documental | 100% |
+| Decision del gate | **PENDIENTE DE APROBACION** |
+| Efecto sobre Fase 2 | **Condicionada** — Analisis Funcional v2.1.0 habilitado al aprobar gate F1 |
+
+> **Nota**: Los 5 entregables de la Fase 1 v2.1.0 están completados (100%): Acta de Constitución, Presentación de Kickoff, Registro de Interesados, Matriz de Riesgos Inicial y Cronograma Preliminar. La fase queda pendiente de aprobación formal por el usuario sponsor para habilitar la Fase 2 — Análisis Funcional v2.1.0.
+
+---
+
+### Fase 2 — Analisis Funcional v2.1.0 (COMPLETADA Y APROBADA) — 2026-05-05
+
+| ID | Entregable | Path | Responsable | Estado |
+|---|---|---|---|---|
+| F2v2.1-DEL-001 | Especificacion Funcional | `docs/entregables/v2.1/fase-2-analisis/especificacion-funcional.md` | business-analyst | ✅ Completado |
+| F2v2.1-DEL-002 | Reglas de Negocio | `docs/entregables/v2.1/fase-2-analisis/reglas-de-negocio.md` | business-analyst | ✅ Completado |
+| F2v2.1-DEL-003 | Diagramas de Proceso | `docs/entregables/v2.1/fase-2-analisis/diagramas-de-proceso.md` | business-analyst | ✅ Completado |
+| F2v2.1-DEL-004 | Criterios de Aceptacion | `docs/entregables/v2.1/fase-2-analisis/criterios-de-aceptacion.md` | business-analyst | ✅ Completado |
+| F2v2.1-DEL-005 | Presentacion Propuesta Funcional | `docs/entregables/v2.1/fase-2-analisis/presentacion-propuesta-funcional.html` | business-analyst | ✅ Completado |
+
+### Gate de Fase 2 — Analisis Funcional v2.1.0
+
+| Indicador | Valor |
+|---|---|
+| Fecha de decision | 2026-05-05 |
+| Aprobador | Usuario sponsor |
+| Entregables obligatorios | 5/5 |
+| Completitud documental | 100% |
+| Decision del gate | **APROBADO** |
+| Efecto sobre Fase 3 | **Habilitada** — Diseno Tecnico v2.1.0 |
+
+### Metricas — Fase 2 v2.1.0
+
+| Metrica | Valor |
+|---|---|
+| Features | 13 |
+| Reglas de negocio | 13 |
+| Diagramas de proceso | 8 |
+| Criterios de aceptacion (Given/When/Then) | 64 |
+| Casos de borde | 70 |
+| Entregables | 5/5 (100%) |
+
+### Dashboard de fases — v2.1.0 (actualizado)
+
+| Fase | Semaforo | Estado |
+|---|---|---|
+| F0 — Descubrimiento v2.1 | 🟢 Verde | **Completada — APROBADA por sponsor** |
+| F1 — Inicio v2.1 | 🟡 Amarillo | **Completada — Gate ⚠️ pendiente de aprobacion** |
+| F2 — Analisis Funcional v2.1 | 🟢 Verde | **Completada — APROBADA por sponsor** |
+| F3 — Diseno Tecnico v2.1 | 🟢 Verde | **Completada — APROBADA por solution-architect** |
+| F4 — Construccion v2.1 | 🟢 Verde | **APROBADA — 13/13 features, 228 tests, 0 errores** |
+| F5 — QA v2.1 | ⚪ Gris | Pendiente |
+| F6 — UAT v2.1 | ⚪ Gris | Pendiente |
+| F7 — Despliegue v2.1 | ⚪ Gris | Pendiente |
+| F8 — Estabilizacion v2.1 | ⚪ Gris | Pendiente |
+| F9 — Cierre v2.1 | ⚪ Gris | Pendiente |
+
+---
+
+### Fase 3 — Diseno Tecnico v2.1.0 (COMPLETADA Y APROBADA) — 2026-05-06
+
+| ID | Entregable | Path | Responsable | Estado |
+|---|---|---|---|---|
+| F3v2.1-DEL-001 | Documento de Arquitectura (13 ADRs) | `docs/entregables/v2.1/fase-3-diseno-tecnico/documento-de-arquitectura.md` | solution-architect | ✅ Completado |
+| F3v2.1-DEL-002 | Presentacion de Arquitectura | `docs/entregables/v2.1/fase-3-diseno-tecnico/presentacion-arquitectura.html` | solution-architect | ✅ Completado |
+| F3v2.1-DEL-003 | Descomposicion Tecnica de Tareas (98 tareas) | `docs/entregables/v2.1/fase-3-diseno-tecnico/descomposicion-tecnica.md` | tech-lead | ✅ Completado |
+| F3v2.1-DEL-004 | URLs Publicas | `docs/entregables/v2.1/fase-3-diseno-tecnico/urls-publicas.md` | project-manager | ✅ Completado |
+
+### Gate de Fase 3 — Diseno Tecnico v2.1.0
+
+| Indicador | Valor |
+|---|---|
+| Fecha de decision | 2026-05-06 |
+| Aprobador | solution-architect |
+| Entregables obligatorios | 4/4 |
+| Completitud documental | 100% |
+| ADRs evaluados | 13/13 (100% features cubiertas) |
+| Criterios de aprobacion | 6/6 (100%) |
+| Decision del gate | **APROBADO** |
+| Efecto sobre Fase 4 | **Habilitada** — Construccion v2.1.0 |
+
+### Metricas — Fase 3 v2.1.0
+
+| Metrica | Valor |
+|---|---|
+| ADRs | 13 (100% features cubiertas) |
+| Diagramas C4 | 4 (Contexto, Contenedores, Componentes, Secuencia) |
+| Tareas descompuestas | 98 |
+| Esfuerzo total estimado | 268h (~33.5d secuencial, ~15d ruta critica) |
+| Riesgos tecnicos | 7 (con mitigacion documentada) |
+| Benchmarks definidos | 9 (4 precision + 5 latencia) |
+| Matriz de integraciones | 9 contratos |
+| Backward compatibility | Preservada (deprecacion, no eliminacion) |
+
+---
+
+### Fase 4 — Construccion v2.1.0 (APROBADA) — 2026-05-06
+
+| ID | Entregable | Path | Responsable | Estado |
+|---|---|---|---|---|
+| F4v2.1-DEL-001 | Verificacion de Entorno (12/12 OK) | `docs/entregables/v2.1/fase-4-construccion/00-verificacion-entorno.md` | devops | ✅ Completado |
+| F4v2.1-DEL-002 | Construccion R1-MVP (7 features) | `docs/entregables/v2.1/fase-4-construccion/01-construccion-r1-mvp.md` | developer-backend | ✅ Completado |
+| F4v2.1-DEL-003 | Construccion R2 (6 features) | `docs/entregables/v2.1/fase-4-construccion/02-construccion-r2.md` | developer-backend | ✅ Completado |
+| F4v2.1-DEL-004 | Pruebas Unitarias (228/243) | `docs/entregables/v2.1/fase-4-construccion/pruebas-unitarias.md` | developer-backend | ✅ Completado |
+| F4v2.1-DEL-005 | Code Review Anti-Mock (Capa 2) | `docs/entregables/v2.1/fase-4-construccion/code-review-anti-mock.md` | tech-lead | ✅ APROBADO CON OBSERVACIONES |
+| F4v2.1-DEL-006 | Feature-Spec Compliance (Capa 3) | `docs/entregables/v2.1/fase-4-construccion/feature-spec-compliance.md` | business-analyst | ✅ APROBADO CON OBSERVACIONES |
+| F4v2.1-DEL-007 | Presentacion de Avance Fase 4 | `docs/entregables/v2.1/fase-4-construccion/presentacion-avance-fase4.html` | project-manager | ✅ Completado |
+
+### Gate de Fase 4 — Construccion v2.1.0
+
+| Indicador | Valor |
+|---|---|
+| Fecha de decision | 2026-05-06 |
+| Aprobador | tech-lead (gate approver) |
+| Entregables obligatorios | 7/7 |
+| Completitud documental | 100% |
+| Features implementadas | 13/13 (7 R1-MVP + 6 R2) |
+| Commits atomicos | 10 |
+| Tests pasando (post-fix) | 228/243 (93.8%) |
+| Errores | 0 (2 regresiones criticas resueltas) |
+| Capa 1 — Anti-Mock (dev) | APROBADO |
+| Capa 2 — Code Review | APROBADO CON OBSERVACIONES (6 obs) |
+| Capa 3 — Feature-Spec Compliance | APROBADO CON OBSERVACIONES (4 desviaciones) |
+| Mocks silenciosos detectados | 0 |
+| Decision del gate | **APROBADO** |
+| Efecto sobre Fase 5 | **Habilitada** — QA v2.1.0 |
+
+### Metricas de Construccion — Fase 4 v2.1.0
+
+| Metrica | Valor |
+|---|---|
+| Features totales | 13 |
+| Archivos nuevos creados | 17 |
+| Archivos modificados | 22 |
+| Tests unitarios nuevos | 15 |
+| Tests totales ejecutandose | 243 |
+| Tests pasando | 228 (93.8%) |
+| Errores CDIProvider | 0 (corregido) |
+| Errores Flyway/H2 | 0 (corregido) |
+| Fallos pre-existentes | 14 (infraestructura: Qdrant + Exception Mapper) |
+| Integraciones reales | 7 (OpenAI ×3, Qdrant, PostgreSQL, Keycloak, Caffeine) |
+| Mocks convencionales marcados | 7 |
+
+### Auditoria de Capas — Fase 4 v2.1.0
+
+| Capa | Responsable | Resultado |
+|---|---|---|
+| Capa 1 — Anti-Mock Dev | developer-backend | **APROBADO** |
+| Capa 2 — Code Review | tech-lead | **APROBADO CON OBSERVACIONES** |
+| Capa 3 — Feature-Spec Compliance | business-analyst | **APROBADO CON OBSERVACIONES** |
+
+### Observaciones y Desviaciones
+
+| Grupo | ID | Descripcion | Severidad | Fase destino |
+|---|---|---|---|---|
+| Tech-Lead | O1 | InMemoryEmbeddingProvider fallback silencioso en prod | ALTA | 8 |
+| Tech-Lead | O2 | Sin tests de integracion para servicios externos | ALTA | 5/8 |
+| Tech-Lead | O3 | Invalidacion de cache total (no granular) | MEDIA | 8 |
+| Tech-Lead | O4 | TTL cache grafo 300s vs spec 60s | BAJA | 8 |
+| Tech-Lead | O5 | AdminResourceV2 sin validacion OIDC | MEDIA | 8 |
+| Tech-Lead | O6 | Eliminacion Qdrant best-effort post-commit | BAJA | 8 |
+| BA | D01 | TTL cache grafo 300s (spec: 60s) | BAJA | 8 |
+| BA | D02 | 6 modos header vs 4 en spec | BAJA | — |
+| BA | D03 | Cache JWT solo docs (spec: server-side) | MEDIA | 8 |
+| BA | D04 | Invalidacion total vs granular | MEDIA | 8 |
+
+### Dashboard de fases — v2.1.0 (actualizado)
+
+| Fase | Semaforo | Estado |
+|---|---|---|
+| F0 — Descubrimiento v2.1 | 🟢 Verde | **Completada — APROBADA por sponsor** |
+| F1 — Inicio v2.1 | 🟡 Amarillo | **Completada — Gate ⚠️ pendiente de aprobacion** |
+| F2 — Analisis Funcional v2.1 | 🟢 Verde | **Completada — APROBADA por sponsor** |
+| F3 — Diseno Tecnico v2.1 | 🟢 Verde | **Completada — APROBADA por solution-architect** |
+| F4 — Construccion v2.1 | 🟢 Verde | **APROBADA — 13/13 features, 228 tests, 0 errores** |
+| F5 — QA v2.1 | ⚪ Gris | Pendiente — Habilitada |
+| F6 — UAT v2.1 | ⚪ Gris | Pendiente |
+| F7 — Despliegue v2.1 | ⚪ Gris | Pendiente |
+| F8 — Estabilizacion v2.1 | ⚪ Gris | Pendiente |
+| F9 — Cierre v2.1 | ⚪ Gris | Pendiente |

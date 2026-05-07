@@ -291,30 +291,38 @@ public class MemoryResourceV2 {
      * Extracts named entities from text content (UAT-S08).
      *
      * <p>Does NOT persist anything — only analyzes and returns entities.
-     * Uses the configured {@code LlmService} (MockLlmService in test,
-     * OpenAiLlmService in production).</p>
+     * Uses OpenAI gpt-4o-mini exclusively (no mock degradation).</p>
+     *
+     * <p>New in v2.1.0: returns {@code source} and {@code extractionTimeMs}
+     * metadata. Error codes: 400 (validation), 502 (provider error),
+     * 503 (unavailable), 504 (timeout).</p>
      */
     @POST
     @Path("/extract")
-    @Operation(summary = "Extract entities", description = "Extracts named entities from the provided text content using the LLM service.")
+    @Operation(summary = "Extract entities", description = "Extracts named entities from the provided text content using OpenAI gpt-4o-mini.")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Entities extracted successfully",
                     content = @Content(schema = @Schema(implementation = ExtractResponse.class))),
             @APIResponse(responseCode = "400", description = "Validation error — content is required"),
-            @APIResponse(responseCode = "403", description = "Forbidden")
+            @APIResponse(responseCode = "403", description = "Forbidden"),
+            @APIResponse(responseCode = "502", description = "LLM provider error"),
+            @APIResponse(responseCode = "503", description = "LLM service not configured"),
+            @APIResponse(responseCode = "504", description = "Extraction timed out")
     })
     public ExtractResponse extractEntities(
             @HeaderParam("X-Tenant-Id") String xTenantId,
             @Valid ExtractRequest request) {
 
+        long startTime = System.currentTimeMillis();
         String tenantId = resolveTenant(xTenantId);
-        List<ExtractedEntity> entities = memoryService.extractEntities(request.content(), tenantId);
+        List<ExtractedEntity> entities = memoryService.extractEntities(request.getContent(), tenantId);
 
         List<ExtractResponse.ExtractedEntityDto> dtos = entities.stream()
                 .map(e -> new ExtractResponse.ExtractedEntityDto(e.name(), e.type(), e.confidence()))
                 .toList();
 
-        return new ExtractResponse(dtos);
+        long extractionTimeMs = System.currentTimeMillis() - startTime;
+        return new ExtractResponse(dtos, "openai-gpt-4o-mini", extractionTimeMs);
     }
 
     /**

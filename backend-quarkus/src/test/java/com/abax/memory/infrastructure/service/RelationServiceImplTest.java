@@ -2,6 +2,8 @@ package com.abax.memory.infrastructure.service;
 
 import com.abax.memory.api.dto.v2.CreateMemoryRequest;
 import com.abax.memory.api.dto.v2.MemoryResponse;
+import com.abax.memory.api.dto.v2.PatchRelationRequest;
+import com.abax.memory.api.dto.v2.UpdateRelationRequest;
 import com.abax.memory.domain.enums.RelationType;
 import com.abax.memory.domain.model.Relation;
 import com.abax.memory.domain.service.MemoryService;
@@ -19,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -276,6 +279,168 @@ class RelationServiceImplTest {
 
         assertThat(relations).hasSize(1);
         assertThat(relations.get(0).getTargetId()).isEqualTo(target.id());
+    }
+
+    // ── v2.1.0: Update and Patch Tests (CP-V21-024) ──────────────────
+
+    @Test
+    @Order(16)
+    @DisplayName("updateRelation — fully replaces type, weight, and metadata")
+    @Transactional
+    void updateRelation_shouldFullyReplaceFields() {
+        var source = createMemory(TENANT_A, "Update Source", "Source for update.");
+        var target = createMemory(TENANT_A, "Update Target", "Target for update.");
+
+        Relation rel = relationService.createRelation(
+                source.id(), target.id(), RelationType.MENTIONS, TENANT_A);
+        // Weight defaults to 1.0 from the entity column default
+        assertThat(rel.getWeight()).isEqualTo(1.0);
+
+        var metadata = Map.<String, Object>of("reason", "updated", "priority", 1);
+        var request = new UpdateRelationRequest(
+                RelationType.SUPPORTS, 0.85, metadata);
+        Relation updated = relationService.updateRelation(rel.getId(), request, TENANT_A, "test-actor");
+
+        assertThat(updated.getType()).isEqualTo(RelationType.SUPPORTS);
+        assertThat(updated.getWeight()).isEqualTo(0.85);
+        assertThat(updated.getMetadata()).containsEntry("reason", "updated");
+        assertThat(updated.getMetadata()).containsEntry("priority", 1);
+        assertThat(updated.getUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    @Order(17)
+    @DisplayName("updateRelation — throws 404 for non-existent relation")
+    @Transactional
+    void updateRelation_shouldThrow404ForNonExistent() {
+        var request = new UpdateRelationRequest(RelationType.RELATED_TO, 1.0, null);
+        assertThatThrownBy(() -> relationService.updateRelation(
+                UUID.randomUUID(), request, TENANT_A, "test-actor"))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @Order(18)
+    @DisplayName("updateRelation — throws 404 for cross-tenant update")
+    @Transactional
+    void updateRelation_shouldThrow404ForCrossTenant() {
+        var source = createMemory(TENANT_A, "Cross Update Src", "Source.");
+        var target = createMemory(TENANT_A, "Cross Update Tgt", "Target.");
+
+        Relation rel = relationService.createRelation(
+                source.id(), target.id(), RelationType.MENTIONS, TENANT_A);
+
+        var request = new UpdateRelationRequest(RelationType.SUPPORTS, 1.0, null);
+        assertThatThrownBy(() -> relationService.updateRelation(
+                rel.getId(), request, TENANT_B, "test-actor"))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @Order(19)
+    @DisplayName("patchRelation — updates only provided fields")
+    @Transactional
+    void patchRelation_shouldUpdateOnlyProvidedFields() {
+        var source = createMemory(TENANT_A, "Patch Source", "Source for patch.");
+        var target = createMemory(TENANT_A, "Patch Target", "Target for patch.");
+
+        Relation rel = relationService.createRelation(
+                source.id(), target.id(), RelationType.MENTIONS, TENANT_A);
+
+        // Patch only the type
+        var patchRequest = new PatchRelationRequest(RelationType.DEPENDS_ON, null, null);
+        Relation patched = relationService.patchRelation(rel.getId(), patchRequest, TENANT_A, "test-actor");
+
+        assertThat(patched.getType()).isEqualTo(RelationType.DEPENDS_ON);
+        // Source/target IDs unchanged
+        assertThat(patched.getSourceId()).isEqualTo(source.id());
+        assertThat(patched.getTargetId()).isEqualTo(target.id());
+    }
+
+    @Test
+    @Order(20)
+    @DisplayName("patchRelation — updates weight only")
+    @Transactional
+    void patchRelation_shouldUpdateWeightOnly() {
+        var source = createMemory(TENANT_A, "Patch Weight Src", "Source.");
+        var target = createMemory(TENANT_A, "Patch Weight Tgt", "Target.");
+
+        Relation rel = relationService.createRelation(
+                source.id(), target.id(), RelationType.SUPPORTS, TENANT_A);
+
+        var patchRequest = new PatchRelationRequest(null, 0.5, null);
+        Relation patched = relationService.patchRelation(rel.getId(), patchRequest, TENANT_A, "test-actor");
+
+        assertThat(patched.getWeight()).isEqualTo(0.5);
+        assertThat(patched.getType()).isEqualTo(RelationType.SUPPORTS); // unchanged
+    }
+
+    @Test
+    @Order(21)
+    @DisplayName("patchRelation — updates metadata only")
+    @Transactional
+    void patchRelation_shouldUpdateMetadataOnly() {
+        var source = createMemory(TENANT_A, "Patch Meta Src", "Source.");
+        var target = createMemory(TENANT_A, "Patch Meta Tgt", "Target.");
+
+        Relation rel = relationService.createRelation(
+                source.id(), target.id(), RelationType.BELONGS_TO, TENANT_A);
+
+        var metadata = Map.<String, Object>of("confidence", 0.9, "source", "auto");
+        var patchRequest = new PatchRelationRequest(null, null, metadata);
+        Relation patched = relationService.patchRelation(rel.getId(), patchRequest, TENANT_A, "test-actor");
+
+        assertThat(patched.getMetadata()).containsEntry("confidence", 0.9);
+        assertThat(patched.getMetadata()).containsEntry("source", "auto");
+        assertThat(patched.getType()).isEqualTo(RelationType.BELONGS_TO); // unchanged
+    }
+
+    @Test
+    @Order(22)
+    @DisplayName("patchRelation — throws error when no fields provided")
+    @Transactional
+    void patchRelation_shouldThrowWhenNoFieldsProvided() {
+        var source = createMemory(TENANT_A, "Patch Empty Src", "Source.");
+        var target = createMemory(TENANT_A, "Patch Empty Tgt", "Target.");
+
+        Relation rel = relationService.createRelation(
+                source.id(), target.id(), RelationType.MENTIONS, TENANT_A);
+
+        var patchRequest = new PatchRelationRequest(null, null, null);
+        assertThatThrownBy(() -> relationService.patchRelation(
+                rel.getId(), patchRequest, TENANT_A, "test-actor"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("At least one field");
+    }
+
+    @Test
+    @Order(23)
+    @DisplayName("patchRelation — throws 404 for non-existent relation")
+    @Transactional
+    void patchRelation_shouldThrow404ForNonExistent() {
+        var patchRequest = new PatchRelationRequest(RelationType.RELATED_TO, null, null);
+        assertThatThrownBy(() -> relationService.patchRelation(
+                UUID.randomUUID(), patchRequest, TENANT_A, "test-actor"))
+                .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @Order(24)
+    @DisplayName("updateRelation — audit trail is recorded on update")
+    @Transactional
+    void updateRelation_shouldRecordAuditTrail() {
+        var source = createMemory(TENANT_A, "Audit Update Src", "Source.");
+        var target = createMemory(TENANT_A, "Audit Update Tgt", "Target.");
+
+        Relation rel = relationService.createRelation(
+                source.id(), target.id(), RelationType.MENTIONS, TENANT_A);
+
+        var request = new UpdateRelationRequest(
+                RelationType.CAUSED_BY, 0.75, Map.<String, Object>of("audit_test", true));
+        Relation updated = relationService.updateRelation(rel.getId(), request, TENANT_A, "audit-actor");
+
+        assertThat(updated.getUpdatedAt()).isNotNull();
+        assertThat(updated.getType()).isEqualTo(RelationType.CAUSED_BY);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────

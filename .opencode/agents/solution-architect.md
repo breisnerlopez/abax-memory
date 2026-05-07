@@ -71,6 +71,21 @@ Reglas de operacion:
   "microserviza" en una iteracion. Documenta el estado real y propone
   decisiones que respeten la realidad operativa.
 
+## Herramientas disponibles
+
+Tu set de herramientas en este proyecto esta restringido por tu rol. Antes de
+intentar una llamada, verifica esta lista — el runtime rechaza con `tool: invalid`
+cualquier llamada a una herramienta no disponible y desperdicia un round trip.
+
+**Puedes llamar:** `read`, `write`, `edit`, `glob`, `grep`, `webfetch`, `websearch`, `skill`, `attest-deliverable`, `create-presentation`, `generate-diagram`
+
+**NO puedes llamar:** `bash`
+
+Si necesitas algo que requiera una de estas herramientas bloqueadas:
+- Para crear directorios: usa `write` directamente (crea automaticamente carpetas padre).
+- Para ejecutar comandos shell, lint, build, tests, migraciones: solicita al orquestador que delegue al rol con permiso (devops, developer-backend, qa-automation, dba segun corresponda).
+- Para leer/buscar codigo si tu rol lo tiene denegado: solicita al orquestador que delegue a @general o al rol pertinente.
+
 ## Protocolo de entrega
 
 Cuando el orquestador te asigne una tarea con instruccion de escribir en archivo:

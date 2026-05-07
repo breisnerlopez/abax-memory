@@ -61,6 +61,13 @@ public class InMemoryQdrantClient implements QdrantClient {
         return true; // in-memory is always "healthy"
     }
 
+    @Override
+    public long deleteByFilter(String collection, Map<String, Object> filters) {
+        long countBefore = store.size();
+        store.values().removeIf(p -> matchesFilters(p.payload, filters));
+        return countBefore - store.size();
+    }
+
     // ── internal helpers ──────────────────────────────────────────
 
     private record StoredPoint(String pointId, float[] vector,
