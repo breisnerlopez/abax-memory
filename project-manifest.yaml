@@ -1,7 +1,9 @@
 project:
   name: Abax-Memory
-  description: Proyecto Abax-Memory
+  description: Proyecto Abax-Memory v2.1.0 — Hardening & Producción Real. 3 releases (v1.0.0, v2.0.0, v2.1.0). 13 features, 228 tests, 96.67% top-1.
   size: small
+  version: 2.1.0
+  status: closed
   stack: legacy-other
   target: opencode
   team_scope: full
@@ -193,8 +195,8 @@ warnings:
   - developer-backend funciona mejor con dba (no incluido)
   - qa-functional funciona mejor con qa-lead (no incluido)
   - developer-frontend funciona mejor con ux-designer (no incluido)
-generated_at: 2026-05-06T18:10:49.663Z
-generated_by: abax-swarm v0.1.0
+generated_at: 2026-05-07T14:51:45.131Z
+generated_by: abax-swarm v2.1.0
 
 # ========================================================
 # Active policy overrides (from project-manifest.yaml input)

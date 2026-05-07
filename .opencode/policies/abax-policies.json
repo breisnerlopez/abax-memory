@@ -1,4 +1,9 @@
 {
+  "_metadata": {
+    "engine_version": "2.1.0",
+    "generated_at": "2026-05-07T14:51:45.131Z",
+    "generated_by": "abax-swarm v2.1.0"
+  },
   "task_contracts": {
     "atomic_actions": [
       {
@@ -288,7 +293,10 @@
           "artifact_type": "document",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         },
         {
@@ -300,7 +308,10 @@
           "artifact_type": "document",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         },
         {
@@ -312,7 +323,10 @@
           "artifact_type": "document",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         },
         {
@@ -324,7 +338,10 @@
           "artifact_type": "document",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         },
         {
@@ -336,7 +353,10 @@
           "artifact_type": "document",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         },
         {
@@ -440,7 +460,10 @@
           "artifact_type": "document",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         },
         {
@@ -452,7 +475,10 @@
           "artifact_type": "document",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         },
         {
@@ -464,7 +490,10 @@
           "artifact_type": "diagram",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         },
         {
@@ -476,7 +505,10 @@
           "artifact_type": "document",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         },
         {
@@ -488,8 +520,30 @@
           "artifact_type": "presentation",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
+        },
+        {
+          "id": "change-impact-report",
+          "name": "Analisis de Impacto del Cambio",
+          "responsible": "project-manager",
+          "approver": "business-analyst",
+          "mandatory": false,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "project-manager",
+            "business-analyst"
+          ],
+          "approver_fallback": [
+            "business-analyst",
+            "tech-lead",
+            "solution-architect"
+          ]
         }
       ],
       "gates": [],
@@ -513,7 +567,11 @@
           "responsible_fallback": [
             "tech-lead"
           ],
-          "approver_fallback": []
+          "approver_fallback": [
+            "solution-architect",
+            "project-manager",
+            "developer-backend"
+          ]
         },
         {
           "id": "architecture-presentation",
@@ -547,6 +605,44 @@
           ]
         },
         {
+          "id": "integration-design-doc",
+          "name": "Diseno de Integraciones",
+          "responsible": "solution-architect",
+          "approver": "tech-lead",
+          "mandatory": false,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "solution-architect",
+            "tech-lead"
+          ],
+          "approver_fallback": [
+            "tech-lead",
+            "project-manager",
+            "developer-backend"
+          ]
+        },
+        {
+          "id": "security-assessment",
+          "name": "Evaluacion de Seguridad",
+          "responsible": "solution-architect",
+          "approver": "tech-lead",
+          "mandatory": false,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "solution-architect",
+            "tech-lead"
+          ],
+          "approver_fallback": [
+            "tech-lead",
+            "project-manager",
+            "developer-backend"
+          ]
+        },
+        {
           "id": "test-strategy-doc",
           "name": "Estrategia de Pruebas",
           "responsible": "qa-functional",
@@ -558,7 +654,11 @@
           "responsible_fallback": [
             "qa-functional"
           ],
-          "approver_fallback": []
+          "approver_fallback": [
+            "business-analyst",
+            "tech-lead",
+            "solution-architect"
+          ]
         },
         {
           "id": "technical-task-breakdown",
@@ -570,7 +670,11 @@
           "verification": [],
           "attestation_required": false,
           "responsible_fallback": [],
-          "approver_fallback": []
+          "approver_fallback": [
+            "business-analyst",
+            "tech-lead",
+            "solution-architect"
+          ]
         }
       ],
       "gates": [],
@@ -594,7 +698,11 @@
           "responsible_fallback": [
             "tech-lead"
           ],
-          "approver_fallback": []
+          "approver_fallback": [
+            "solution-architect",
+            "project-manager",
+            "developer-backend"
+          ]
         },
         {
           "id": "source-code",
@@ -622,7 +730,11 @@
           ],
           "attestation_required": true,
           "responsible_fallback": [],
-          "approver_fallback": []
+          "approver_fallback": [
+            "solution-architect",
+            "project-manager",
+            "developer-backend"
+          ]
         },
         {
           "id": "unit-tests",
@@ -634,7 +746,11 @@
           "verification": [],
           "attestation_required": false,
           "responsible_fallback": [],
-          "approver_fallback": []
+          "approver_fallback": [
+            "solution-architect",
+            "project-manager",
+            "developer-backend"
+          ]
         },
         {
           "id": "api-documentation",
@@ -646,13 +762,17 @@
           "verification": [],
           "attestation_required": false,
           "responsible_fallback": [],
-          "approver_fallback": []
+          "approver_fallback": [
+            "solution-architect",
+            "project-manager",
+            "developer-backend"
+          ]
         },
         {
           "id": "project-readme",
           "name": "README del Proyecto",
           "responsible": "tech-lead",
-          "approver": "tech-lead",
+          "approver": "solution-architect",
           "mandatory": true,
           "artifact_type": "document",
           "verification": [],
@@ -660,13 +780,17 @@
           "responsible_fallback": [
             "tech-lead"
           ],
-          "approver_fallback": []
+          "approver_fallback": [
+            "solution-architect",
+            "project-manager",
+            "developer-backend"
+          ]
         },
         {
           "id": "docs-structure-skeleton",
           "name": "Esqueleto de docs/",
           "responsible": "tech-lead",
-          "approver": "tech-lead",
+          "approver": "solution-architect",
           "mandatory": true,
           "artifact_type": "document",
           "verification": [],
@@ -674,7 +798,11 @@
           "responsible_fallback": [
             "tech-lead"
           ],
-          "approver_fallback": []
+          "approver_fallback": [
+            "solution-architect",
+            "project-manager",
+            "developer-backend"
+          ]
         },
         {
           "id": "sprint-status-presentation",
@@ -698,7 +826,11 @@
           "verification": [],
           "attestation_required": false,
           "responsible_fallback": [],
-          "approver_fallback": []
+          "approver_fallback": [
+            "tech-lead",
+            "project-manager",
+            "developer-backend"
+          ]
         },
         {
           "id": "feature-spec-compliance",
@@ -709,7 +841,10 @@
           "artifact_type": "report",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         }
       ],
@@ -751,37 +886,49 @@
           "id": "test-cases",
           "name": "Casos de Prueba",
           "responsible": "qa-functional",
-          "approver": "qa-lead",
+          "approver": "tech-lead",
           "mandatory": true,
           "artifact_type": "document",
           "verification": [],
           "attestation_required": false,
           "responsible_fallback": [],
-          "approver_fallback": []
+          "approver_fallback": [
+            "qa-functional",
+            "tech-lead",
+            "project-manager"
+          ]
         },
         {
           "id": "test-execution-report",
           "name": "Reporte de Ejecucion de Pruebas",
           "responsible": "qa-functional",
-          "approver": "qa-lead",
+          "approver": "tech-lead",
           "mandatory": true,
           "artifact_type": "report",
           "verification": [],
           "attestation_required": false,
           "responsible_fallback": [],
-          "approver_fallback": []
+          "approver_fallback": [
+            "qa-functional",
+            "tech-lead",
+            "project-manager"
+          ]
         },
         {
           "id": "defect-report",
           "name": "Reporte de Defectos",
           "responsible": "qa-functional",
-          "approver": "qa-lead",
+          "approver": "tech-lead",
           "mandatory": true,
           "artifact_type": "report",
           "verification": [],
           "attestation_required": false,
           "responsible_fallback": [],
-          "approver_fallback": []
+          "approver_fallback": [
+            "qa-functional",
+            "tech-lead",
+            "project-manager"
+          ]
         },
         {
           "id": "qa-results-presentation",
@@ -795,13 +942,36 @@
           "responsible_fallback": [
             "qa-functional"
           ],
-          "approver_fallback": []
+          "approver_fallback": [
+            "business-analyst",
+            "tech-lead",
+            "solution-architect"
+          ]
+        },
+        {
+          "id": "performance-report",
+          "name": "Reporte de Pruebas de Rendimiento",
+          "responsible": "qa-functional",
+          "approver": "tech-lead",
+          "mandatory": false,
+          "artifact_type": "report",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "qa-functional",
+            "tech-lead"
+          ],
+          "approver_fallback": [
+            "qa-functional",
+            "tech-lead",
+            "project-manager"
+          ]
         },
         {
           "id": "regression-report",
           "name": "Reporte de Regresion",
           "responsible": "qa-functional",
-          "approver": "qa-functional",
+          "approver": "qa-lead",
           "mandatory": true,
           "artifact_type": "report",
           "verification": [],
@@ -832,7 +1002,10 @@
           "artifact_type": "document",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         },
         {
@@ -844,7 +1017,10 @@
           "artifact_type": "report",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         },
         {
@@ -856,7 +1032,10 @@
           "artifact_type": "document",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         },
         {
@@ -868,7 +1047,10 @@
           "artifact_type": "presentation",
           "verification": [],
           "attestation_required": false,
-          "responsible_fallback": [],
+          "responsible_fallback": [
+            "project-manager",
+            "tech-lead"
+          ],
           "approver_fallback": []
         }
       ],
@@ -907,7 +1089,11 @@
           "responsible_fallback": [
             "tech-lead"
           ],
-          "approver_fallback": []
+          "approver_fallback": [
+            "solution-architect",
+            "project-manager",
+            "developer-backend"
+          ]
         },
         {
           "id": "go-live-presentation",
@@ -925,7 +1111,7 @@
           "id": "communication-plan-doc",
           "name": "Plan de Comunicacion",
           "responsible": "project-manager",
-          "approver": "project-manager",
+          "approver": "business-analyst",
           "mandatory": true,
           "artifact_type": "document",
           "verification": [],
@@ -933,13 +1119,36 @@
           "responsible_fallback": [
             "project-manager"
           ],
-          "approver_fallback": []
+          "approver_fallback": [
+            "business-analyst",
+            "tech-lead",
+            "solution-architect"
+          ]
+        },
+        {
+          "id": "training-materials",
+          "name": "Materiales de Capacitacion",
+          "responsible": "project-manager",
+          "approver": "business-analyst",
+          "mandatory": false,
+          "artifact_type": "document",
+          "verification": [],
+          "attestation_required": false,
+          "responsible_fallback": [
+            "project-manager",
+            "business-analyst"
+          ],
+          "approver_fallback": [
+            "business-analyst",
+            "tech-lead",
+            "solution-architect"
+          ]
         },
         {
           "id": "runbook",
           "name": "Runbook Operativo",
           "responsible": "tech-lead",
-          "approver": "tech-lead",
+          "approver": "solution-architect",
           "mandatory": true,
           "artifact_type": "document",
           "verification": [],
@@ -947,7 +1156,11 @@
           "responsible_fallback": [
             "tech-lead"
           ],
-          "approver_fallback": []
+          "approver_fallback": [
+            "solution-architect",
+            "project-manager",
+            "developer-backend"
+          ]
         }
       ],
       "gates": [
@@ -992,7 +1205,11 @@
           "verification": [],
           "attestation_required": false,
           "responsible_fallback": [],
-          "approver_fallback": []
+          "approver_fallback": [
+            "business-analyst",
+            "tech-lead",
+            "solution-architect"
+          ]
         },
         {
           "id": "support-status-report",
@@ -1004,7 +1221,11 @@
           "verification": [],
           "attestation_required": false,
           "responsible_fallback": [],
-          "approver_fallback": []
+          "approver_fallback": [
+            "business-analyst",
+            "tech-lead",
+            "solution-architect"
+          ]
         },
         {
           "id": "stabilization-presentation",
@@ -1068,7 +1289,7 @@
           "id": "final-documentation",
           "name": "Documentacion Final del Proyecto",
           "responsible": "project-manager",
-          "approver": "project-manager",
+          "approver": "business-analyst",
           "mandatory": true,
           "artifact_type": "document",
           "verification": [],
@@ -1076,7 +1297,11 @@
           "responsible_fallback": [
             "project-manager"
           ],
-          "approver_fallback": []
+          "approver_fallback": [
+            "business-analyst",
+            "tech-lead",
+            "solution-architect"
+          ]
         }
       ],
       "gates": [],

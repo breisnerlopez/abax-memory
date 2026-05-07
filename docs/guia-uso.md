@@ -1,16 +1,18 @@
-# Guía de Uso — Abax-Memory v2.0.8
+# Guía de Uso — Abax-Memory v2.1.0
 
-- **Fase**: Estabilización (F8)
+- **Fase**: Cierre (F9)
 - **Responsable**: business-analyst
-- **Fecha**: 2026-05-05
-- **Release**: v2.0.8
-- **Estado**: Completado
+- **Fecha**: 2026-05-07
+- **Release**: v2.1.0 (Hardening & Producción Real)
+- **Estado**: Actualizado con features v2.1.0
 - **Fuentes**:
-  - API REST v2 (19 endpoints, SearchResourceV2 + MemoryResourceV2)
+  - API REST v2 (19 endpoints + 2 nuevos v2.1: DELETE namespace, X-Graph-Strategy)
   - Creación de memorias (`CreateMemoryRequest`, `UpdateMemoryRequest`)
   - Creación de relaciones (`CreateRelationRequest`, 9 tipos)
   - Búsqueda unificada, semántica e híbrida (`UnifiedSearchRequest`, `SemanticSearchRequest`)
-  - Expansión de grafo (`GraphResponse`, BFS con depth)
+  - Cross-encoder reranker (FT-V21-001.1)
+  - Expansión de grafo con X-Graph-Strategy (FT-V21-004.1)
+  - Unificación de colecciones Qdrant (FT-V21-003.2)
 
 ---
 
@@ -29,7 +31,7 @@
 
 ## 1. Modos de Uso
 
-Abax-Memory v2.0.0 expone **5 modos de interacción** principales a través de su API REST v2. Todos los endpoints requieren el header `X-Tenant-Id` para aislamiento multi-tenant. El header `Content-Type: application/json` es obligatorio en peticiones con cuerpo.
+Abax-Memory v2.1.0 expone **5 modos de interacción** principales a través de su API REST v2. Todos los endpoints requieren el header `X-Tenant-Id` para aislamiento multi-tenant. El header `Content-Type: application/json` es obligatorio en peticiones con cuerpo.
 
 ### 1.1 Búsqueda Unificada (recomendado)
 
@@ -623,7 +625,7 @@ curl -s -X POST "$BASE/search" \
 
 ## 4. Perfiles de Dominio Recomendados
 
-Abax-Memory v2.0.0 incluye **3 perfiles de dominio pre-cargados**. Cada perfil define qué `kinds` son relevantes, metadatos sugeridos y comportamiento por defecto.
+Abax-Memory v2.1.0 incluye **3 perfiles de dominio pre-cargados**. Cada perfil define qué `kinds` son relevantes, metadatos sugeridos y comportamiento por defecto.
 
 | Perfil | Kinds activos | Metadatos sugeridos | Cuándo usarlo |
 |---|---|---|---|

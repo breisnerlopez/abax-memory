@@ -1,5 +1,46 @@
 # Changelog — Abax-Memory
 
+## [2.1.0] — 2026-05-07
+
+### Added — 13 Features en 4 Categorías
+
+#### Precisión (Accuracy)
+- **Cross-encoder reranker**: etapa de re-ranking con modelo cross-encoder para mejorar la precisión de resultados semánticos.
+- **Ajuste de pesos search/semantic/hybrid**: recalibración de combinación de scores léxicos, semánticos e híbridos basada en benchmarks reales.
+- **Expansión de grafo top-3**: recuperación de los 3 nodos más relevantes en expansión BFS del grafo de relaciones.
+
+#### Velocidad (Speed)
+- **Cache JWT (Caffeine)**: caché en memoria de tokens JWT validados. Latencia ≤5ms en cache hit. Invalidación ≤5s vía polling Keycloak Admin Events.
+- **Optimización de queries Qdrant**: consolidación de filtros y payload retrieval. Reducción de round-trips al vector store.
+- **Cold Start Qdrant**: warmup de colecciones al iniciar el backend, eliminando latencia de primera búsqueda.
+
+#### Eficiencia (Efficiency)
+- **Unificación de colecciones Qdrant**: consolidación de múltiples colecciones en una sola con filtros por namespace. Reducción de overhead operacional.
+- **Diagnóstico Worker**: worker de processing jobs diagnosticado, reparado y verificado funcionalmente.
+- **graphEntryStrategy configurable**: estrategia de entrada al grafo (`fixed`, `dynamic`, `relevance`) parametrizable por tenant.
+
+#### API / Developer Experience
+- **Header X-Graph-Strategy**: permite al cliente especificar estrategia de expansión de grafo vía header HTTP (`X-Graph-Strategy: fixed|dynamic|relevance`).
+- **DELETE /api/v2/admin/namespaces/{name}**: nuevo endpoint para eliminar todos los recursos de un namespace en una sola operación atómica.
+- **Fix POST /extract**: corrección de bug en endpoint de extracción de entidades. Ahora usa OpenAI real (`gpt-4o-mini`), nunca `MockLlmService`.
+- **Unificación endpoints search/hybrid**: consolidación de endpoints de búsqueda para API más limpia y consistente.
+
+### Métricas de Calidad
+- Tests: **228/243** pasando (93.8% — 15 fallos pre-existentes de infraestructura)
+- QA: **56/56** casos de prueba ejecutables aprobados (100%), **12 defectos** detectados y cerrados (100% tasa de cierre)
+- UAT: **14/14** escenarios aprobados (100%), **7/8** criterios de éxito
+- Precisión semántica: **96.67% top-1** (benchmark 30 queries multi-dominio)
+- Carga concurrente: **0% errores** bajo 100 VUs (k6)
+- Stack: Docker Compose **4/4 healthy** (Backend + PostgreSQL + Qdrant + Keycloak)
+- Rollback: ≤7 minutos (probado exitosamente)
+- Incidentes críticos en producción: **0**
+
+### Docker
+- ghcr.io/breisnerlopez/abax-memory:v2.1.0
+- ghcr.io/breisnerlopez/abax-memory:latest
+
+### Diff
+- [v2.0.9...v2.1.0](https://github.com/breisnerlopez/abax-memory/compare/v2.0.9...v2.1.0)
 
 ## [2.0.9] — 2026-05-05
 

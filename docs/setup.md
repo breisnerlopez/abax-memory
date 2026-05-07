@@ -136,7 +136,7 @@ export $(cat ../.env | xargs)
 export QUARKUS_DATASOURCE_JDBC_URL="jdbc:postgresql://localhost:5432/pmoadb"
 export QUARKUS_DATASOURCE_USERNAME="pmoa"
 export QUARKUS_DATASOURCE_PASSWORD="pmoa"
-export ABAX_QDRANT_HOST="localhost"
+export ABAX_V2_QDRANT_HOST="localhost"
 mvn quarkus:dev
 ```
 
@@ -179,7 +179,7 @@ Para una verificación rápida de todos los servicios de infraestructura, ejecut
 
 ```
 ══════════════════════════════════════════════════════════
-  Abax-Memory v2.0.0 — Stack Verification
+  Abax-Memory v2.1.0 — Stack Verification
   2026-05-04 HH:MM:SS
 ══════════════════════════════════════════════════════════
 
@@ -407,9 +407,9 @@ docker compose ps postgres  # Debe mostrar estado "healthy"
 | `QUARKUS_DATASOURCE_JDBC_URL` | `jdbc:postgresql://localhost:5432/pmoadb` | Conexion a PostgreSQL |
 | `QUARKUS_DATASOURCE_USERNAME` | `pmoa` | Usuario de base de datos |
 | `QUARKUS_DATASOURCE_PASSWORD` | `pmoa` | Contrasena de base de datos |
-| `ABAX_QDRANT_HOST` | `localhost` | Servidor Qdrant |
-| `ABAX_QDRANT_PORT` | `6333` | Puerto REST de Qdrant |
-| `ABAX_QDRANT_COLLECTION` | `abax-memories` | Coleccion de vectores |
+| `ABAX_V2_QDRANT_HOST` | `localhost` | Servidor Qdrant |
+| `ABAX_V2_QDRANT_PORT` | `6333` | Puerto REST de Qdrant |
+| `ABAX_V2_QDRANT_COLLECTION` | `abax-memories` | Coleccion de vectores |
 | `QUARKUS_OIDC_AUTH_SERVER_URL` | `http://localhost:8443/realms/abax-memory` | Auth server URL |
 | `QUARKUS_OIDC_CLIENT_ID` | `abax-memory-api` | Client ID OIDC |
 | `ABAX_OPENAI_VALIDATION_MODEL` | `gpt-4o` | Modelo de validacion |
