@@ -1,9 +1,9 @@
 # Diagnóstico: Problema del OIDC Híbrido en Abax-Memory v2.0.0
 
-- **Fase**: construction (v1.0.0 — movido a `docs/entregables/v1/fase-construction/` el 2026-05-07)
+- **Fase**: construction (v1.0.0 — archivado desde `docs/entregables/fase-construction/` el 2026-05-07)
 - **Responsable**: Tech Lead
 - **Fecha**: 2026-05-04
-- **Estado**: Completado — Archivado en v1
+- **Estado**: Completado — Archivado en v1 (corrección retrospectiva de organización de carpetas)
 
 ---
 

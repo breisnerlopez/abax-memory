@@ -242,6 +242,25 @@ Cada release (`v1`, `v2`, …) es un proyecto autocontenido con su propio ciclo 
 | **Fase actual v2** | Pre-F0 — Documentación de iteración completada |
 | **Estado actual** | v2.0.9 CERRADO (9/9 fases completadas, 7 hotfixes post-cierre) |
 
+### v2.1.0 — Cierre y correcciones de documentación (2026-05-07)
+
+| Campo | Valor |
+|---|---|
+| **Versión** | 2.1.0 |
+| **Fecha de cierre** | 2026-05-07 |
+| **Estado** | CERRADO — Aceptado por el sponsor |
+| **Correcciones de documentación** | Ver `docs/auditoria-documentacion-v2.1.0.md` — 21 hallazgos corregidos |
+
+#### Corrección retrospectiva v1: Carpeta huérfana `fase-construction/`
+
+El archivo `docs/entregables/fase-construction/diagnostico-oidc-hibrido.md` fue detectado como carpeta huérfana durante la auditoría de documentación v2.1.0 (hallazgo C-09). No pertenecía a `v1/`, `v2/`, ni `v2.1/`, violando la estrategia de folder por release (R1).
+
+- **Acción**: Movido a `docs/entregables/v1/fase-construction/diagnostico-oidc-hibrido.md` el 2026-05-07.
+- **Justificación**: El diagnóstico fue generado durante la fase de construcción original (v1.0.0) y pertenece al ciclo v1. La carpeta `fase-construction/` en la raíz de `entregables/` era un remanente de la estructura plana pre-migración.
+- **Regla aplicada**: R2 — Corrección retrospectiva documentada en iteration-log.md. El contenido del archivo v1 no se modifica, solo se reubica.
+
+---
+
 ### v2.1.0 — Iniciada 2026-05-05
 
 | Campo | Valor |
@@ -251,7 +270,7 @@ Cada release (`v1`, `v2`, …) es un proyecto autocontenido con su propio ciclo 
 | **Estrategia** | A — Folder por release |
 | **Decidida por** | Usuario (sponsor) |
 | **Orquestador** | project-manager |
-| **Alcance** | 16 mejoras en 4 categorías (Precisión, Velocidad, Eficiencia, API/DX) |
+| **Alcance** | 13 mejoras en 4 categorías (Precisión, Velocidad, Eficiencia, API/DX). Scope original: 16. Reducción documentada en §7.1. |
 | **Stack base** | Mismo que v2.0.x (Quarkus + PostgreSQL + Qdrant + Keycloak + OpenAI) con mejoras focalizadas |
 | **Cambios clave vs v2.0.9** | Reranker cross-encoder; ajuste search/semantic/hybrid; expansión grafo top-3; cache JWT; unificación colecciones Qdrant; endpoint DELETE namespace; header X-Graph-Strategy; fix POST /extract |
 | **Documentación v2.0.x** | Preservada intacta en `docs/entregables/v2/` |
@@ -350,7 +369,17 @@ docs/
         └── ...                              # Fases F0 a F9 conforme avancen
 ```
 
-### Scope de v2.1.0: 16 Mejoras en 4 Categorías
+### Scope de v2.1.0: 13 Mejoras en 4 Categorías (Reducido de 16 original)
+
+> **Nota de reducción de scope (2026-05-06)**: El scope original definido en F0 (2026-05-05) incluía **16 mejoras**. Durante la Fase 4 — Construcción, **3 features fueron diferidas** a v2.2.0 por las siguientes razones:
+>
+> | # | Feature diferida | Categoría original | Motivo del diferimiento | Target |
+> |---|---|---|---|---|
+> | 1 | Thresholds de similitud ajustables por dominio | Precisión | Complejidad de implementación (reglas de negocio por perfil). Requiere re-arquitectura del motor de reglas. | v2.2.0 |
+> | 2 | Lazy loading de embeddings | Velocidad | Dependencia de cambio en Qdrant client. No crítico para el MVP de hardening. | v2.2.0 |
+> | 3 | Rate limiting por API key | API/DX | Requiere integración con Keycloak OIDC + claims de rate-limit por client. Depende de OIDC real. | v2.2.0 |
+>
+> **13 features implementadas** en v2.1.0, verificadas en QA (56/56 CPs) y UAT (14/14 escenarios).
 
 #### Categoría 1 — Precisión (Accuracy)
 

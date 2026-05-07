@@ -1,8 +1,9 @@
 # Bitacora del Proyecto
-- **Fase**: 9-Cierre → **PROYECTO CERRADO**
+- **Fase**: v2.1.0 — Cierre → **PROYECTO CERRADO (3 releases)**
 - **Responsable**: project-manager
-- **Fecha**: 2026-05-02
-- **Estado**: CERRADO — Proyecto completado. 9/9 fases. Producto desplegado y publicado.
+- **Fecha**: 2026-05-07
+- **Estado**: CERRADO — v1.0.0 (2026-05-02), v2.0.0 (2026-05-04), v2.1.0 (2026-05-07). 3 releases completados. Proyecto desplegado y publicado.
+- **Iteraciones**: v1.0.0 (PMOA IT Ops), v2.0.0 (Motor Multi-Dominio), v2.1.0 (Hardening & Producción Real)
 ---
 
 ## ACTUALIZACION — Fase 9 Cierre: COMPLETADA (2026-05-02)
