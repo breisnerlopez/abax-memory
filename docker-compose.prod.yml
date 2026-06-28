@@ -1,0 +1,143 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: abax-memory-postgres
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    environment:
+      POSTGRES_DB: ${ABAX_POSTGRES_DB:-abaxmemory}
+      POSTGRES_USER: ${ABAX_POSTGRES_USER:-abaxmemory}
+      POSTGRES_PASSWORD: ${ABAX_POSTGRES_PASSWORD:?ABAX_POSTGRES_PASSWORD is required}
+    volumes:
+      - abax-memory-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U ${ABAX_POSTGRES_USER:-abaxmemory} -d ${ABAX_POSTGRES_DB:-abaxmemory}
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - abax-memory
+
+  qdrant:
+    image: qdrant/qdrant:v1.17.1
+    container_name: abax-memory-qdrant
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp
+    volumes:
+      - abax-memory-qdrant-data:/qdrant/storage
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - bash -lc 'exec 3<>/dev/tcp/127.0.0.1/6333'
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - abax-memory
+
+  backend:
+    image: ghcr.io/breisnerlopez/abax-memory:latest
+    container_name: abax-memory-backend
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?OPENAI_API_KEY is required}
+      QUARKUS_OIDC_AUTH_SERVER_URL: http://localhost:8443/realms/abax-memory
+      QUARKUS_OIDC_CLIENT_ID: abax-memory-api
+      QUARKUS_OIDC_CREDENTIALS_SECRET: dummy
+      JAVA_OPTS_APPEND: >-
+        -Dquarkus.http.host=0.0.0.0
+        -Djava.util.logging.manager=org.jboss.logmanager.LogManager
+        -Dquarkus.langchain4j.openai.api-key=${OPENAI_API_KEY:?OPENAI_API_KEY is required}
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgres:5432/${ABAX_POSTGRES_DB:-abaxmemory}
+      QUARKUS_DATASOURCE_USERNAME: ${ABAX_POSTGRES_USER:-abaxmemory}
+      QUARKUS_DATASOURCE_PASSWORD: ${ABAX_POSTGRES_PASSWORD:?ABAX_POSTGRES_PASSWORD is required}
+      ABAX_QDRANT_HOST: qdrant
+      ABAX_QDRANT_PORT: "6333"
+      ABAX_QDRANT_COLLECTION: ${ABAX_QDRANT_COLLECTION:-abax-memories}
+      ABAX_QDRANT_USE_TLS: "false"
+      ABAX_QDRANT_VECTOR_SIZE: "3072"
+      ABAX_V2_QDRANT_HOST: qdrant
+      ABAX_V2_QDRANT_PORT: "6333"
+      ABAX_V2_QDRANT_COLLECTION: ${ABAX_QDRANT_COLLECTION:-abax-memories}
+      ABAX_V2_QDRANT_USE_TLS: "false"
+      ABAX_V2_QDRANT_VECTOR_SIZE: "3072"
+      ABAX_V2_OPENAI_API_KEY: ${OPENAI_API_KEY:?OPENAI_API_KEY is required}
+      ABAX_OPENAI_VALIDATION_MODEL: ${ABAX_OPENAI_VALIDATION_MODEL:-gpt-4o}
+      ABAX_V2_OPENAI_EMBEDDING_MODEL: ${ABAX_V2_OPENAI_EMBEDDING_MODEL:-text-embedding-3-large}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - bash -lc 'exec 3<>/dev/tcp/127.0.0.1/8080'
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - abax-memory
+
+  frontend:
+    build:
+      context: .
+      dockerfile: deploy/frontend.Dockerfile
+      args:
+        VITE_BASE_PATH: /memoria/
+    image: abax-memory-frontend:local
+    container_name: abax-memory-frontend
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - abax-memory
+      - secure-publishing
+
+networks:
+  abax-memory:
+    name: abax-memory
+  secure-publishing:
+    external: true
+
+volumes:
+  abax-memory-postgres-data:
+    name: abax-memory-postgres-data
+  abax-memory-qdrant-data:
+    name: abax-memory-qdrant-data

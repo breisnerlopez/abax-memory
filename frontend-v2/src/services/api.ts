@@ -18,7 +18,8 @@ import type {
   ApiError,
 } from '../types';
 
-const API_BASE = '/api/v2';
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+const API_BASE = `${basePath === '' ? '' : basePath}/api/v2`;
 
 // MOCK: Hardcoded tenant/role for development // REPLACE_BEFORE_PROD
 const MOCK_TENANT_ID = 'tenant-001';

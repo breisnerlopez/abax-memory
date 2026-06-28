@@ -7,9 +7,11 @@ import ReviewPage from './pages/ReviewPage';
 import AdminPage from './pages/AdminPage';
 import DashboardPage from './pages/DashboardPage';
 
+const baseName = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
+
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={baseName}>
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<SearchPage />} />

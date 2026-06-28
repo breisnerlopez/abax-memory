@@ -912,14 +912,18 @@ public class SearchServiceImpl implements SearchService {
     }
 
     /**
-     * Builds the text to embed: title + summary + content.
+     * Builds the text to embed from the semantic definition only.
+     *
+     * The category title is an external label and must not influence vector
+     * similarity; otherwise similar prefixes like "ERROR DEL CLIENTE=>" or
+     * "MESON=>" dominate the embedding space and create false positives.
      */
     private String buildIndexableText(MemoryFragmentEntity entity) {
         StringBuilder sb = new StringBuilder();
-        if (entity.getTitle() != null) sb.append(entity.getTitle()).append(". ");
-        if (entity.getSummary() != null) sb.append(entity.getSummary()).append(". ");
+        if (entity.getSummary() != null && !entity.getSummary().isBlank()) {
+            sb.append(entity.getSummary()).append(". ");
+        }
         if (entity.getContent() != null) {
-            // Truncate very long content to 8000 chars for embedding
             String content = entity.getContent();
             if (content.length() > 8000) {
                 content = content.substring(0, 8000);

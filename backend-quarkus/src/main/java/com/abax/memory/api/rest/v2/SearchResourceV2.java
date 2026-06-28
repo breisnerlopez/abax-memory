@@ -18,6 +18,7 @@ import com.abax.memory.domain.service.NamespaceService;
 import com.abax.memory.domain.service.RelationService;
 import com.abax.memory.domain.service.SearchService;
 import com.abax.memory.infrastructure.security.TenantContext;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -71,6 +72,7 @@ import java.util.UUID;
 @Path("/api/v2")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@ApplicationScoped
 public class SearchResourceV2 {
 
     private static final Logger LOG = Logger.getLogger(SearchResourceV2.class);

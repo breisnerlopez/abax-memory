@@ -8,6 +8,7 @@ import com.abax.memory.domain.service.DomainProfileService;
 import com.abax.memory.infrastructure.security.TenantContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -61,6 +62,7 @@ import java.util.Map;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Domains V2", description = "Domain profile management operations — API v2")
+@ApplicationScoped
 public class DomainProfileResource {
 
     private static final Logger LOG = Logger.getLogger(DomainProfileResource.class);

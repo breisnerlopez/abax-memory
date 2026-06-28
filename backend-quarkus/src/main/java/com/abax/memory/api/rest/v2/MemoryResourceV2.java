@@ -13,6 +13,7 @@ import com.abax.memory.domain.model.ExtractedEntity;
 import com.abax.memory.domain.service.AuditService;
 import com.abax.memory.domain.service.MemoryService;
 import com.abax.memory.infrastructure.security.TenantContext;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.BeanParam;
@@ -67,6 +68,7 @@ import java.util.UUID;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Memories V2", description = "MemoryFragment CRUD operations — API v2")
+@ApplicationScoped
 public class MemoryResourceV2 {
 
     @Inject
